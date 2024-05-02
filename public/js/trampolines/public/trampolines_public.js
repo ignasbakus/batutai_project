@@ -1,0 +1,72 @@
+let Actions = {
+    InitActions: function () {
+        Carousels.trampolinesCarousel.init();
+        Trampolines.init();
+    }
+}
+
+let Carousels = {
+    trampolinesCarousel: {
+        Carousel: new bootstrap.Carousel('#trampolinesCarousel', {
+            keyboard: true,
+            touch: true
+        }),
+        ChosenTrampoline: 1,
+        init: function () {
+            $('#trampolinesCarousel').on('slide.bs.carousel', event => {
+                this.ChosenTrampoline = $(event.relatedTarget).data('trampolineid')
+            })
+            $('#selectTrampoline').on('click', () => {
+                Trampolines.addToSelected(this.ChosenTrampoline)
+            })
+        }
+    }
+}
+
+let Trampolines = {
+    init: function () {
+        /*Global init*/
+    },
+    chosen: [],
+    addToSelected: function (TrampolineID) {
+        if (this.chosen.find((element) => element === TrampolineID) !== TrampolineID) {
+            this.chosen.push(TrampolineID)
+        }
+        console.log('selected = ' + TrampolineID + ' | chosen trampolines => ', this.chosen)
+        this.getTrampolinesView()
+    },
+    removeFromSelected: function (TrampolineID) {
+        let findInChosen = this.chosen.findIndex((element) => element === TrampolineID)
+        this.chosen.splice(findInChosen, 1)
+        this.getTrampolinesView()
+    },
+    initEventsAfterHtmlUpdate: function () {
+        $('.removeSelectedTrampoline').on('click', (event) => {
+            event.stopPropagation()
+            this.removeFromSelected($(event.currentTarget).data('trampolineid'))
+        })
+    },
+    getTrampolinesView : function () {
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            method: "POST",
+            url: "/trampolines/public/render_selected_view",
+            data: {
+                chosenTrampolines: Trampolines.chosen
+            }
+        }).done((response) => {
+            console.log("response : ", response);
+            $('#SelectedTrampolines').html(response.view)
+            this.initEventsAfterHtmlUpdate();
+        }).fail(function (jqXHR, textStatus) {
+            alert("Request failed: " + textStatus);
+        });
+    }
+}
+
+$(document).ready(function () {
+    console.log("/js/trampolines/public/trampolines_public.js -> ready!");
+    Actions.InitActions();
+});
