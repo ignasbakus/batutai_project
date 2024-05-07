@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Trampolines\BaseTrampoline;
+use App\Trampolines\TrampolineOrderData;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -29,6 +31,8 @@ class OrderController extends Controller
 
     public function orderInsert(Request $request): JsonResponse
     {
+        /*Validation*/
+        /*Phone required*/
         $formData = $request->only([
             'customerName',
             'customerSurname',
@@ -39,9 +43,21 @@ class OrderController extends Controller
             'customerDeliveryAddress'
         ]);
 
+        $Order = (new BaseTrampoline())->rent((new TrampolineOrderData()));
+
         return response()->json([
             'status' => true,
             'received_params' => $formData
         ]);
+    }
+
+    public function orderUpdate()
+    {
+
+    }
+
+    public function orderDelete()
+    {
+
     }
 }

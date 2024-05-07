@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
@@ -18,4 +19,13 @@ class Order extends Model
         'total_sum',
         'client_id'
     ];
+
+    public function trampolines(): HasMany
+    {
+        return $this->hasMany(OrdersTrampoline::class);
+    }
+
+    /*hasOne -> client*/
+    /*hasOne -> client_address*/
+
 }

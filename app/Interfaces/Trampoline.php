@@ -3,6 +3,7 @@
 namespace App\Interfaces;
 
 use App\Trampolines\BaseTrampolineData;
+use App\Trampolines\TrampolineOrderData;
 
 interface Trampoline
 {
@@ -14,7 +15,7 @@ interface Trampoline
 
     public function read($TrampolineID);
 
-    public function rent();
+    public function rent(TrampolineOrderData $trampolineOrderData);
 
     public function cancelRent();
 

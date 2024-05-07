@@ -3,8 +3,16 @@
 namespace App\Trampolines;
 
 use App\Interfaces\Trampoline;
+use App\Models\Client;
+use App\Models\ClientAddress;
+use App\Models\Order;
+use App\Models\OrdersTrampoline;
 use App\Models\Parameter;
+use Carbon\Carbon;
 use Faker\Provider\Base;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class BaseTrampoline implements Trampoline
 {
@@ -64,14 +72,56 @@ class BaseTrampoline implements Trampoline
         $trampoline->delete();
     }
 
-    public function read($TrampolineID): \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Builder|array|null
+    public function read($TrampolineID): Model|Collection|Builder|array|null
     {
         return \App\Models\Trampoline::with('Parameter')->find($TrampolineID);
     }
 
-    public function rent()
+    public function rent(TrampolineOrderData $trampolineOrderData): static
     {
-        // TODO: Implement rent() method.
+
+        $Client = (new Client())->updateOrCreate(
+            [
+                'phone' => $trampolineOrderData->CustomerPhone,
+            ],
+            [
+                'name' => $trampolineOrderData->CustomerName,
+                'surname' => $trampolineOrderData->CustomerSurname,
+                'email' => $trampolineOrderData->CustomerEmail,
+                'phone' => $trampolineOrderData->CustomerPhone
+            ]
+        );
+
+        $ClientAddress = ClientAddress::create([
+            'clients_id' => $Client->id,
+            'address_street' => $trampolineOrderData->Address,
+            'address_town'  => $trampolineOrderData->City,
+            'address_postcode'  => $trampolineOrderData->PostCode,
+            'address_country'  => ''
+        ]);
+
+        $NewOrder = Order::create([
+            'order_number'  => '',
+            'order_date' => Carbon::now()->format('Y-m-d H:i:s'),
+            'rental_duration'  => 5,
+            'delivery_address_id' => $ClientAddress->id,
+            'advance_sum' => 0,
+            'total_sum' => 0,
+            'client_id' => $Client->id
+        ]);
+
+        foreach ($trampolineOrderData->Trampolines as $trampoline) {
+            OrdersTrampoline::create([
+                'orders_id' => $NewOrder->id,
+                'trampolines_id' => $trampoline->id,
+                'rental_start' => Carbon::now()->format('Y-m-d H:i:s'),
+                'rental_end' => Carbon::now()->format('Y-m-d H:i:s'),
+                'rental_duration' => 5,
+                'total_sum' => 0,
+            ]);
+        }
+
+        return $this;
     }
 
     public function cancelRent()
