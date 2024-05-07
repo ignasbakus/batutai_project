@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('order_number', 20); /*UNIQ STRING - HSjhdjdj */
+            $table->string('order_number', 50); /*UNIQ STRING - HSjhdjdj */
             $table->dateTime('order_date'); /*Uzsakymo patiekimo data*/
             $table->decimal('rental_duration'); /*Kodel float - todel kad jeigu ateityje kils poreikis valandu paskaitai, gali kilti situacija kai bus x.6 val.*/
             $table->integer('delivery_address_id'); /*Mano pasiulymas yra daryti atskira adresu teibla, ir adresus siesti tu klienut*/
