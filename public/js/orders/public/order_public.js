@@ -12,6 +12,9 @@
         }
     }
     let Calendar = null;
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+    today = today.toISOString().split('T')[0];
     document.addEventListener('DOMContentLoaded', function() {
         Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
             initialDate: Dates.CalendarInitial,
@@ -19,6 +22,12 @@
             //timeZone: 'local',
             editable: true,
             selectable: true,
+            eventChange: function(changeInfo) {
+                let newStartDate = new Date(changeInfo.event.start);
+                if (newStartDate < new Date(today)) {
+                    changeInfo.revert();
+                }
+            },
             // businessHours: true,
             dayMaxEvents: true,
             events: [],

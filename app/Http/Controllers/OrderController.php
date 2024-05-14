@@ -27,23 +27,13 @@ class OrderController extends Controller
     public function publicGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
         $Trampolines = (new Trampoline())->newQuery()->whereIn('id',\request()->get('trampoline_id',[]))->get();
-        $Availability = (new BaseTrampoline())->getAvailability($Trampolines, Carbon::now(), true);
+        $Availability = (new BaseTrampoline())->getAvailability($Trampolines, Carbon::now()->startOfDay(), true);
         foreach ($Trampolines as $trampoline) {
             $trampoline->rental_start = Carbon::parse($Availability[0]->start)->format('Y-m-d');
             $trampoline->rental_end = Carbon::parse($Availability[0]->end)->format('Y-m-d');
         }
         return view ('orders.public.order',[
-            'Availability' => $Availability
-            /*[
-                (object)[
-                    'extendedProps' => [
-                        'trampolines' => $Trampolines,
-                    ],
-                    'title' => $OrderEventName,
-                    'start' => Carbon::parse($startDate)->format('Y-m-d'),
-                    'end' => Carbon::parse($endDate)->format('Y-m-d')
-                ]
-            ]*/,
+            'Availability' => $Availability,
             'Occupied' => (new BaseTrampoline())->getOccupation($Trampolines, OccupationTimeFrames::MONTH, true),
             'Trampolines' => $Trampolines,
             'Dates' => (object)[

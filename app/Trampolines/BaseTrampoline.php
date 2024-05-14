@@ -9,10 +9,12 @@ use App\Models\Order;
 use App\Models\OrdersTrampoline;
 use App\Models\Parameter;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Faker\Provider\Base;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BaseTrampoline implements Trampoline
@@ -172,21 +174,26 @@ class BaseTrampoline implements Trampoline
         $occupiedDates = [];
         switch ($TimeFrame) {
             case OccupationTimeFrames::WEEK:
-                $GetOccupationFrom = Carbon::now()->startOfWeek()->format('Y-m-d');
-                $GetOccupationTill = Carbon::now()->endOfWeek()->format('Y-m-d');
+                $GetOccupationFrom = Carbon::now()->startOfWeek();
+                $GetOccupationTill = Carbon::now()->endOfWeek();
                 break;
             case OccupationTimeFrames::MONTH:
-                $GetOccupationFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
-                $GetOccupationTill = Carbon::now()->endOfMonth()->format('Y-m-d');
+                $GetOccupationFrom = Carbon::now()->startOfMonth();
+                $GetOccupationTill = Carbon::now()->endOfMonth();
                 break;
             default:
                 return $occupiedDates;
                 break;
         }
         foreach ($Trampolines as $trampoline) {
-            $occupiedDatesForTrampoline = OrdersTrampoline::where('trampolines_id', $trampoline->id)
-                ->whereBetween('rental_start', [$GetOccupationFrom, $GetOccupationTill])
-                ->get();
+            //$occupiedDatesForTrampoline = OrdersTrampoline::where('trampolines_id', $trampoline->id)->whereBetween('rental_start', [$GetOccupationFrom, $GetOccupationTill])->get();
+            $Query = (new OrdersTrampoline())->newQuery();
+            $Query->where('trampolines_id', $trampoline->id);
+            $Query->where(function (Builder $builder) use ($GetOccupationTill, $GetOccupationFrom) {
+                $builder->whereBetween('rental_start', [$GetOccupationFrom->format('Y-m-d'), $GetOccupationTill->format('Y-m-d')]);
+                $builder->orWhereBetween('rental_end', [$GetOccupationFrom->addDay()->format('Y-m-d'), $GetOccupationTill->addDay()->format('Y-m-d')]);
+            });
+            $occupiedDatesForTrampoline = $Query->get();
             foreach ($occupiedDatesForTrampoline as $orderTrampoline) {
                 if ($FullCalendarFormat) {
                     $DoWeHaveEventForSameDates = false;
@@ -217,6 +224,7 @@ class BaseTrampoline implements Trampoline
                         }
                         if (!$merged) {
                             $occupiedDates[] = (object)[
+                                'title' => 'orderTrampoline = ['. $orderTrampoline->id.']',
                                 'id' => $orderTrampoline->id,
                                 'start' => $orderTrampoline->rental_start,
                                 'end' => $orderTrampoline->rental_end,
@@ -233,46 +241,62 @@ class BaseTrampoline implements Trampoline
                 }
             }
         }
+
+        /* ---- V2 ----*/
+        $occupiedDates = [];
+        foreach ($Trampolines as $trampoline) {
+            $Query = (new OrdersTrampoline())->newQuery();
+            $Query->where('trampolines_id', $trampoline->id);
+            $Query->where(function (Builder $builder) use ($GetOccupationTill, $GetOccupationFrom) {
+                $builder->whereBetween('rental_start', [$GetOccupationFrom->format('Y-m-d'), $GetOccupationTill->format('Y-m-d')]);
+                $builder->orWhereBetween('rental_end', [$GetOccupationFrom->addDay()->format('Y-m-d'), $GetOccupationTill->addDay()->format('Y-m-d')]);
+            });
+            $occupiedDates = array_merge($occupiedDates,$Query->get()->toArray());
+        }
+
+
+//        for ()
+//
+//        foreach ($occupiedDates as $occupiedDate) {
+//            for()
+//        }
+
+
         return $occupiedDates;
     }
 
     public function getAvailability(Collection $Trampolines, Carbon $fromDate,$FullCalendarFormat = false): array
     {
-        /*Logic to find available day*/
         $availableDates = [];
-
-        $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH, true);
-
-        foreach ($occupiedDates as $occupiedDate){
-//            if($occupiedDate->start)
-        }
-        /*
-            Log::info('Availability: ' . json_encode($availability));
-            $startDate = null;
-            foreach ($availability as $occupiedSlot) {
-                if ($occupiedSlot->start > Carbon::now()) {
-                    $startDate = $occupiedSlot->start;
-                    break;
+        $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH);
+        $isDateRangeOccupied = function(Carbon $start, Carbon $end) use ($occupiedDates) {
+            foreach ($occupiedDates as $occupiedDate) {
+                $occupiedStartDate = Carbon::parse($occupiedDate->rental_start);
+                $occupiedEndDate = Carbon::parse($occupiedDate->rental_end);
+                if ($start->lt($occupiedEndDate) && $end->gt($occupiedStartDate)) {
+                    return true;
                 }
             }
-
-            $endDate = $startDate ? Carbon::parse($startDate)->addDays(1)->format('Y-m-d') : null;
-        */
-
-        $startDate = '2024-05-30';
-        $endDate = '2024-05-31';
-
+            return false;
+        };
+        $todayStart = Carbon::parse($fromDate)->startOfDay();
+        $todayEnd = Carbon::parse($fromDate)->addDay()->startOfDay();
+        while ($isDateRangeOccupied($todayStart, $todayEnd)) {
+            $todayStart->addDay();
+            $todayEnd->addDay();
+        }
         if ($FullCalendarFormat) {
             $availableDates[] = (object)[
                 'extendedProps' => [
                     'trampolines' => $Trampolines,
                 ],
                 'title' => 'Jūsų užsakymas',
-                'start' => Carbon::parse($startDate)->format('Y-m-d'),
-                'end' => Carbon::parse($endDate)->format('Y-m-d')
+                'start' => $todayStart->format('Y-m-d'),
+                'end' => $todayEnd->format('Y-m-d')
             ];
+        } else {
+            return [$todayStart->format('Y-m-d')];
         }
-
         return $availableDates;
     }
 }
