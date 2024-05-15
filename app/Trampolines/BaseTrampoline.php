@@ -106,23 +106,23 @@ class BaseTrampoline implements Trampoline
             [
                 'clients_id' => $Client->id,
                 'address_street' => $trampolineOrderData->Address,
-                'address_town'  => $trampolineOrderData->City,
-                'address_postcode'  => $trampolineOrderData->PostCode,
-                'address_country'  => ''
+                'address_town' => $trampolineOrderData->City,
+                'address_postcode' => $trampolineOrderData->PostCode,
+                'address_country' => ''
             ],
             [
                 'clients_id' => $Client->id,
                 'address_street' => $trampolineOrderData->Address,
-                'address_town'  => $trampolineOrderData->City,
-                'address_postcode'  => $trampolineOrderData->PostCode,
-                'address_country'  => ''
+                'address_town' => $trampolineOrderData->City,
+                'address_postcode' => $trampolineOrderData->PostCode,
+                'address_country' => ''
             ]
         );
 
         $this->OrderData->Order = Order::create([
-            'order_number'  => Str::uuid(),
+            'order_number' => Str::uuid(),
             'order_date' => Carbon::now()->format('Y-m-d H:i:s'),
-            'rental_duration'  => 5,
+            'rental_duration' => 5,
             'delivery_address_id' => $ClientAddress->id,
             'advance_sum' => 0,
             'total_sum' => 0,
@@ -171,105 +171,162 @@ class BaseTrampoline implements Trampoline
 
     public function getOccupation(Collection $Trampolines, OccupationTimeFrames $TimeFrame, $FullCalendarFormat = false): array
     {
+//        $occupiedDates = [];
+//        switch ($TimeFrame) {
+//            case OccupationTimeFrames::WEEK:
+//                $GetOccupationFrom = Carbon::now()->startOfWeek();
+//                $GetOccupationTill = Carbon::now()->endOfWeek();
+//                break;
+//            case OccupationTimeFrames::MONTH:
+//                $GetOccupationFrom = Carbon::now()->startOfMonth();
+//                $GetOccupationTill = Carbon::now()->endOfMonth();
+//                break;
+//            default:
+//                return $occupiedDaysForEvents;
+//                break;
+//        }
+//        foreach ($Trampolines as $trampoline) {
+//            //$occupiedDaysForEventsForTrampoline = OrdersTrampoline::where('trampolines_id', $trampoline->id)->whereBetween('rental_start', [$GetOccupationFrom, $GetOccupationTill])->get();
+//            $Query = (new OrdersTrampoline())->newQuery();
+//            $Query->where('trampolines_id', $trampoline->id);
+//            $Query->where(function (Builder $builder) use ($GetOccupationTill, $GetOccupationFrom) {
+//                $builder->whereBetween('rental_start', [$GetOccupationFrom->format('Y-m-d'), $GetOccupationTill->format('Y-m-d')]);
+//                $builder->orWhereBetween('rental_end', [$GetOccupationFrom->addDay()->format('Y-m-d'), $GetOccupationTill->addDay()->format('Y-m-d')]);
+//            });
+//            $occupiedDaysForEventsForTrampoline = $Query->get();
+//            foreach ($occupiedDaysForEventsForTrampoline as $orderTrampoline) {
+//                if ($FullCalendarFormat) {
+//                    $DoWeHaveEventForSameDates = false;
+//                    foreach ($occupiedDaysForEvents as $occupiedDate) {
+//                        if (
+//                            $occupiedDate->start == $orderTrampoline->rental_start &&
+//                            $occupiedDate->end == $orderTrampoline->rental_end
+//                        ) {
+//                            $DoWeHaveEventForSameDates = true;
+//                        }
+//                    }
+//                    if (!$DoWeHaveEventForSameDates) {
+//                        $merged = false;
+//                        foreach ($occupiedDaysForEvents as $occupiedDate) {
+//                            if ($occupiedDate->end == $orderTrampoline->rental_start) {
+//                                $occupiedDate->end = $orderTrampoline->rental_end;
+//                                $merged = true;
+//                                break;
+//                            } elseif ($occupiedDate->start == $orderTrampoline->rental_end) {
+//                                $occupiedDate->start = $orderTrampoline->rental_start;
+//                                $merged = true;
+//                                break;
+//                            } elseif ($orderTrampoline->rental_end >= $occupiedDate->start && $orderTrampoline->rental_start <= $occupiedDate->end) {
+//                                $occupiedDate->start = min($occupiedDate->start, $orderTrampoline->rental_start);
+//                                $occupiedDate->end = max($occupiedDate->end, $orderTrampoline->rental_end);
+//                                $merged = true;
+//                            }
+//                        }
+//                        if (!$merged) {
+//                            $occupiedDaysForEvents[] = (object)[
+//                                'id' => $orderTrampoline->id,
+//                                'start' => $orderTrampoline->rental_start,
+//                                'end' => $orderTrampoline->rental_end,
+//                                'backgroundColor' => 'red',
+//                                'editable' => false,
+//                                'extendedProps' => [
+//                                    'type_custom' => 'occ'
+//                                ],
+//                            ];
+//                        }
+//                    }
+//                } else {
+//                    $occupiedDaysForEvents[] = $orderTrampoline;
+//                }
+//            }
+//        }
+
+        /* ---- V2 ----*/
+
         $occupiedDates = [];
+        $daysWithEvents = [];
+
         switch ($TimeFrame) {
             case OccupationTimeFrames::WEEK:
-                $GetOccupationFrom = Carbon::now()->startOfWeek();
-                $GetOccupationTill = Carbon::now()->endOfWeek();
+                $getOccupationFrom = Carbon::now()->startOfWeek();
+                $getOccupationTill = Carbon::now()->endOfWeek();
                 break;
             case OccupationTimeFrames::MONTH:
-                $GetOccupationFrom = Carbon::now()->startOfMonth();
-                $GetOccupationTill = Carbon::now()->endOfMonth();
+                $getOccupationFrom = Carbon::now()->startOfMonth();
+                $getOccupationTill = Carbon::now()->endOfMonth();
                 break;
             default:
                 return $occupiedDates;
                 break;
         }
+
+        $from = $getOccupationFrom->copy();
+        $till = $getOccupationTill->copy();
+
+        // Fetch all reservations for the given timeframe
         foreach ($Trampolines as $trampoline) {
-            //$occupiedDatesForTrampoline = OrdersTrampoline::where('trampolines_id', $trampoline->id)->whereBetween('rental_start', [$GetOccupationFrom, $GetOccupationTill])->get();
             $Query = (new OrdersTrampoline())->newQuery();
             $Query->where('trampolines_id', $trampoline->id);
-            $Query->where(function (Builder $builder) use ($GetOccupationTill, $GetOccupationFrom) {
-                $builder->whereBetween('rental_start', [$GetOccupationFrom->format('Y-m-d'), $GetOccupationTill->format('Y-m-d')]);
-                $builder->orWhereBetween('rental_end', [$GetOccupationFrom->addDay()->format('Y-m-d'), $GetOccupationTill->addDay()->format('Y-m-d')]);
+            $Query->where(function (Builder $builder) use ($getOccupationTill, $getOccupationFrom) {
+                $builder->whereBetween('rental_start', [$getOccupationFrom->format('Y-m-d'), $getOccupationTill->format('Y-m-d')]);
+                $builder->orWhereBetween('rental_end', [$getOccupationFrom->addDay()->format('Y-m-d'), $getOccupationTill->addDay()->format('Y-m-d')]);
             });
             $occupiedDatesForTrampoline = $Query->get();
-            foreach ($occupiedDatesForTrampoline as $orderTrampoline) {
-                if ($FullCalendarFormat) {
-                    $DoWeHaveEventForSameDates = false;
-                    foreach ($occupiedDates as $occupiedDate) {
-                        if (
-                            $occupiedDate->start == $orderTrampoline->rental_start &&
-                            $occupiedDate->end == $orderTrampoline->rental_end
-                        ) {
-                            $DoWeHaveEventForSameDates = true;
-                        }
+
+            for ($currentDate = $from->copy(); $currentDate->lte($till); $currentDate->addDay()) {
+                foreach ($occupiedDatesForTrampoline as $reserved) {
+                    if ($currentDate->between($reserved->rental_start, $reserved->rental_end) && !$currentDate->equalTo($reserved->rental_end)) {
+                        $daysWithEvents[] = $currentDate->copy()->format('Y-m-d');
+                        break;
                     }
-                    if (!$DoWeHaveEventForSameDates) {
-                        $merged = false;
-                        foreach ($occupiedDates as $occupiedDate) {
-                            if ($occupiedDate->end == $orderTrampoline->rental_start) {
-                                $occupiedDate->end = $orderTrampoline->rental_end;
-                                $merged = true;
-                                break;
-                            } elseif ($occupiedDate->start == $orderTrampoline->rental_end) {
-                                $occupiedDate->start = $orderTrampoline->rental_start;
-                                $merged = true;
-                                break;
-                            } elseif ($orderTrampoline->rental_end >= $occupiedDate->start && $orderTrampoline->rental_start <= $occupiedDate->end) {
-                                $occupiedDate->start = min($occupiedDate->start, $orderTrampoline->rental_start);
-                                $occupiedDate->end = max($occupiedDate->end, $orderTrampoline->rental_end);
-                                $merged = true;
-                            }
-                        }
-                        if (!$merged) {
-                            $occupiedDates[] = (object)[
-                                'title' => 'orderTrampoline = ['. $orderTrampoline->id.']',
-                                'id' => $orderTrampoline->id,
-                                'start' => $orderTrampoline->rental_start,
-                                'end' => $orderTrampoline->rental_end,
-                                'backgroundColor' => 'red',
-                                'editable' => false,
-                                'extendedProps' => [
-                                    'type_custom' => 'occ'
-                                ],
-                            ];
-                        }
-                    }
-                } else {
-                    $occupiedDates[] = $orderTrampoline;
                 }
             }
         }
+        // Split consecutive dates
+        if (!empty($daysWithEvents)) {
+            $dateGroups = [];
+            $currentGroup = [$daysWithEvents[0]];
 
-        /* ---- V2 ----*/
-        $occupiedDates = [];
-        foreach ($Trampolines as $trampoline) {
-            $Query = (new OrdersTrampoline())->newQuery();
-            $Query->where('trampolines_id', $trampoline->id);
-            $Query->where(function (Builder $builder) use ($GetOccupationTill, $GetOccupationFrom) {
-                $builder->whereBetween('rental_start', [$GetOccupationFrom->format('Y-m-d'), $GetOccupationTill->format('Y-m-d')]);
-                $builder->orWhereBetween('rental_end', [$GetOccupationFrom->addDay()->format('Y-m-d'), $GetOccupationTill->addDay()->format('Y-m-d')]);
-            });
-            $occupiedDates = array_merge($occupiedDates,$Query->get()->toArray());
+            for ($i = 1; $i < count($daysWithEvents); $i++) {
+                $currentDate = strtotime($daysWithEvents[$i]);
+                $previousDate = strtotime($daysWithEvents[$i - 1]);
+
+                if ($currentDate - $previousDate == 86400) { // 86400 seconds = 1 day
+                    $currentGroup[] = $daysWithEvents[$i];
+                } else {
+                    $dateGroups[] = $currentGroup;
+                    $currentGroup = [$daysWithEvents[$i]];
+                }
+            }
+
+            $events = [];
+            foreach ($dateGroups as $group) {
+                $event = (object)[
+                    'id' => null,
+                    'start' => date('Y-m-d 00:00:00', strtotime($group[0])),
+                    'end' => date('Y-m-d 00:00:00', strtotime(end($group) . ' +1 day')),
+                    'backgroundColor' => 'red',
+                    'editable' => false,
+                    'extendedProps' => [
+                        'type_custom' => 'occ'
+                    ]
+                ];
+
+                // Add the event to the events array
+                $events[] = $event;
+            }
+//@todo patvarkyti kad teisingai paduotu returne eventus
+            dd($events);
+        } else {
+            return $occupiedDates;
         }
-
-
-//        for ()
-//
-//        foreach ($occupiedDates as $occupiedDate) {
-//            for()
-//        }
-
-
-        return $occupiedDates;
     }
 
-    public function getAvailability(Collection $Trampolines, Carbon $fromDate,$FullCalendarFormat = false): array
+    public function getAvailability(Collection $Trampolines, Carbon $fromDate, $FullCalendarFormat = false): array
     {
         $availableDates = [];
         $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH);
-        $isDateRangeOccupied = function(Carbon $start, Carbon $end) use ($occupiedDates) {
+        $isDateRangeOccupied = function (Carbon $start, Carbon $end) use ($occupiedDates) {
             foreach ($occupiedDates as $occupiedDate) {
                 $occupiedStartDate = Carbon::parse($occupiedDate->rental_start);
                 $occupiedEndDate = Carbon::parse($occupiedDate->rental_end);
