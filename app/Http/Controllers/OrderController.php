@@ -19,9 +19,9 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    public function adminGetIndex()
+    public function adminGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
-
+        return view('orders.private.admin_order_table');
     }
 
     public function publicGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application

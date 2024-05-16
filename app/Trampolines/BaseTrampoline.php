@@ -265,6 +265,7 @@ class BaseTrampoline implements Trampoline
 
         // Fetch all reservations for the given timeframe
         foreach ($Trampolines as $trampoline) {
+            //$occupiedDaysForEventsForTrampoline = OrdersTrampoline::where('trampolines_id', $trampoline->id)->whereBetween('rental_start', [$GetOccupationFrom, $GetOccupationTill])->get();
             $Query = (new OrdersTrampoline())->newQuery();
             $Query->where('trampolines_id', $trampoline->id);
             $Query->where(function (Builder $builder) use ($getOccupationTill, $getOccupationFrom) {
@@ -273,53 +274,77 @@ class BaseTrampoline implements Trampoline
             });
             $occupiedDatesForTrampoline = $Query->get();
 
-            for ($currentDate = $from->copy(); $currentDate->lte($till); $currentDate->addDay()) {
-                foreach ($occupiedDatesForTrampoline as $reserved) {
-                    if ($currentDate->between($reserved->rental_start, $reserved->rental_end) && !$currentDate->equalTo($reserved->rental_end)) {
-                        $daysWithEvents[] = $currentDate->copy()->format('Y-m-d');
-                        break;
+            if ($FullCalendarFormat) {
+                for ($currentDate = $from->copy(); $currentDate->lte($till); $currentDate->addDay()) {
+                    foreach ($occupiedDatesForTrampoline as $reserved) {
+                        if ($currentDate->between($reserved->rental_start, $reserved->rental_end) && !$currentDate->equalTo($reserved->rental_end)) {
+                            $formattedDate = $currentDate->copy()->format('Y-m-d');
+                            if (!in_array($formattedDate, $daysWithEvents)) {
+                                $daysWithEvents[] = $formattedDate;
+                                Log::info('Date added to daysWithEvents: ' . $formattedDate);
+                            }
+                            break;
+                        }
                     }
                 }
-            }
-        }
-        // Split consecutive dates
-        if (!empty($daysWithEvents)) {
-            $dateGroups = [];
-            $currentGroup = [$daysWithEvents[0]];
-
-            for ($i = 1; $i < count($daysWithEvents); $i++) {
-                $currentDate = strtotime($daysWithEvents[$i]);
-                $previousDate = strtotime($daysWithEvents[$i - 1]);
-
-                if ($currentDate - $previousDate == 86400) { // 86400 seconds = 1 day
-                    $currentGroup[] = $daysWithEvents[$i];
-                } else {
-                    $dateGroups[] = $currentGroup;
-                    $currentGroup = [$daysWithEvents[$i]];
+            } else {
+                foreach ($occupiedDatesForTrampoline as $reserved) {
+                    $occupiedDates[] = $reserved;
                 }
             }
-
-            $events = [];
-            foreach ($dateGroups as $group) {
-                $event = (object)[
-                    'id' => null,
-                    'start' => date('Y-m-d 00:00:00', strtotime($group[0])),
-                    'end' => date('Y-m-d 00:00:00', strtotime(end($group) . ' +1 day')),
-                    'backgroundColor' => 'red',
-                    'editable' => false,
-                    'extendedProps' => [
-                        'type_custom' => 'occ'
-                    ]
-                ];
-
-                // Add the event to the events array
-                $events[] = $event;
-            }
-//@todo patvarkyti kad teisingai paduotu returne eventus
-            dd($events);
-        } else {
-            return $occupiedDates;
         }
+        if ($FullCalendarFormat){
+            $dateGroups = $this->splitConsecutiveDatesIntoGroups($daysWithEvents);
+            $events = $this->formatGroupsIntoEvents($dateGroups);
+            $occupiedDates = array_merge($occupiedDates, $events);
+        }
+        return $occupiedDates;
+    }
+
+    function splitConsecutiveDatesIntoGroups($daysWithEvents): array
+    {
+        if (empty($daysWithEvents)) {
+            return [];
+        }
+
+        $dateGroups = [];
+        $currentGroup = [$daysWithEvents[0]];
+
+        for ($i = 1; $i < count($daysWithEvents); $i++) {
+            $currentDate = strtotime($daysWithEvents[$i]);
+            $previousDate = strtotime($daysWithEvents[$i - 1]);
+
+            if ($currentDate - $previousDate == 86400) { // 86400 seconds = 1 day
+                $currentGroup[] = $daysWithEvents[$i];
+            } else {
+                $dateGroups[] = $currentGroup;
+                $currentGroup = [$daysWithEvents[$i]];
+            }
+        }
+
+        $dateGroups[] = $currentGroup;
+        return $dateGroups;
+    }
+
+    function formatGroupsIntoEvents($dateGroups): array
+    {
+        $events = [];
+        foreach ($dateGroups as $group) {
+            $event = (object)[
+                'id' => null,
+                'start' => date('Y-m-d', strtotime($group[0])),
+                'end' => date('Y-m-d', strtotime(end($group) . ' +1 day')),
+                'backgroundColor' => 'red',
+                'editable' => false,
+                'extendedProps' => [
+                    'type_custom' => 'occ'
+                ]
+            ];
+
+            // Add the event to the events array
+            $events[] = $event;
+        }
+        return $events;
     }
 
     public function getAvailability(Collection $Trampolines, Carbon $fromDate, $FullCalendarFormat = false): array

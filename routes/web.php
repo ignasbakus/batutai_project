@@ -12,7 +12,7 @@ Route::controller(ClientsController::class)->group(function () {
 Route::controller(OrderController::class)->prefix('orders')->group(function () {
     /*For admin usage (authenticated user)*/
     Route::prefix('admin')->group(function () {
-        Route::get('/', 'adminGetIndex'); //http://locahost:8000/orders/admin
+        Route::get('/', 'adminGetIndex')->name("orderTableIndex"); //http://locahost:8000/orders/admin
         Route::prefix('order')->group(function () {
             //http://locahost:8000/orders/admin/order [CRUD]
             Route::get('/', 'orderGet');
