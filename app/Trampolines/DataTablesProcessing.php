@@ -2,6 +2,9 @@
 
 namespace App\Trampolines;
 
+use App\Models\Client;
+use App\Models\ClientAddress;
+use App\Models\OrdersTrampoline;
 use App\Models\Parameter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +33,11 @@ class DataTablesProcessing
         switch ($model->getTable()) {
             case 'trampolines' :
                 $Query->leftJoin((new Parameter())->getTable(), (new Parameter())->getTable() . '.trampolines_id', '=', 'trampolines.id');
+                break;
+            case 'orders' :
+                $Query->leftJoin((new OrdersTrampoline())->getTable(), (new OrdersTrampoline())->getTable() . 'orders_id', '=', 'orders.id');
+                $Query->leftJoin((new Client())->getTable(), (new Client())->getTable() . 'id', '=', 'orders.client_id');
+                $Query->leftJoin((new ClientAddress())->getTable(), (new ClientAddress())->getTable() . 'id', '=', 'orders.delivery_address_id');
                 break;
         }
         try {

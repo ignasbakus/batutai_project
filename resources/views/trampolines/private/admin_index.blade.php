@@ -6,7 +6,7 @@
                 naują batutą
             </button>
             <button id="refreshTable" class="btn btn-secondary">
-                Arnaujinti lentelė
+                Atnaujinti lentelė
             </button>
         </div>
         <div class="col-2">
