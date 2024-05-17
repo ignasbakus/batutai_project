@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Trampoline;
 use App\Trampolines\BaseTrampoline;
 use App\Trampolines\OccupationTimeFrames;
+use App\Trampolines\TrampolineOrder;
 use App\Trampolines\TrampolineOrderData;
 use Carbon\Carbon;
 use http\Env\Response;
@@ -116,8 +117,11 @@ class OrderController extends Controller
 
     }
 
-    public function orderDelete()
+    public function orderDelete(): JsonResponse
     {
-
+        (new TrampolineOrder())->delete((new TrampolineOrderData(\request())));
+        return response()->json([
+            'status' => true
+        ]);
     }
 }

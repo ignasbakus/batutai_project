@@ -292,7 +292,8 @@ let Trampolines = {
                     }
                 }).done((response) => {
                     if (response.status) {
-                        $('#removeTrampolineModal .modal-body p').html('Ar tikrai norite ištrinti batutą "' + response.trampoline.title + '"?');
+                        $('#removeTrampolineModal .modal-body p').
+                        html('Ar tikrai norite ištrinti batutą "' + response.trampoline.title + '"?');
                         this.element.show()
                     }
                 })

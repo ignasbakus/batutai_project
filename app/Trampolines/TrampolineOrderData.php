@@ -2,8 +2,11 @@
 
 namespace App\Trampolines;
 
+use Illuminate\Http\Request;
+
 class TrampolineOrderData
 {
+    public int $orderID;
     public string $CustomerName;
     public string $CustomerSurname;
     public string $CustomerEmail;
@@ -14,20 +17,21 @@ class TrampolineOrderData
     public array $Trampolines;
     public function __construct()
     {
-        //Order form -> client info
-        $this->CustomerName = request()->get('customerName','');
-        $this->CustomerSurname = request()->get('customerSurname','');
-        $this->CustomerEmail = request()->get('customerEmail','');
-        $this->CustomerPhone = request()->get('customerPhoneNumber','');
+            //Order id
+            $this->orderID = request()->get('orderID', 0);
 
-        //order form -> client address
-        $this->City = request()->get('customerDeliveryCity','');
-        $this->PostCode = request()->get('customerDeliveryPostCode','');
-        $this->Address = request()->get('customerDeliveryAddress','');
+            //Order form -> client info
+            $this->CustomerName = request()->get('customerName','');
+            $this->CustomerSurname = request()->get('customerSurname','');
+            $this->CustomerEmail = request()->get('customerEmail','');
+            $this->CustomerPhone = request()->get('customerPhoneNumber','');
 
-        //Trampolines -> [{id:xxx,rent_start:YYYY-MM-DD,rent_end:YYYY-MM-DD}]
-        $this->Trampolines = request()->get('trampolines',[]);
-    }
+            //order form -> client address
+            $this->City = request()->get('customerDeliveryCity','');
+            $this->PostCode = request()->get('customerDeliveryPostCode','');
+            $this->Address = request()->get('customerDeliveryAddress','');
 
-
+            //Trampolines -> [{id:xxx,rent_start:YYYY-MM-DD,rent_end:YYYY-MM-DD}]
+            $this->Trampolines = request()->get('trampolines',[]);
+        }
 }
