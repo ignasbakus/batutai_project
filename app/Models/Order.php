@@ -23,7 +23,7 @@ class Order extends Model
 
     public function trampolines(): HasMany
     {
-        return $this->hasMany(OrdersTrampoline::class);
+        return $this->hasMany(OrdersTrampoline::class,'orders_id');
     }
 
     public function client(): BelongsTo

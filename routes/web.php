@@ -14,6 +14,7 @@ Route::controller(OrderController::class)->prefix('orders')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/', 'adminGetIndex')->name("orderTableIndex"); //http://locahost:8000/orders/admin
         Route::prefix('order')->group(function () {
+            Route::post('datatable/get', 'adminGetDatatable');
             //http://locahost:8000/orders/admin/order [CRUD]
             Route::get('/', 'orderGet');
             Route::post('/', 'orderInsert');

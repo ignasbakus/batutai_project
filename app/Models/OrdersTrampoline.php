@@ -17,4 +17,6 @@ class OrdersTrampoline extends Model
         'rental_duration',
         'total_sum',
     ];
+
+
 }

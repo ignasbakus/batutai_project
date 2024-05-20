@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Trampoline;
 use App\Trampolines\BaseTrampoline;
+use App\Trampolines\DataTablesProcessing;
 use App\Trampolines\OccupationTimeFrames;
 use App\Trampolines\TrampolineOrder;
 use App\Trampolines\TrampolineOrderData;
@@ -20,6 +22,32 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
+
+    public function adminGetDatatable(): JsonResponse
+    {
+        $Orders = (new DataTablesProcessing())->getPaginatedData(
+            new Order(),
+            [
+                'Trampolines',
+                'Client',
+                'Address'
+            ],
+            \request()->get('length', 0),
+            \request()->get('start', 0),
+            \request()->get('order', [])
+        );
+
+        return response()->json([
+            'status' => true,
+            'DATA' => $Orders->data,
+            'draw' => \request()->get('draw'),
+            'list' => $Orders->List,
+            'recordsTotal' => $Orders->recordsTotal,
+            'recordsFiltered' => $Orders->recordsFiltered,
+        ]);
+
+    }
+
     public function adminGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
         return view('orders.private.admin_order_table');
