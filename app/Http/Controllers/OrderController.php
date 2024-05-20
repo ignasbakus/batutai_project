@@ -10,7 +10,6 @@ use App\Trampolines\OccupationTimeFrames;
 use App\Trampolines\TrampolineOrder;
 use App\Trampolines\TrampolineOrderData;
 use Carbon\Carbon;
-use http\Env\Response;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -71,9 +70,12 @@ class OrderController extends Controller
         ]);
     }
 
-    public function orderGet()
+    public function orderGet(): JsonResponse
     {
-
+        return \response()->json([
+            'status' => true,
+            'order' => (new TrampolineOrder())->read(request()->get('order_id'))
+        ]);
     }
 
     public function orderInsert(Request $request): JsonResponse
@@ -140,16 +142,14 @@ class OrderController extends Controller
         ]);
     }
 
-    public function orderUpdate()
+    public function orderUpdate(Request $request): JsonResponse
     {
-
+        return response()->json((new TrampolineOrder())->update(new TrampolineOrderData($request)));
     }
 
-    public function orderDelete(): JsonResponse
+    public function orderDelete(Request $request): JsonResponse
     {
-        (new TrampolineOrder())->delete((new TrampolineOrderData(\request())));
-        return response()->json([
-            'status' => true
-        ]);
+        //$DeleteResult = (new TrampolineOrder())->delete((new TrampolineOrderData()));
+        return response()->json((new TrampolineOrder())->delete((new TrampolineOrderData($request))));
     }
 }
