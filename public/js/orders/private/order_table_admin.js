@@ -11,6 +11,68 @@ let Variables = {
     }
 }
 
+let Calendar = null;
+let today = new Date();
+today.setHours(0, 0, 0, 0);
+today = today.toISOString().split('T')[0];
+document.addEventListener('DOMContentLoaded', function() {
+    Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialDate: Dates.CalendarInitial,
+        locale: 'lt',
+        //timeZone: 'local',
+        editable: true,
+        selectable: true,
+        eventChange: function(changeInfo) {
+            let newStartDate = new Date(changeInfo.event.start);
+            if (newStartDate < new Date(today)) {
+                changeInfo.revert();
+            }
+        },
+        // businessHours: true,
+        dayMaxEvents: true,
+        events: [],
+        eventAllow: function(dropInfo, draggedEvent) {
+            let CouldBeDropped = true;
+            let dropStart = new Date(dropInfo.startStr);
+            let dropEnd = new Date(dropInfo.endStr);
+            Occupied.forEach(function (Occupation) {
+                let OccupationStart = new Date(Occupation.start);
+                let OccupationEnd = new Date(Occupation.end);
+                if ((dropStart >= OccupationStart && dropStart < OccupationEnd) || (dropEnd > OccupationStart && dropEnd <= OccupationEnd) || (dropStart <= OccupationStart && dropEnd >= OccupationEnd)) {
+                    console.log('Occupied!');
+                    CouldBeDropped = false;
+                    return false;
+                }
+            });
+            Trampolines.forEach(function (Trampoline){
+                draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline){
+                    if (Trampoline.id === AffectedTrampoline.id) {
+                        Trampoline.rental_start = dropInfo.startStr
+                        Trampoline.rental_end = dropInfo.endStr
+                    }
+                })
+            })
+            console.log('Rental range => ',dropInfo.startStr,'<>',dropInfo.endStr)
+            return CouldBeDropped;
+        },
+        eventTimeFormat: { /*like 14:30:00*/
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }
+    });
+    Calendar.render();
+    addEvent(Occupied)
+    addEvent(Availability)
+})
+
+function addEvent (EventsToAdd) {
+    EventsToAdd.forEach(function (Event){
+        Calendar.addEvent(Event)
+    });
+}
+
 let Orders = {
     init: function () {
         this.Modals.deleteOrder.init()

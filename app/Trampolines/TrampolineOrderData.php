@@ -4,6 +4,7 @@ namespace App\Trampolines;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\MessageBag;
 
 class TrampolineOrderData
 {
@@ -19,10 +20,13 @@ class TrampolineOrderData
     public array $Trampolines;
 
     public bool $ValidationStatus;
-    public \Illuminate\Support\MessageBag $failedInputs;
+    public MessageBag $failedInputs;
 
     public function __construct(Request $request = null)
     {
+        $this->Trampolines = [];
+        $this->failedInputs = new MessageBag();
+
         if (!is_null($request)) {
             $validator = Validator::make($request->all(), [
                 'customerName' => 'required|min:3',

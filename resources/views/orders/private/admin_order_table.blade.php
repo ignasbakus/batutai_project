@@ -52,61 +52,69 @@
     </div>
     <div class="modal fade" id="updateOrderModal" data-bs-backdrop="static" tabindex="-1"
          aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Užsakymo atnaujinimas</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="updateOrderForm" class="needs-validation" novalidate>
-                        <div class="row mb-3">
-                            <div class="form-group col-6">
-                                <label for="customerName">Vardas:</label>
-                                <input name="customerName" type="text" class="form-control" id="customerName" placeholder="Įveskite vardą" required>
-                                <div class="invalid-feedback customerNameInValidFeedback"></div>
-                            </div>
-                            <div class="form-group col-6">
-                                <label for="customerSurname">Pavardė:</label>
-                                <input name="customerSurname" type="text" class="form-control" id="customerSurname" placeholder="Įveskite pavardę" required>
-                                <div class="invalid-feedback customerSurnameInValidFeedback"></div>
-                            </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <form id="updateOrderForm" class="needs-validation" novalidate>
+                                <div class="row mb-3">
+                                    <div class="form-group col-6">
+                                        <label for="customerName">Vardas:</label>
+                                        <input name="customerName" type="text" class="form-control" id="customerName" placeholder="Įveskite vardą" required>
+                                        <div class="invalid-feedback customerNameInValidFeedback"></div>
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="customerSurname">Pavardė:</label>
+                                        <input name="customerSurname" type="text" class="form-control" id="customerSurname" placeholder="Įveskite pavardę" required>
+                                        <div class="invalid-feedback customerSurnameInValidFeedback"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label for="customerPhoneNumber">Telefono Numeris:</label>
+                                    <input name="customerPhoneNumber" type="tel" class="form-control" id="customerPhoneNumber" placeholder="Įveskite telefono numerį">
+                                    <div class="invalid-feedback customerPhoneNumberInValidFeedback"></div>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label for="customerEmail">El. Paštas:</label>
+                                    <input name="customerEmail" type="email" class="form-control" id="customerEmail" placeholder="Įveskite el. paštą" required>
+                                    <div class="invalid-feedback customerEmailInValidFeedback"></div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="form-group col-6">
+                                        <label for="customerDeliveryCity">Pristatymo Miestas:</label>
+                                        <input name="customerDeliveryCity" type="text" class="form-control" id="customerDeliveryCity"
+                                               placeholder="Įveskite pristatymo miestą" required>
+                                        <div class="invalid-feedback customerDeliveryCityInValidFeedback"></div>
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="customerDeliveryPostCode">Pašto Kodas:</label>
+                                        <input name="customerDeliveryPostCode" type="text" class="form-control" id="customerDeliveryPostCode" placeholder="Įveskite pašto kodą" required>
+                                        <div class="invalid-feedback customerDeliveryPostCodeInValidFeedback"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label for="customerDeliveryAddress">Pristatymo Adresas:</label>
+                                    <input name="customerDeliveryAddress" class="form-control" id="customerDeliveryAddress" placeholder="Įveskite pristatymo adresą" required>
+                                    <div class="invalid-feedback customerDeliveryAddressNameInValidFeedback"></div>
+                                </div>
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input informClient" name="informClient" type="checkbox" value="" id="flexCheckChecked" checked>
+                                    <label class="form-check-label" for="informClient">
+                                        Informuoti klientą
+                                    </label>
+                                </div>
+                            </form>
                         </div>
-                        <div class="form-group mt-3">
-                            <label for="customerPhoneNumber">Telefono Numeris:</label>
-                            <input name="customerPhoneNumber" type="tel" class="form-control" id="customerPhoneNumber" placeholder="Įveskite telefono numerį">
-                            <div class="invalid-feedback customerPhoneNumberInValidFeedback"></div>
+                        <div class="col-1"></div>
+                        <div class="col-7">
+                            <div id="calendar"></div>
                         </div>
-                        <div class="form-group mt-3">
-                            <label for="customerEmail">El. Paštas:</label>
-                            <input name="customerEmail" type="email" class="form-control" id="customerEmail" placeholder="Įveskite el. paštą" required>
-                            <div class="invalid-feedback customerEmailInValidFeedback"></div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="form-group col-6">
-                                <label for="customerDeliveryCity">Pristatymo Miestas:</label>
-                                <input name="customerDeliveryCity" type="text" class="form-control" id="customerDeliveryCity"
-                                       placeholder="Įveskite pristatymo miestą" required>
-                                <div class="invalid-feedback customerDeliveryCityInValidFeedback"></div>
-                            </div>
-                            <div class="form-group col-6">
-                                <label for="customerDeliveryPostCode">Pašto Kodas:</label>
-                                <input name="customerDeliveryPostCode" type="text" class="form-control" id="customerDeliveryPostCode" placeholder="Įveskite pašto kodą" required>
-                                <div class="invalid-feedback customerDeliveryPostCodeInValidFeedback"></div>
-                            </div>
-                        </div>
-                        <div class="form-group mt-3">
-                            <label for="customerDeliveryAddress">Pristatymo Adresas:</label>
-                            <input name="customerDeliveryAddress" class="form-control" id="customerDeliveryAddress" placeholder="Įveskite pristatymo adresą" required>
-                            <div class="invalid-feedback customerDeliveryAddressNameInValidFeedback"></div>
-                        </div>
-                        <div class="form-check mt-3">
-                            <input class="form-check-input informClient" name="informClient" type="checkbox" value="" id="flexCheckChecked" checked>
-                            <label class="form-check-label" for="informClient">
-                                Informuoti klientą
-                            </label>
-                        </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Uždaryti</button>
@@ -117,5 +125,6 @@
     </div>
 @endsection
 @section('custom_js')
+    <script src='/frameworks/fullcalendar6111/dist/index.global.js'></script>
     <script src="/js/orders/private/order_table_admin.js"></script>
 @endsection

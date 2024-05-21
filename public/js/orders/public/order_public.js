@@ -116,10 +116,16 @@
                         }
                         /*Renew fullcalendar occupation*/
                         Occupied = response.Occupied
-                        Calendar.removeAllEvents();
-                        addEvent(Occupied)
-                        Availability = response.Events
-                        addEvent(Availability)
+                        if (response.status) {
+                            Calendar.removeAllEvents();
+                            addEvent(Occupied)
+                            Availability = response.Events
+                            addEvent(Availability)
+                        } else {
+                            /*keisti order evento spalva*/
+                            /*trionti visus occ eventus*/
+                            //addEvent(Occupied) /*perpiesti occ eventus*/
+                        }
                     })
                 }
             }

@@ -5,12 +5,15 @@ namespace App\Trampolines;
 use App\Interfaces\Order;
 use App\Models\Client;
 use App\Models\ClientAddress;
+use App\Models\OrdersTrampoline;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\MessageBag;
+use Illuminate\Support\Str;
 
 class TrampolineOrder implements Order
 {
@@ -19,6 +22,8 @@ class TrampolineOrder implements Order
     public array $receivedParams;
     public array $Messages;
     public bool $status;
+    public \App\Models\Order $Order;
+    public array $OrderTrampolines;
     public \Illuminate\Support\MessageBag $failedInputs;
 
     public function __construct()
@@ -27,6 +32,92 @@ class TrampolineOrder implements Order
         $this->receivedParams = [];
         $this->Errors = [];
         $this->Messages = [];
+    }
+
+    public function create (TrampolineOrderData $trampolineOrderData): static
+    {
+        if (!$trampolineOrderData->ValidationStatus) {
+            $this->failedInputs = $trampolineOrderData->failedInputs;
+            $this->status = false;
+            try {
+                $Trampoline = (object)[
+                    'rental_start' => $trampolineOrderData->Trampolines[0]['rental_start'],
+                    'rental_end' => $trampolineOrderData->Trampolines[0]['rental_end']
+                ];
+            } catch (\Exception) {
+                $Trampoline = (object)[
+                    'rental_start' => Carbon::parse(request()->get('trampolines')[0]['rental_start']),
+                    'rental_end' => Carbon::parse(request()->get('trampolines')[0]['rental_end'])
+                ];
+            }
+            $this->Order = (object)[
+                'Order' => (object)[
+                    'id' => 0,
+                    'OrderTrampolines' => [$Trampoline]
+                ]
+            ];
+            return $this;
+        }
+        $Client = (new Client())->updateOrCreate(
+            [
+                'phone' => $trampolineOrderData->CustomerPhone,
+            ],
+            [
+                'name' => $trampolineOrderData->CustomerName,
+                'surname' => $trampolineOrderData->CustomerSurname,
+                'email' => $trampolineOrderData->CustomerEmail,
+                'phone' => $trampolineOrderData->CustomerPhone
+            ]
+        );
+        $ClientAddress = ClientAddress::updateOrCreate(
+            [
+                'clients_id' => $Client->id,
+                'address_street' => $trampolineOrderData->Address,
+                'address_town' => $trampolineOrderData->City,
+                'address_postcode' => $trampolineOrderData->PostCode,
+                'address_country' => ''
+            ],
+            [
+                'clients_id' => $Client->id,
+                'address_street' => $trampolineOrderData->Address,
+                'address_town' => $trampolineOrderData->City,
+                'address_postcode' => $trampolineOrderData->PostCode,
+                'address_country' => ''
+            ]
+        );
+        /*Pakartotinis batutu prieinamumo patikrinimas !*/
+        $this->Order = \App\Models\Order::create([
+            'order_number' => Str::uuid(),
+            'order_date' => Carbon::now()->format('Y-m-d H:i:s'),
+            'rental_duration' => 0,
+            'delivery_address_id' => $ClientAddress->id,
+            'advance_sum' => 0,
+            'total_sum' => 0,
+            'client_id' => $Client->id
+        ]);
+        $OrderTotalSum = 0;
+        $OrderRentalDuration = 0;
+        foreach ($trampolineOrderData->Trampolines as $trampoline) {
+            $RentalStart = Carbon::parse($trampoline['rental_start']);
+            $RentalDuration = $RentalStart->diffInDays(Carbon::parse($trampoline['rental_end']));
+            $Trampoline = \App\Models\Trampoline::with('Parameter')->find($trampoline['id']);
+            $this->OrderTrampolines[] = OrdersTrampoline::create([
+                'orders_id' => $this->Order->id,
+                'trampolines_id' => $Trampoline->id,
+                'rental_start' => Carbon::parse($trampoline['rental_start'])->format('Y-m-d'),
+                'rental_end' => Carbon::parse($trampoline['rental_end'])->format('Y-m-d'),
+                'rental_duration' => $RentalDuration,
+                'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
+            ]);
+            $OrderTotalSum += $RentalDuration * $Trampoline->Parameter->price;
+            $OrderRentalDuration = $RentalDuration;
+        }
+        $this->Order->update([
+            'total_sum' => $OrderTotalSum,
+            'rental_duration' => $OrderRentalDuration
+        ]);
+        $this->status = true;
+        return $this;
     }
 
     public function update(TrampolineOrderData $trampolineOrderData): static
@@ -85,7 +176,6 @@ class TrampolineOrder implements Order
         }
         return $this;
     }
-
 
     public function read($orderID): Model|Collection|Builder|array|null
     {
