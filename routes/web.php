@@ -26,6 +26,7 @@ Route::controller(OrderController::class)->prefix('orders')->group(function () {
     Route::prefix('public')->group(function () {
         Route::get('/', 'publicGetIndex'); //http://locahost:8000/orders/public
         Route::prefix('order')->group(function () {
+            Route::post('calendar/get', 'publicGetCalendar');
             //http://locahost:8000/orders/public/order [CRUD]
             Route::get('/', 'orderGet');
             Route::post('/', 'orderInsert');

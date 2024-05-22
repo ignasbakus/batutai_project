@@ -10,14 +10,12 @@ use App\Trampolines\OccupationTimeFrames;
 use App\Trampolines\TrampolineOrder;
 use App\Trampolines\TrampolineOrderData;
 use Carbon\Carbon;
-use http\Env\Response;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 
 class OrderController extends Controller
@@ -63,11 +61,20 @@ class OrderController extends Controller
         }
         return view ('orders.public.order',[
             'Availability' => $Availability,
-            'Occupied' => (new BaseTrampoline())->getOccupation($Trampolines, OccupationTimeFrames::MONTH, true),
+            'Occupied' => (new BaseTrampoline())->getOccupation($Trampolines, OccupationTimeFrames::MONTH, new Order() , true),
             'Trampolines' => $Trampolines,
             'Dates' => (object)[
                 'CalendarInitial'=>Carbon::now()->format('Y-m-d')
             ]
+        ]);
+    }
+
+    public function publicGetCalendar(Request $request): JsonResponse
+    {
+        $occupied = (new BaseTrampoline())->getOccupationDataForTargetDate($request);
+        return response()->json([
+            'status' => true,
+            'occupied' => $occupied
         ]);
     }
 
@@ -107,10 +114,16 @@ class OrderController extends Controller
                 ]
             ];
         }
+
         return response()->json([
             'failed_input' => $Order->failedInputs,
             'status' => $Order->status,
-            'Occupied' => (new BaseTrampoline())->getOccupation($Trampolines, OccupationTimeFrames::MONTH, true),
+            'Occupied' => (new BaseTrampoline())->getOccupation(
+                $Trampolines,
+                OccupationTimeFrames::MONTH,
+                $Order->Order,
+                true
+            ),
             'Events' => $Events
         ]);
     }
@@ -123,6 +136,8 @@ class OrderController extends Controller
     public function orderDelete(Request $request): JsonResponse
     {
         //$DeleteResult = (new TrampolineOrder())->delete((new TrampolineOrderData()));
-        return response()->json((new TrampolineOrder())->delete((new TrampolineOrderData($request))));
+//        dd($request);
+        $deleteResult = (new TrampolineOrder())->delete($request->input('orderID'));
+        return response()->json($deleteResult);
     }
 }

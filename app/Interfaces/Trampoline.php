@@ -2,6 +2,7 @@
 
 namespace App\Interfaces;
 
+use App\Models\Order;
 use App\Trampolines\BaseTrampolineData;
 use App\Trampolines\OccupationTimeFrames;
 use App\Trampolines\TrampolineOrderData;
@@ -17,13 +18,11 @@ interface Trampoline
 
     public function read($TrampolineID);
 
-    public function rent(TrampolineOrderData $trampolineOrderData);
-
     public function cancelRent();
 
     public function makeRentable();
 
     public function onHold();
 
-    public function getOccupation(Collection $Trampolines,OccupationTimeFrames $TimeFrame, $FullCalendarFormat = false);
+    public function getOccupation(Collection $Trampolines,OccupationTimeFrames $TimeFrame, Order $Order ,$FullCalendarFormat = false);
 }

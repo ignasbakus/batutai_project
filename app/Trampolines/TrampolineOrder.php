@@ -34,7 +34,7 @@ class TrampolineOrder implements Order
         $this->Messages = [];
     }
 
-    public function create (TrampolineOrderData $trampolineOrderData): static
+    public function create(TrampolineOrderData $trampolineOrderData): static
     {
         if (!$trampolineOrderData->ValidationStatus) {
             $this->failedInputs = $trampolineOrderData->failedInputs;
@@ -50,12 +50,13 @@ class TrampolineOrder implements Order
                     'rental_end' => Carbon::parse(request()->get('trampolines')[0]['rental_end'])
                 ];
             }
-            $this->Order = (object)[
-                'Order' => (object)[
-                    'id' => 0,
-                    'OrderTrampolines' => [$Trampoline]
-                ]
-            ];
+
+            $fakeOrder = new \App\Models\Order();
+            $fakeOrder->id = 0;
+            $fakeOrder->OrderTrampolines = [$Trampoline];
+
+            $this->Order = $fakeOrder;
+
             return $this;
         }
         $Client = (new Client())->updateOrCreate(
@@ -161,17 +162,19 @@ class TrampolineOrder implements Order
         return $this;
     }
 
-    public function delete(TrampolineOrderData $trampolineOrderData): static
+    public function delete($orderID): static
     {
         try {
-            $order = \App\Models\Order::find($trampolineOrderData->orderID);
-//            $order->trampolines()->delete();
-//            $order->client()->delete();
-//            $order->address()->delete();
-//            $this->status = $order->delete();
-            $this->Messages[] = 'Užsakymas #'.$trampolineOrderData->orderID.' ištrintas sėkmingai !';
+
+            $order = \App\Models\Order::find($orderID);
+
+            $order->trampolines()->delete();
+            $order->client()->delete();
+            $order->address()->delete();
+            $this->status = $order->delete();
+            $this->Messages[] = 'Užsakymas #' . $orderID . ' ištrintas sėkmingai !';
         } catch (\Exception $exception) {
-            $this->Errors[] = 'Trinant užsakymą įvyko klaida : '.$exception->getMessage();
+            $this->Errors[] = 'Trinant užsakymą įvyko klaida : ' . $exception->getMessage();
             $this->status = false;
         }
         return $this;

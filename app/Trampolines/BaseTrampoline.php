@@ -14,6 +14,7 @@ use Faker\Provider\Base;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -82,78 +83,6 @@ class BaseTrampoline implements Trampoline
         return \App\Models\Trampoline::with('Parameter')->find($TrampolineID);
     }
 
-    public function rent(TrampolineOrderData $trampolineOrderData): static
-    {
-
-        $this->OrderData = (object)[
-            'Order' => null,
-            'OrderTrampolines' => []
-        ];
-
-        $Client = (new Client())->updateOrCreate(
-            [
-                'phone' => $trampolineOrderData->CustomerPhone,
-            ],
-            [
-                'name' => $trampolineOrderData->CustomerName,
-                'surname' => $trampolineOrderData->CustomerSurname,
-                'email' => $trampolineOrderData->CustomerEmail,
-                'phone' => $trampolineOrderData->CustomerPhone
-            ]
-        );
-
-        $ClientAddress = ClientAddress::updateOrCreate(
-            [
-                'clients_id' => $Client->id,
-                'address_street' => $trampolineOrderData->Address,
-                'address_town' => $trampolineOrderData->City,
-                'address_postcode' => $trampolineOrderData->PostCode,
-                'address_country' => ''
-            ],
-            [
-                'clients_id' => $Client->id,
-                'address_street' => $trampolineOrderData->Address,
-                'address_town' => $trampolineOrderData->City,
-                'address_postcode' => $trampolineOrderData->PostCode,
-                'address_country' => ''
-            ]
-        );
-
-        $this->OrderData->Order = Order::create([
-            'order_number' => Str::uuid(),
-            'order_date' => Carbon::now()->format('Y-m-d H:i:s'),
-            'rental_duration' => 5,
-            'delivery_address_id' => $ClientAddress->id,
-            'advance_sum' => 0,
-            'total_sum' => 0,
-            'client_id' => $Client->id
-        ]);
-
-        $OrderTotalSum = 0;
-        $OrderRentalDuration = 0;
-        foreach ($trampolineOrderData->Trampolines as $trampoline) {
-            $RentalStart = Carbon::parse($trampoline['rental_start']);
-            $RentalDuration = $RentalStart->diffInDays(Carbon::parse($trampoline['rental_end']));
-            $Trampoline = \App\Models\Trampoline::with('Parameter')->find($trampoline['id']);
-            $this->OrderData->OrderTrampolines[] = OrdersTrampoline::create([
-                'orders_id' => $this->OrderData->Order->id,
-                'trampolines_id' => $Trampoline->id,
-                'rental_start' => Carbon::parse($trampoline['rental_start'])->format('Y-m-d'),
-                'rental_end' => Carbon::parse($trampoline['rental_end'])->format('Y-m-d'),
-                'rental_duration' => $RentalDuration,
-                'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
-            ]);
-            $OrderTotalSum += $RentalDuration * $Trampoline->Parameter->price;
-            $OrderRentalDuration = $RentalDuration;
-        }
-        $this->OrderData->Order->update([
-            'total_sum' => $OrderTotalSum,
-            'rental_duration' => $OrderRentalDuration /*Not in every case would be true - needs develop*/
-        ]);
-
-        return $this;
-    }
-
     public function cancelRent()
     {
         // TODO: Implement cancelRent() method.
@@ -169,7 +98,7 @@ class BaseTrampoline implements Trampoline
         // TODO: Implement onHold() method.
     }
 
-    public function getOccupation(Collection $Trampolines, OccupationTimeFrames $TimeFrame, $FullCalendarFormat = false): array
+    public function getOccupation(Collection $Trampolines, OccupationTimeFrames $TimeFrame, Order $Order ,$FullCalendarFormat = false, Carbon $TargetDate = null): array
     {
 //        $occupiedDates = [];
 //        switch ($TimeFrame) {
@@ -246,23 +175,54 @@ class BaseTrampoline implements Trampoline
         $occupiedDates = [];
         $daysWithEvents = [];
 
-        switch ($TimeFrame) {
-            case OccupationTimeFrames::WEEK:
-                $getOccupationFrom = Carbon::now()->startOfWeek();
-                $getOccupationTill = Carbon::now()->endOfWeek();
-                break;
-            case OccupationTimeFrames::MONTH:
-                $getOccupationFrom = Carbon::now()->startOfMonth();
-                $getOccupationTill = Carbon::now()->endOfMonth();
-                break;
-            default:
-                return $occupiedDates;
-                break;
-        }
+        /*if ($Order->id > 0) {
+            $Order->load('trampolines');
+            if (empty($Order->trampolines) || !isset($Order->trampolines[0])) {
+                throw new \Exception('Order has no trampolines.');
+            }
+            $rental_start = $Order->trampolines[0]->rental_start;
+            $rental_end = $Order->trampolines[0]->rental_end;
+        }*/
 
+        $Order->load('trampolines');
+        if (empty($Order->trampolines) || !isset($Order->trampolines[0])) {
+            $rental_start = null;
+            $rental_end = null;
+        } else {
+            $rental_start = $Order->trampolines[0]->rental_start;
+            $rental_end = $Order->trampolines[0]->rental_end;
+        }
+        if (is_null($TargetDate)) {
+            switch ($TimeFrame) {
+                case OccupationTimeFrames::WEEK:
+                    $getOccupationFrom = Carbon::now()->startOfWeek();
+                    $getOccupationTill = Carbon::now()->endOfWeek();
+                    break;
+                case OccupationTimeFrames::MONTH:
+                    $getOccupationFrom = Carbon::now()->startOfMonth();
+                    $getOccupationTill = Carbon::now()->endOfMonth();
+                    break;
+                default:
+                    return $occupiedDates;
+                    break;
+            }
+        } else {
+            switch ($TimeFrame) {
+                case OccupationTimeFrames::WEEK:
+                    $getOccupationFrom = $TargetDate->startOfWeek();
+                    $getOccupationTill = $TargetDate->endOfWeek();
+                    break;
+                case OccupationTimeFrames::MONTH:
+                    $getOccupationFrom = $TargetDate->startOfMonth();
+                    $getOccupationTill = $TargetDate->endOfMonth();
+                    break;
+                default:
+                    return $occupiedDates;
+                    break;
+            }
+        }
         $from = $getOccupationFrom->copy();
         $till = $getOccupationTill->copy();
-
         // Fetch all reservations for the given timeframe
         foreach ($Trampolines as $trampoline) {
             //$occupiedDaysForEventsForTrampoline = OrdersTrampoline::where('trampolines_id', $trampoline->id)->whereBetween('rental_start', [$GetOccupationFrom, $GetOccupationTill])->get();
@@ -279,7 +239,7 @@ class BaseTrampoline implements Trampoline
                     foreach ($occupiedDatesForTrampoline as $reserved) {
                         if ($currentDate->between($reserved->rental_start, $reserved->rental_end) && !$currentDate->equalTo($reserved->rental_end)) {
                             $formattedDate = $currentDate->copy()->format('Y-m-d');
-                            if (!in_array($formattedDate, $daysWithEvents)) {
+                            if (!in_array($formattedDate, $daysWithEvents) && $reserved->rental_start !== $rental_start && $reserved->rental_end !== $rental_end ) {
                                 $daysWithEvents[] = $formattedDate;
                                 Log::info('Date added to daysWithEvents: ' . $formattedDate);
                             }
@@ -347,10 +307,27 @@ class BaseTrampoline implements Trampoline
         return $events;
     }
 
+    public function getOccupationDataForTargetDate(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $trampolines = (new \App\Models\Trampoline())->newQuery()->whereIn('id',$request->get('trampoline_id',[]))->get();
+
+        $Result = self::getOccupation(
+            $trampolines,
+            OccupationTimeFrames::MONTH,
+            new Order(),
+            true,
+            Carbon::now()->addMonth()
+        );
+        dd($Result);
+        return response()->json([
+            'occupiedDates' => $Result
+        ]);
+    }
+
     public function getAvailability(Collection $Trampolines, Carbon $fromDate, $FullCalendarFormat = false): array
     {
         $availableDates = [];
-        $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH);
+        $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH , new Order());
         $isDateRangeOccupied = function (Carbon $start, Carbon $end) use ($occupiedDates) {
             foreach ($occupiedDates as $occupiedDate) {
                 $occupiedStartDate = Carbon::parse($occupiedDate->rental_start);
@@ -374,7 +351,7 @@ class BaseTrampoline implements Trampoline
                 ],
                 'title' => 'Jūsų užsakymas',
                 'start' => $todayStart->format('Y-m-d'),
-                'end' => $todayEnd->format('Y-m-d')
+                'end' => $todayEnd->format('Y-m-d'),
             ];
         } else {
             return [$todayStart->format('Y-m-d')];

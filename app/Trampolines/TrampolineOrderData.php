@@ -3,6 +3,7 @@
 namespace App\Trampolines;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
 
@@ -50,6 +51,7 @@ class TrampolineOrderData
                 'customerDeliveryAddress.min' => 'Adresas per trumpas'
             ]);
             if($validator->fails()) {
+                Log::info('Didnt pass validator');
                 $this->ValidationStatus = false;
                 $this->failedInputs = $validator->errors();
                 return $this;

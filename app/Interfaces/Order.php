@@ -8,7 +8,7 @@ interface Order
 {
     public function update(TrampolineOrderData $trampolineOrderData);
 
-    public function delete(TrampolineOrderData $trampolineOrderData);
+    public function delete($orderID);
 
     public function read($orderID);
 }
