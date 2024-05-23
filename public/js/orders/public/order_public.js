@@ -9,6 +9,9 @@ let Variables = {
         });
         values.trampolines = Trampolines
         return values;
+    },
+    getTrampolines: function () {
+        return Trampolines
     }
 }
 let Calendar = null;
@@ -36,11 +39,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 addEvent(Occupied)
             } else if (droppedMonth > currentMonth) {
-                Calendar.getEvents().forEach(function (event) {
-                    if (event.extendedProps.type_custom === 'occ') {
-                        event.remove();
-                    }
-                })
+                // Calendar.getEvents().forEach(function (event) {
+                //     if (event.extendedProps.type_custom === 'occ') {
+                //         event.remove();
+                //     }
+                // })
                 Calendar.next();
                 updateEvents()
             }
@@ -95,26 +98,24 @@ function addEvent(EventsToAdd) {
 }
 
 function updateEvents() {
-    let currentMonth = Calendar.getDate();
-    let month = currentMonth.getMonth() + 1;
-
     $.ajax({
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         url: '/orders/public/order/calendar/get',
         method: 'POST',
         data: {
-            // trampoline_id:
+            trampoline_id: Variables.getTrampolines().map(t => t.id)
         },
-        success: function(response) {
-            console.log(response)
-            if (response && response.occupiedDates) {
-                // addEvent(Occupied)
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching occupation data:', error);
+    }).done((response) => {
+        Occupied = response.Occupied
+        if (response.status){
+            Calendar.removeAllEvents();
+            addEvent(Occupied)
+            Availability = response.Events
+            addEvent(Availability)
         }
-    });
+    }).always((instance) => {
+        console.log("always => response : ", instance);
+    })
 }
 
 let TrampolineOrder = {
@@ -159,6 +160,7 @@ let TrampolineOrder = {
                     }
                     /*Renew fullcalendar occupation*/
                     Occupied = response.Occupied
+                    console.log('Occupied create =>', Occupied)
                     if (response.status) {
                         Calendar.removeAllEvents();
                         addEvent(Occupied)

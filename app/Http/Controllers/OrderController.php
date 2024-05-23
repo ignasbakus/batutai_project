@@ -54,6 +54,7 @@ class OrderController extends Controller
     public function publicGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
         $Trampolines = (new Trampoline())->newQuery()->whereIn('id',\request()->get('trampoline_id',[]))->get();
+        Log::info('publicGetIndex trampolines =>',$Trampolines->toArray());
         $Availability = (new BaseTrampoline())->getAvailability($Trampolines, Carbon::now()->startOfDay(), true);
         foreach ($Trampolines as $trampoline) {
             $trampoline->rental_start = Carbon::parse($Availability[0]->start)->format('Y-m-d');
@@ -69,12 +70,22 @@ class OrderController extends Controller
         ]);
     }
 
-    public function publicGetCalendar(Request $request): JsonResponse
+    public function publicGetCalendar(): JsonResponse
     {
-        $occupied = (new BaseTrampoline())->getOccupationDataForTargetDate($request);
+        $Trampolines = (new Trampoline())->newQuery()->whereIn('id',\request()->get('trampoline_id',[]))->get();
+        $Availability = (new BaseTrampoline())->getAvailability($Trampolines, Carbon::now()->startOfDay()->addMonth(), true);
+        $Occupied = (new BaseTrampoline())->getOccupation($Trampolines, OccupationTimeFrames::MONTH, new Order(), true, Carbon::now()->startOfDay()->addMonth());
+        foreach ($Trampolines as $trampoline) {
+            $trampoline->rental_start = Carbon::parse($Availability[0]->start)->format('Y-m-d');
+            $trampoline->rental_end = Carbon::parse($Availability[0]->end)->format('Y-m-d');
+        }
         return response()->json([
-            'status' => true,
-            'occupied' => $occupied
+            'Availability' => $Availability,
+            'Occupied' => $Occupied,
+            'Trampolines' => $Trampolines,
+            'Dates' => (object)[
+                'CalendarInitial'=>Carbon::now()->addDay()->format('Y-m-d')
+            ]
         ]);
     }
 

@@ -98,7 +98,7 @@ class BaseTrampoline implements Trampoline
         // TODO: Implement onHold() method.
     }
 
-    public function getOccupation(Collection $Trampolines, OccupationTimeFrames $TimeFrame, Order $Order ,$FullCalendarFormat = false, Carbon $TargetDate = null): array
+    public function getOccupation(Collection $Trampolines, OccupationTimeFrames $TimeFrame, Order $Order, $FullCalendarFormat = false, Carbon $TargetDate = null): array
     {
 //        $occupiedDates = [];
 //        switch ($TimeFrame) {
@@ -174,7 +174,7 @@ class BaseTrampoline implements Trampoline
 
         $occupiedDates = [];
         $daysWithEvents = [];
-
+//        Log::info('First load trampolines => ', $Trampolines->toArray());
         /*if ($Order->id > 0) {
             $Order->load('trampolines');
             if (empty($Order->trampolines) || !isset($Order->trampolines[0])) {
@@ -209,20 +209,25 @@ class BaseTrampoline implements Trampoline
         } else {
             switch ($TimeFrame) {
                 case OccupationTimeFrames::WEEK:
-                    $getOccupationFrom = $TargetDate->startOfWeek();
-                    $getOccupationTill = $TargetDate->endOfWeek();
+                    $getOccupationFrom = $TargetDate->copy()->startOfWeek();
+                    $getOccupationTill = $TargetDate->copy()->endOfWeek();
                     break;
                 case OccupationTimeFrames::MONTH:
-                    $getOccupationFrom = $TargetDate->startOfMonth();
-                    $getOccupationTill = $TargetDate->endOfMonth();
+                    $getOccupationFrom = $TargetDate->copy()->startOfMonth();
+                    $getOccupationTill = $TargetDate->copy()->endOfMonth();
                     break;
                 default:
                     return $occupiedDates;
                     break;
             }
         }
+
+
         $from = $getOccupationFrom->copy();
         $till = $getOccupationTill->copy();
+        Log::info('From', $from->toArray());
+        Log::info('Till', $till->toArray());
+
         // Fetch all reservations for the given timeframe
         foreach ($Trampolines as $trampoline) {
             //$occupiedDaysForEventsForTrampoline = OrdersTrampoline::where('trampolines_id', $trampoline->id)->whereBetween('rental_start', [$GetOccupationFrom, $GetOccupationTill])->get();
@@ -233,15 +238,15 @@ class BaseTrampoline implements Trampoline
                 $builder->orWhereBetween('rental_end', [$getOccupationFrom->addDay()->format('Y-m-d'), $getOccupationTill->addDay()->format('Y-m-d')]);
             });
             $occupiedDatesForTrampoline = $Query->get();
+            Log::info('Occupied dates =>', $occupiedDatesForTrampoline->toArray());
 
             if ($FullCalendarFormat) {
                 for ($currentDate = $from->copy(); $currentDate->lte($till); $currentDate->addDay()) {
                     foreach ($occupiedDatesForTrampoline as $reserved) {
                         if ($currentDate->between($reserved->rental_start, $reserved->rental_end) && !$currentDate->equalTo($reserved->rental_end)) {
                             $formattedDate = $currentDate->copy()->format('Y-m-d');
-                            if (!in_array($formattedDate, $daysWithEvents) && $reserved->rental_start !== $rental_start && $reserved->rental_end !== $rental_end ) {
+                            if (!in_array($formattedDate, $daysWithEvents) && $reserved->rental_start !== $rental_start && $reserved->rental_end !== $rental_end) {
                                 $daysWithEvents[] = $formattedDate;
-                                Log::info('Date added to daysWithEvents: ' . $formattedDate);
                             }
                             break;
                         }
@@ -253,7 +258,7 @@ class BaseTrampoline implements Trampoline
                 }
             }
         }
-        if ($FullCalendarFormat){
+        if ($FullCalendarFormat) {
             $dateGroups = $this->splitConsecutiveDatesIntoGroups($daysWithEvents);
             $events = $this->formatGroupsIntoEvents($dateGroups);
             $occupiedDates = array_merge($occupiedDates, $events);
@@ -307,27 +312,18 @@ class BaseTrampoline implements Trampoline
         return $events;
     }
 
-    public function getOccupationDataForTargetDate(Request $request): \Illuminate\Http\JsonResponse
-    {
-        $trampolines = (new \App\Models\Trampoline())->newQuery()->whereIn('id',$request->get('trampoline_id',[]))->get();
+//    public function getOccupationDataForTargetDate(Collection $Trampolines): \Illuminate\Http\JsonResponse
+//    {
+////        Log::info('next month trampolines =>', $Trampolines->toArray());
+//        $result = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH, new Order(), true, Carbon::now()->startOfDay()->addMonth());
+//        // Return JSON response
+//        return response()->json($result);
+//    }
 
-        $Result = self::getOccupation(
-            $trampolines,
-            OccupationTimeFrames::MONTH,
-            new Order(),
-            true,
-            Carbon::now()->addMonth()
-        );
-        dd($Result);
-        return response()->json([
-            'occupiedDates' => $Result
-        ]);
-    }
-
-    public function getAvailability(Collection $Trampolines, Carbon $fromDate, $FullCalendarFormat = false): array
+    public function getAvailability(Collection $Trampolines, Carbon $fromDate, $FullCalendarFormat = false, ): array
     {
         $availableDates = [];
-        $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH , new Order());
+        $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH, new Order(), false, $fromDate);
         $isDateRangeOccupied = function (Carbon $start, Carbon $end) use ($occupiedDates) {
             foreach ($occupiedDates as $occupiedDate) {
                 $occupiedStartDate = Carbon::parse($occupiedDate->rental_start);
