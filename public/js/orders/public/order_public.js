@@ -100,7 +100,7 @@ function addEvent(EventsToAdd) {
 function updateEvents() {
     $.ajax({
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        url: '/orders/public/order/calendar/get',
+        url: '/orders/public/order/public_calendar/get',
         method: 'POST',
         data: {
             trampoline_id: Variables.getTrampolines().map(t => t.id)

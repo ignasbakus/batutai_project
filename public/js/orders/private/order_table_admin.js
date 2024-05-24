@@ -15,47 +15,23 @@ let Calendar = null;
 let today = new Date();
 today.setHours(0, 0, 0, 0);
 today = today.toISOString().split('T')[0];
-document.addEventListener('DOMContentLoaded', function() {
+
+function populateFullCalendar(Dates, Occupied, Event) {
+    // Initialize the FullCalendar with specified options
     Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialDate: Dates.CalendarInitial,
         locale: 'lt',
-        //timeZone: 'local',
         editable: true,
         selectable: true,
         eventChange: function(changeInfo) {
-            let newStartDate = new Date(changeInfo.event.start);
-            if (newStartDate < new Date(today)) {
-                changeInfo.revert();
-            }
+            // Add event change logic here
         },
-        // businessHours: true,
         dayMaxEvents: true,
-        events: [],
+        events: [], // Initially set events to an empty array
         eventAllow: function(dropInfo, draggedEvent) {
-            let CouldBeDropped = true;
-            let dropStart = new Date(dropInfo.startStr);
-            let dropEnd = new Date(dropInfo.endStr);
-            Occupied.forEach(function (Occupation) {
-                let OccupationStart = new Date(Occupation.start);
-                let OccupationEnd = new Date(Occupation.end);
-                if ((dropStart >= OccupationStart && dropStart < OccupationEnd) || (dropEnd > OccupationStart && dropEnd <= OccupationEnd) || (dropStart <= OccupationStart && dropEnd >= OccupationEnd)) {
-                    console.log('Occupied!');
-                    CouldBeDropped = false;
-                    return false;
-                }
-            });
-            Trampolines.forEach(function (Trampoline){
-                draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline){
-                    if (Trampoline.id === AffectedTrampoline.id) {
-                        Trampoline.rental_start = dropInfo.startStr
-                        Trampoline.rental_end = dropInfo.endStr
-                    }
-                })
-            })
-            console.log('Rental range => ',dropInfo.startStr,'<>',dropInfo.endStr)
-            return CouldBeDropped;
+            // Add event allow logic here
         },
-        eventTimeFormat: { /*like 14:30:00*/
+        eventTimeFormat: {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
@@ -63,14 +39,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     Calendar.render();
-    addEvent(Occupied)
-    addEvent(Availability)
-})
 
-function addEvent (EventsToAdd) {
-    EventsToAdd.forEach(function (Event){
-        Calendar.addEvent(Event)
-    });
+    console.log(Dates.CalendarInitial);
+    console.log("Occupied:", Occupied);
+    console.log("Event:", Event);
+
+    // Add events to the calendar
+    addEvent(Occupied);
+    addEvent(Event);
+}
+
+function addEvent(EventsToAdd) {
+    // Check if EventsToAdd is an array
+    if (Array.isArray(EventsToAdd)) {
+        EventsToAdd.forEach(function (Event) {
+            Calendar.addEvent(Event);
+        });
+    } else {
+        // If EventsToAdd is not an array, assume it's a single event object
+        Calendar.addEvent(EventsToAdd);
+    }
 }
 
 let Orders = {
@@ -278,8 +266,33 @@ let Orders = {
             init: function () {
                 this.Events.init()
             },
-            prepareModal: function (OrderID) {
-                this.orderIdToUpdate = OrderID
+            prepareModal: function(OrderID) {
+                this.orderIdToUpdate = OrderID;
+                $.ajax({
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    dataType: 'json',
+                    method: "POST",
+                    url: "/orders/admin/order/admin_calendar/get",
+                    data: {
+                        order_id: OrderID
+                    }
+                }).done((response) => {
+                    if (response.status) {
+                        let Dates = response.Dates;
+                        let Occupied = response.Occupied;
+                        let Event = response.Event;
+                        populateFullCalendar(Dates, Occupied, Event);
+                        // After fetching calendar data, fetch form data and open modal
+                        this.fetchFormDataAndOpenModal(OrderID);
+                    } else {
+                        console.error("Failed to fetch calendar data: ", response.message);
+                    }
+                }).always((instance) => {
+                    console.log("always => response : ", instance);
+                });
+            },
+            fetchFormDataAndOpenModal: function(OrderID) {
+                // Fetch form data
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     dataType: 'json',
@@ -292,13 +305,13 @@ let Orders = {
                     console.log("done => response : ", response);
                     console.log("done => response.trampoline : ", response.order);
                     if (response.status) {
-                        this.fillDataForm(response.order)
-                        Orders.Modals.updateOrder.element.show()
+                        this.fillDataForm(response.order);
+                        Orders.Modals.updateOrder.element.show();
                     }
-                    console.log('response => ', response)
+                    console.log('response => ', response);
                 }).always((instance) => {
                     console.log("always => response : ", instance);
-                })
+                });
             },
             Events: {
                 init: function () {

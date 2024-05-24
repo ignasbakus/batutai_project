@@ -111,7 +111,7 @@
                             </form>
                         </div>
                         <div class="col-1"></div>
-                        <div class="col-7">
+                        <div class="col-4">
                             <div id="calendar"></div>
                         </div>
                     </div>
