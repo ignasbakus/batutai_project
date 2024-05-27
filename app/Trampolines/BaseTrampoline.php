@@ -185,12 +185,14 @@ class BaseTrampoline implements Trampoline
         }*/
 
         $Order->load('trampolines');
+
         if (empty($Order->trampolines) || !isset($Order->trampolines[0])) {
             $rental_start = null;
             $rental_end = null;
         } else {
             $rental_start = $Order->trampolines[0]->rental_start;
             $rental_end = $Order->trampolines[0]->rental_end;
+
         }
         if (is_null($TargetDate)) {
             switch ($TimeFrame) {
@@ -240,6 +242,7 @@ class BaseTrampoline implements Trampoline
             if ($FullCalendarFormat) {
                 for ($currentDate = $from->copy(); $currentDate->lte($till); $currentDate->addDay()) {
                     foreach ($occupiedDatesForTrampoline as $reserved) {
+
                         if ($currentDate->between($reserved->rental_start, $reserved->rental_end) && !$currentDate->equalTo($reserved->rental_end)) {
                             $formattedDate = $currentDate->copy()->format('Y-m-d');
                             if (!in_array($formattedDate, $daysWithEvents) && $reserved->rental_start !== $rental_start && $reserved->rental_end !== $rental_end) {
@@ -341,6 +344,7 @@ class BaseTrampoline implements Trampoline
             $availableDates[] = (object)[
                 'extendedProps' => [
                     'trampolines' => $Trampolines,
+                    'type_custom' => 'trampolineEvent'
                 ],
                 'title' => 'Jūsų užsakymas',
                 'start' => $todayStart->format('Y-m-d'),

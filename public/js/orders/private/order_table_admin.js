@@ -5,7 +5,7 @@ let Variables = {
     getOrderFormInputs: function (ModalID) {
         let values = {}
         this.orderFormInput.forEach(function (inputName) {
-            values[inputName] = $('#'+ModalID+' input[name=' + inputName + ']').val()
+            values[inputName] = $('#' + ModalID + ' input[name=' + inputName + ']').val()
         })
         return values
     }
@@ -16,20 +16,44 @@ let today = new Date();
 today.setHours(0, 0, 0, 0);
 today = today.toISOString().split('T')[0];
 
-function populateFullCalendar(Dates, Occupied, Event) {
+function populateFullCalendar(Dates, Occupied, Event, Trampolines) {
     // Initialize the FullCalendar with specified options
     Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialDate: Dates.CalendarInitial,
         locale: 'lt',
         editable: true,
         selectable: true,
-        eventChange: function(changeInfo) {
-            // Add event change logic here
-        },
+        // eventChange: function(changeInfo) {
+        // },
         dayMaxEvents: true,
-        events: [], // Initially set events to an empty array
-        eventAllow: function(dropInfo, draggedEvent) {
-            // Add event allow logic here
+        events: [],
+        eventAllow: function (dropInfo, draggedEvent) {
+            let CouldBeDropped = true;
+            let dropStart = new Date(dropInfo.startStr);
+            let dropEnd = new Date(dropInfo.endStr);
+
+            // Check for occupation overlap
+            Occupied.forEach(function (Occupation) {
+                let OccupationStart = new Date(Occupation.start);
+                let OccupationEnd = new Date(Occupation.end);
+                if ((dropStart >= OccupationStart && dropStart < OccupationEnd) || (dropEnd > OccupationStart && dropEnd <= OccupationEnd) || (dropStart <= OccupationStart && dropEnd >= OccupationEnd)) {
+                    CouldBeDropped = false;
+                    return false;
+                }
+            });
+
+            // Check trampolines in the dragged event
+
+            Trampolines.forEach(function (Trampoline) {
+                draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
+                    if (Trampoline.id === AffectedTrampoline.id) {
+                        Trampoline.rental_start = dropInfo.startStr
+                        Trampoline.rental_end = dropInfo.endStr
+                    }
+                })
+            });
+
+            return CouldBeDropped;
         },
         eventTimeFormat: {
             hour: '2-digit',
@@ -40,25 +64,31 @@ function populateFullCalendar(Dates, Occupied, Event) {
     });
     Calendar.render();
 
-    console.log(Dates.CalendarInitial);
-    console.log("Occupied:", Occupied);
-    console.log("Event:", Event);
+    console.log('Initial Date:', Dates.CalendarInitial);
+    console.log('Occupied:', Occupied);
+    console.log('Events:', Event);
+    // Validate and add events to the calendar
+    if (Occupied && Array.isArray(Occupied)) {
+        addEvent(Occupied);
+        // console.log('Occupied events: ', Occupied)
+    } else {
+        console.error('Occupied events data is invalid:', Occupied);
+    }
 
-    // Add events to the calendar
-    addEvent(Occupied);
-    addEvent(Event);
+    if (Event && Array.isArray(Event)) {
+        addEvent(Event);
+    } else if (Event && typeof Event === 'object') {
+        addEvent([Event]);
+    } else {
+        console.error('Event data is invalid:', Event);
+    }
 }
 
 function addEvent(EventsToAdd) {
-    // Check if EventsToAdd is an array
-    if (Array.isArray(EventsToAdd)) {
-        EventsToAdd.forEach(function (Event) {
-            Calendar.addEvent(Event);
-        });
-    } else {
-        // If EventsToAdd is not an array, assume it's a single event object
-        Calendar.addEvent(EventsToAdd);
-    }
+    EventsToAdd.forEach(function (Event) {
+        console.log('Adding event:', Event);
+        Calendar.addEvent(Event);
+    });
 }
 
 let Orders = {
@@ -265,54 +295,58 @@ let Orders = {
             },
             init: function () {
                 this.Events.init()
+                document.getElementById('updateOrderModal').addEventListener('shown.bs.modal', event => {
+                    console.log('Modal i opened => getDataForModal !')
+                    this.getDataForModal()
+                })
             },
-            prepareModal: function(OrderID) {
+            prepareModal: function (OrderID) {
                 this.orderIdToUpdate = OrderID;
-                $.ajax({
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    dataType: 'json',
-                    method: "POST",
-                    url: "/orders/admin/order/admin_calendar/get",
-                    data: {
-                        order_id: OrderID
-                    }
-                }).done((response) => {
-                    if (response.status) {
-                        let Dates = response.Dates;
-                        let Occupied = response.Occupied;
-                        let Event = response.Event;
-                        populateFullCalendar(Dates, Occupied, Event);
-                        // After fetching calendar data, fetch form data and open modal
-                        this.fetchFormDataAndOpenModal(OrderID);
-                    } else {
-                        console.error("Failed to fetch calendar data: ", response.message);
-                    }
-                }).always((instance) => {
-                    console.log("always => response : ", instance);
-                });
+                this.element.show()
             },
-            fetchFormDataAndOpenModal: function(OrderID) {
-                // Fetch form data
+            getDataForModal: function () {
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     dataType: 'json',
                     method: "GET",
-                    url: "/orders/admin/order",
+                    url: "/orders/admin/order/getOrderUpdateData",
                     data: {
-                        order_id: OrderID
+                        order_id: Orders.Modals.updateOrder.orderIdToUpdate
                     }
                 }).done((response) => {
-                    console.log("done => response : ", response);
-                    console.log("done => response.trampoline : ", response.order);
                     if (response.status) {
-                        this.fillDataForm(response.order);
-                        Orders.Modals.updateOrder.element.show();
+                        console.log('getOrderUpdateData response => ', response)
+                        this.fillDataForm(response.order)
+                        populateFullCalendar(response.Dates, response.Occupied, response.Events, response.Trampolines)
+                    } else {
+                        console.error("Failed to fetch data: ", response.message);
                     }
-                    console.log('response => ', response);
                 }).always((instance) => {
                     console.log("always => response : ", instance);
                 });
             },
+            // fetchFormDataAndOpenModal: function(OrderID) {
+            //     // Fetch form data
+            //     $.ajax({
+            //         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            //         dataType: 'json',
+            //         method: "GET",
+            //         url: "/orders/admin/order",
+            //         data: {
+            //             order_id: OrderID
+            //         }
+            //     }).done((response) => {
+            //         console.log("done => response : ", response);
+            //         console.log("done => response.trampoline : ", response.order);
+            //         if (response.status) {
+            //             this.fillDataForm(response.order);
+            //             Orders.Modals.updateOrder.element.show();
+            //         }
+            //         console.log('response => ', response);
+            //     }).always((instance) => {
+            //         console.log("always => response : ", instance);
+            //     });
+            // },
             Events: {
                 init: function () {
                     $('#updateOrderModal .updateOrder').on('click', (event) => {

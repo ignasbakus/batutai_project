@@ -51,7 +51,7 @@
         </div>
     </div>
     <div class="modal fade" id="updateOrderModal" data-bs-backdrop="static" tabindex="-1"
-         aria-labelledby="exampleModalLabel" aria-hidden="true">
+         aria-labelledby="updateOrderModal" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header">
@@ -110,7 +110,7 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="col-1"></div>
+                        <div class="col-2"></div>
                         <div class="col-4">
                             <div id="calendar"></div>
                         </div>

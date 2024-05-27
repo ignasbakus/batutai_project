@@ -8,6 +8,7 @@ let Variables = {
             values[inputName] = $('#orderForm input[name="' + inputName + '"]').val();
         });
         values.trampolines = Trampolines
+        console.log('Trampolines orderPublic=>', Trampolines)
         return values;
     },
     getTrampolines: function () {
@@ -61,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let CouldBeDropped = true;
             let dropStart = new Date(dropInfo.startStr);
             let dropEnd = new Date(dropInfo.endStr);
+
             Occupied.forEach(function (Occupation) {
                 let OccupationStart = new Date(Occupation.start);
                 let OccupationEnd = new Date(Occupation.end);
@@ -110,11 +112,11 @@ function updateEvents() {
         if (response.status){
             Calendar.removeAllEvents();
             addEvent(Occupied)
-            Availability = response.Events
+            Availability = response.Availability
             addEvent(Availability)
         }
     }).always((instance) => {
-        console.log("always => response : ", instance);
+        // console.log("always => response : ", instance);
     })
 }
 
