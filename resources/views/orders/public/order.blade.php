@@ -2,7 +2,22 @@
 
 @section('content')
     <div class="row">
-        <div id="sendOrderColumn" class="col-4 ms-5">
+        <div id="thankYouDiv" style="display: none" class="col-4 ms-5">
+            <div>
+                <h2 class="thankYouHeading">Jūsų rezervacija</h2>
+                <p class="thankYouParagraph">Jūsų užsakymo numeris: <span id="orderNumber">454545654</span></p>
+                <p class="thankYouParagraph">Turite klausimų? Kreipkitės į mus el. paštu: <span id="email">op-op@gmail.com</span> arba skambinkite: <span id="phoneNumber">+3705412545</span></p>
+                <p class="thankYouParagraph">Galite keisti rezervacijos datas kalendoriuje dešinėje</p>
+                <p class="thankYouParagraph">Avanso suma: <span id="advanceSum">50 €</span></p>
+                <p class="thankYouParagraph">Kaina su pristatymu: <span id="totalSum">100 €</span></p>
+            </div>
+            <div>
+                <p class="cancelInfo">Jeigu negausime avanso apmokėjimo per 48 valandas, jūsų užsakymas bus automatiškai atšauktas.</p>
+                <button id="payNowButton" class="btn btn-primary mt-auto">Apmokėti avansą</button>
+            </div>
+        </div>
+
+        <div id="sendOrderColumn" class="col-4 ms-5 infoBeforeSuccessfulOrder" style="display: block">
             <h2>Užsakymo Forma</h2>
             <form id="orderForm" class="needs-validation" novalidate>
                 <div class="row">
@@ -47,34 +62,23 @@
 
                 </div>
                 <div class="row">
-                    <div class="col-2">
+                    <div class="col-2 infoBeforeSuccessfulOrder" style="display: block">
                         <button class="btn btn-primary mt-3 createOrder">Siųsti</button>
                     </div>
                     <div class="col-6"></div>
-                    <div class="col-4" style="display: none">
-                        <div class="form-check mt-3">
-                            <input class="form-check-input orderSameDay" type="checkbox" value="" id="flexCheckChecked" checked>
-                            <label class="form-check-label" for="flexCheckChecked">
-                                Batutus uzsakyti ta pacia diena
-                            </label>
-                        </div>
-                    </div>
                 </div>
             </form>
         </div>
         <div class="col-2"></div>
-        <div class="col-5">
+        <div class="col me-5">
             <!--select class="form-select showTrampolineSelect" aria-label="Default select example" style="display: none">
                 <option selected>Pasirinkite batutą ...</option>
 {{--                @foreach($Trampolines as $Trampoline)--}}
-{{--                    <option value="{{$Trampoline->id}}">{{$Trampoline->title}} / {{$Trampoline->description}}</option>--}}
-{{--                @endforeach--}}
+            {{--                    <option value="{{$Trampoline->id}}">{{$Trampoline->title}} / {{$Trampoline->description}}</option>--}}
+            {{--                @endforeach--}}
             </select-->
             <div id="calendar"></div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-6"></div>
     </div>
 @endsection
 

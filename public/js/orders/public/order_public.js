@@ -26,7 +26,6 @@ let Calendar = null;
 let today = new Date();
 today.setHours(0, 0, 0, 0);
 today = today.toISOString().split('T')[0];
-let lastUpdatedMonth = new Date().getMonth();
 let isEventDrop = false; // Flag to prevent double updates
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -48,8 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (droppedMonth < currentMonth) {
                 Calendar.prev();
                 updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar)
-            } else if (droppedMonth > currentMonth && droppedMonth > lastUpdatedMonth) {
-                lastUpdatedMonth = droppedMonth;
+            } else if (droppedMonth > currentMonth) {
                 Calendar.next();
                 updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
             }
@@ -189,6 +187,9 @@ let TrampolineOrder = {
                     Occupied = response.Occupied
                     console.log('Occupied create =>', Occupied)
                     if (response.status) {
+                        $('.infoBeforeSuccessfulOrder').css('display', 'none');
+                        $('#thankYouDiv').css('display', 'block').addClass(' d-flex flex-column justify-content-between');
+
                         Calendar.removeAllEvents()
                         addEvent(Occupied)
                         Availability = response.Events

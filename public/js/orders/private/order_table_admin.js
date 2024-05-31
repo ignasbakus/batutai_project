@@ -30,31 +30,29 @@ let lastVisibleDayOnCalendar;
 let isEventDrop = false;
 let trampolineID;
 let lastStartDate, lastEndDate;
-let lastUpdatedMonth = new Date().getMonth();
-
 
 let CalendarFunctions = {
-    populateFullCalendar: function (){
+    populateFullCalendar: function (InitialDate){
+        isEventDrop = true;
         Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-            initialDate: Dates.CalendarInitial,
+            initialDate: InitialDate,
             locale: 'lt',
             editable: true,
             selectable: true,
             eventDrop: function (dropInfo) {
-                isEventDrop = true
+                isEventDrop = true;
                 let droppedDate = dropInfo.event.start;
                 let currentMonth = Calendar.getDate().getMonth();
                 let droppedMonth = droppedDate.getMonth();
-                console.log('Dropped date =>', droppedDate)
-                console.log('Dropped month =>', droppedMonth)
-                console.log('current month =>', currentMonth)
+                console.log('Dropped date =>', droppedDate);
+                console.log('Dropped month =>', droppedMonth);
+                console.log('current month =>', currentMonth);
                 if (droppedMonth < currentMonth) {
                     Calendar.prev();
-                    // Orders.Modals.updateOrder.getDataForModal(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar)
-                } else if (droppedMonth > currentMonth && droppedMonth > lastUpdatedMonth) {
-                    lastUpdatedMonth = droppedMonth;
-                    // Orders.Modals.updateOrder.getDataForModal(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar)
+                    CalendarFunctions.updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
+                } else if (droppedMonth > currentMonth) {
                     Calendar.next();
+                    CalendarFunctions.updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
                 }
                 $('.confirmation-container').css('display', 'block');
             },
@@ -67,30 +65,17 @@ let CalendarFunctions = {
             datesSet: function (info) {
                 let firstCalendarVisibleDate = info.start;
                 let lastCalendarVisibleDate = info.end;
-                FirstAndLastDays.formCorrectFirstDate(firstCalendarVisibleDate)
-                FirstAndLastDays.formCorrectLastDay(lastCalendarVisibleDate)
+                FirstAndLastDays.formCorrectFirstDate(firstCalendarVisibleDate);
+                FirstAndLastDays.formCorrectLastDay(lastCalendarVisibleDate);
                 console.log('First calendar day => ', firstVisibleDayOnCalendar);
                 console.log('Last calendar day => ', lastVisibleDayOnCalendar);
 
                 if (!isEventDrop) {
-                    // Check if the new date range is different from the last one to avoid redundant requests
-                    if (firstVisibleDayOnCalendar !== lastStartDate || lastVisibleDayOnCalendar !== lastEndDate) {
-                        lastStartDate = firstVisibleDayOnCalendar;
-                        lastEndDate = lastVisibleDayOnCalendar;
-                        // Orders.Modals.updateOrder.getDataForModal(firstCalendarVisibleDate, lastCalendarVisibleDate);
-                    }
+                    CalendarFunctions.updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
                 }
-                isEventDrop = false; // Reset the flag after handling
+                isEventDrop = false;
             },
             dayMaxEvents: true,
-            // loading: function(isLoading) {
-            //     if (isLoading) {
-            //         $('#loading-spinner').css('display', 'block')
-            //     } else {
-            //         $('#loading-spinner').css('display', 'none')
-            //
-            //     }
-            // },
             events: [],
             eventAllow: function (dropInfo, draggedEvent) {
                 let CouldBeDropped = true;
@@ -108,14 +93,13 @@ let CalendarFunctions = {
                 });
 
                 // Check trampolines in the dragged event
-
                 trampolineID.forEach(function (Trampoline) {
                     draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
                         if (Trampoline.id === AffectedTrampoline.id) {
-                            Trampoline.rental_start = dropInfo.startStr
-                            Trampoline.rental_end = dropInfo.endStr
+                            Trampoline.rental_start = dropInfo.startStr;
+                            Trampoline.rental_end = dropInfo.endStr;
                         }
-                    })
+                    });
                 });
 
                 return CouldBeDropped;
@@ -128,25 +112,25 @@ let CalendarFunctions = {
             }
         });
         Calendar.render();
-        Orders.Modals.updateOrder.getDataForModal()
+        Orders.Modals.updateOrder.getDataForModal();
     },
     updateEvents: function (targetStartDate, targetEndDate){
+        $('#spinner').show();
         $.ajax({
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-            url: '/orders/public/order/public_calendar/get',
+            url: '/orders/admin/order/private_calendar/get',
             method: 'POST',
             data: {
-                trampoline_id: trampolineID,
+                order_id: Orders.Modals.updateOrder.orderIdToUpdate,
                 target_start_date: targetStartDate,
                 target_end_date: targetEndDate
             },
         }).done((response) => {
-            Occupied = response.Occupied
             if (response.status) {
-                Calendar.removeAllEvents()
-                this.addEvent(Occupied)
-                Availability = response.Availability
-                this.addEvent(Availability)
+                Calendar.removeAllEvents();
+                this.addEvent(response.Occupied);
+                this.addEvent(response.Availability);
+                $('#spinner').hide();
             }
         }).always((instance) => {
             // console.log("always => response : ", instance);
@@ -158,7 +142,6 @@ let CalendarFunctions = {
             Calendar.addEvent(Event);
         });
     }
-
 }
 // function populateFullCalendar(Dates, Occupied, Event, Trampolines) {
 //     // Initialize the FullCalendar with specified options
@@ -475,15 +458,34 @@ let Orders = {
             init: function () {
                 this.Events.init()
                 document.getElementById('updateOrderModal').addEventListener('shown.bs.modal', event => {
-                    CalendarFunctions.populateFullCalendar()
                 })
             },
             prepareModal: function (OrderID) {
                 this.orderIdToUpdate = OrderID;
                 this.element.show()
+                this.getInitialDatesCalendar()
+            },
+            getInitialDatesCalendar: function () {
+                $('#spinner').show();
+                $.ajax({
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    dataType: 'json',
+                    method: "GET",
+                    url: "/orders/admin/order/getCalendarInitial",
+                    data: {
+                        order_id: Orders.Modals.updateOrder.orderIdToUpdate,
+                    }
+                }).done((response) => {
+                    if (response.status) {
+                        CalendarFunctions.populateFullCalendar(response.Dates.CalendarInitial)
+                    } else {
+                        console.error("Failed to fetch data: ", response.message);
+                    }
+                }).always((instance) => {
+                    console.log("always => response : ", instance);
+                });
             },
             getDataForModal: function () {
-                $('#spinner').show();
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     dataType: 'json',
@@ -499,7 +501,7 @@ let Orders = {
                         Occupied = response.Occupied
                         this.fillDataForm(response.order)
                         trampolineID = response.Trampolines
-                        Calendar.removeAllEvents()
+                        // Calendar.removeAllEvents()
                         CalendarFunctions.addEvent(response.Occupied)
                         CalendarFunctions.addEvent(response.Events)
                         $('#spinner').hide();

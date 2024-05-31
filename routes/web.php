@@ -15,6 +15,8 @@ Route::controller(OrderController::class)->prefix('orders')->group(function () {
         Route::get('/', 'adminGetIndex')->name("orderTableIndex"); //http://locahost:8000/orders/admin
         Route::prefix('order')->group(function () {
             Route::get('getOrderUpdateData', 'prepareOrderUpdateModalInfo');
+            Route::get('getCalendarInitial', 'initializeOrderUpdateCalendar');
+            Route::post('private_calendar/get', 'privateUpdateCalendar');
             Route::post('datatable/get', 'adminGetDatatable');
 //            Route::post('admin_calendar/get', 'adminGetCalendar');
             //http://locahost:8000/orders/admin/order [CRUD]

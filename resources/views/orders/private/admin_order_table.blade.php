@@ -151,9 +151,6 @@
     </div>
 @endsection
 @section('custom_js')
-    <script>
-        let Dates = {{ Illuminate\Support\Js::from($Dates) }};
-    </script>
     <script src='/frameworks/fullcalendar6111/dist/index.global.js'></script>
     <script src="/js/orders/private/order_table_admin.js"></script>
 @endsection

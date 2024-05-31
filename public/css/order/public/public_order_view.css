@@ -1,0 +1,45 @@
+#thankYouDiv {
+    background-color: #f8f9fa;
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#thankYouDiv .thankYouHeading {
+    font-size: 24px;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+#thankYouDiv .thankYouParagraph {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#thankYouDiv span {
+    font-weight: bold;
+    color: #007bff;
+}
+
+#thankYouDiv .cancelInfo {
+    font-size: 14px;
+    color: #ff0000;
+    margin-bottom: 10px;
+}
+
+#thankYouDiv #payNowButton {
+    font-size: 18px;
+    margin-top: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+#thankYouDiv #payNowButton:hover {
+    background-color: #0056b3;
+}

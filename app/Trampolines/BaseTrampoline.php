@@ -221,10 +221,9 @@ class BaseTrampoline implements Trampoline
         return $events;
     }
 
-    public function getAvailability(Collection $Trampolines, Carbon $fromDate, $FullCalendarFormat = false,): array
+    public function getAvailability(Collection $Trampolines, Order $Order ,Carbon $fromDate, $FullCalendarFormat = false): array
     {
-        $tillDate = $fromDate->copy()->addYears(1)->addMonths(6); /*Move to app config*/
-//        Log::info('From date before => ',$fromDate->toArray());
+        $tillDate = $fromDate->copy()->addYears(1)->addMonths(6);
 
         $availableDates = [];
         $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH, new Order(), false, $fromDate,$tillDate);
@@ -254,7 +253,7 @@ class BaseTrampoline implements Trampoline
 //        Log::info('This day start is free => ', $todayStart->toArray());
 //        Log::info('This day end is free => ', $todayEnd->toArray());
 
-        if ($FullCalendarFormat) {
+        if ($FullCalendarFormat && (empty($Order->trampolines) || !isset($Order->trampolines[0]))) {
             $availableDates[] = (object)[
                 'extendedProps' => [
                     'trampolines' => $Trampolines,
@@ -263,6 +262,20 @@ class BaseTrampoline implements Trampoline
                 'title' => 'Jūsų užsakymas',
                 'start' => $todayStart->format('Y-m-d'),
                 'end' => $todayEnd->format('Y-m-d'),
+            ];
+        } else if($FullCalendarFormat && !empty($Order->trampolines) && isset($Order->trampolines[0])) {
+            $availableDates[] = (object)[
+                'id' => $Order->id,
+                'extendedProps' => [
+                    'trampolines' => $Trampolines,
+                    'order' => $Order,
+                    'order_id' => $Order->id,
+                    'type_custom' => 'orderEvent'
+                ],
+                'title' => 'Kliento užsakymas',
+                'start' => $todayStart->format('Y-m-d'),
+                'end' => $todayEnd->format('Y-m-d'),
+                'backgroundColor' => 'green'
             ];
         } else {
             return [$todayStart->format('Y-m-d')];

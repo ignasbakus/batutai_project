@@ -51,34 +51,14 @@ class OrderController extends Controller
 
     public function adminGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
-        return view('orders.private.admin_order_table', [
-            'Dates' => (object)[
-                'CalendarInitial' => Carbon::now()->format('Y-m-d')
-            ]
-        ]);
+        return view('orders.private.admin_order_table');
     }
 
     public function publicGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
-        //$Trampolines = (new Trampoline())->newQuery()->whereIn('id', \request()->get('trampoline_id', []))->get();
-        //$Availability = (new BaseTrampoline())->getAvailability($Trampolines, Carbon::now()->startOfDay(), true);
-//        dd($Availability);
-        /*foreach ($Trampolines as $trampoline) {
-            $trampoline->rental_start = Carbon::parse($Availability[0]->start)->format('Y-m-d');
-            $trampoline->rental_end = Carbon::parse($Availability[0]->end)->format('Y-m-d');
-        }*/
         return view('orders.public.order', [
-            'Availability' => [],/*$Availability*/
-            /*Occupation info get through AJAX when DOM is formed*/
-            'Occupied' => []
-            /*(new BaseTrampoline())->getOccupation(
-                $Trampolines,
-                OccupationTimeFrames::MONTH,
-                new Order(),
-                true,
-                Carbon::parse(\request()->get('calendar_visible_first_date')),
-                Carbon::parse(\request()->get('calendar_visible_last_date')),
-            )*/,
+            'Availability' => [],
+            'Occupied' => [],
             'Trampolines' => (new Trampoline())->newQuery()->whereIn('id', \request()->get('trampoline_id', []))->get(),
             'Dates' => (object)[
                 'CalendarInitial' => Carbon::now()->format('Y-m-d')
@@ -107,7 +87,7 @@ class OrderController extends Controller
 
 //        Log::info('FromDate sent to getAvailability', $targetFromDate->toArray());
         if ($targetFromDate < Carbon::now()) {
-            $Availability = (new BaseTrampoline())->getAvailability($Trampolines, Carbon::now()->startOfDay(), true);
+            $Availability = (new BaseTrampoline())->getAvailability($Trampolines, (new Order()), Carbon::now()->startOfDay(), true);
             $Occupied = (new BaseTrampoline())->getOccupation(
                 $Trampolines,
                 OccupationTimeFrames::MONTH,
@@ -117,7 +97,7 @@ class OrderController extends Controller
                 $targetTillDate
             );
         } else {
-            $Availability = (new BaseTrampoline())->getAvailability($Trampolines, $targetFromDate, true);
+            $Availability = (new BaseTrampoline())->getAvailability($Trampolines, (new Order()), $targetFromDate, true);
             $Occupied = (new BaseTrampoline())->getOccupation(
                 $Trampolines,
                 OccupationTimeFrames::MONTH,
@@ -141,6 +121,62 @@ class OrderController extends Controller
         ]);
     }
 
+    public function privateUpdateCalendar(): JsonResponse
+    {
+
+        try {
+            $orderId = request()->get('order_id');
+            $order = (new TrampolineOrder())->read($orderId);
+//
+            if (!$order instanceof \App\Models\Order) {
+                throw new \Exception('Order not found or invalid type');
+            }
+            $targetFromDate = Carbon::parse(\request()->get('target_start_date', null));
+            $targetTillDate = Carbon::parse(\request()->get('target_end_date', null));
+            $trampolineIds = $order->trampolines()->pluck('trampolines_id');
+
+            $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
+
+            if ($targetFromDate < Carbon::now()) {
+                $Availability = (new BaseTrampoline())->getAvailability($Trampolines, $order, Carbon::now()->startOfDay(), true);
+                $Occupied = (new BaseTrampoline())->getOccupation(
+                    $Trampolines,
+                    OccupationTimeFrames::MONTH,
+                    $order,
+                    true,
+                    Carbon::now()->startOfDay(),
+                    $targetTillDate
+                );
+            } else {
+                $Availability = (new BaseTrampoline())->getAvailability($Trampolines, $order, $targetFromDate, true);
+                $Occupied = (new BaseTrampoline())->getOccupation(
+                    $Trampolines,
+                    OccupationTimeFrames::MONTH,
+                    $order,
+                    true,
+                    $targetFromDate,
+                    $targetTillDate
+                );
+            }
+
+            foreach ($Trampolines as $trampoline) {
+                $trampoline->rental_start = Carbon::parse($Availability[0]->start)->format('Y-m-d');
+                $trampoline->rental_end = Carbon::parse($Availability[0]->end)->format('Y-m-d');
+            }
+
+            return response()->json([
+                'status' => true,
+                'Availability' => $Availability,
+                'Occupied' => $Occupied,
+                'Trampolines' => $Trampolines
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
 
     public function orderGet(): JsonResponse
     {
@@ -218,6 +254,21 @@ class OrderController extends Controller
         return response()->json($deleteResult);
     }
 
+    public function initializeOrderUpdateCalendar(): JsonResponse
+    {
+        $orderID = \request()->get('order_id');
+        $order = (new TrampolineOrder())->read($orderID);
+        $rentalStart = $order->trampolines()->pluck('rental_start')->first();
+//        dd(Carbon::parse($rentalStart));
+
+        return response()->json([
+            'status' => true,
+            'Dates' => (object)[
+                'CalendarInitial' => Carbon::parse($rentalStart)
+            ]
+        ]);
+    }
+
     public function prepareOrderUpdateModalInfo(): JsonResponse
     {
         try {
@@ -243,7 +294,8 @@ class OrderController extends Controller
                 'extendedProps' => [
                     'trampolines' => $order->trampolines->toArray(),
                     'order' => $order,
-                    'order_id' => $order->id
+                    'order_id' => $order->id,
+                    'type_custom' => 'orderEvent'
                 ],
                 'title' => 'Kliento užsakymas',
                 'start' => Carbon::parse($order->trampolines->first()->rental_start)->format('Y-m-d'),
