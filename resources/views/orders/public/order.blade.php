@@ -2,62 +2,99 @@
 
 @section('content')
     <div class="row">
-        <div id="thankYouDiv" style="display: none" class="col-4 ms-5">
-            <div>
-                <h2 class="thankYouHeading">Jūsų rezervacija</h2>
-                <p class="thankYouParagraph">Jūsų užsakymo numeris: <span id="orderNumber">454545654</span></p>
-                <p class="thankYouParagraph">Turite klausimų? Kreipkitės į mus el. paštu: <span id="email">op-op@gmail.com</span> arba skambinkite: <span id="phoneNumber">+3705412545</span></p>
-                <p class="thankYouParagraph">Galite keisti rezervacijos datas kalendoriuje dešinėje</p>
-                <p class="thankYouParagraph">Avanso suma: <span id="advanceSum">50 €</span></p>
-                <p class="thankYouParagraph">Kaina su pristatymu: <span id="totalSum">100 €</span></p>
+        <div class="col-4" id="columnAfterSentOrder" style="display: none">
+            <div id="thankYouDiv" style="display: none" class="ms-5">
+                <div class="px-4 py-5">
+                    <h5 class="text-uppercase">Jonathan Adler</h5>
+                    <h4 class="mt-5 theme-color mb-5">Thanks for your order</h4>
+                    <span class="theme-color">Payment Summary</span>
+                    <div class="mb-3">
+                        <hr class="new1">
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="font-weight-bold">Ether Chair(Qty:1)</span>
+                        <span class="text-muted">$1750.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small>Shipping</small>
+                        <small>$175.00</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small>Tax</small>
+                        <small>$200.00</small>
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <span class="font-weight-bold">Total</span>
+                        <span class="font-weight-bold theme-color">$2125.00</span>
+                    </div>
+                    <div class="text-center mt-5">
+                        <button class="btn btn-primary btn-thankYou">Track your order</button>
+                    </div>
+                </div>
             </div>
-            <div>
-                <p class="cancelInfo">Jeigu negausime avanso apmokėjimo per 48 valandas, jūsų užsakymas bus automatiškai atšauktas.</p>
-                <button id="payNowButton" class="btn btn-primary mt-auto">Apmokėti avansą</button>
+            <div id="confirmationContainer" class="confirmation-container ms-5 mt-3" style="display: none">
+                <button class="btn-close close-button confirmationClose" aria-label="Close"></button>
+                <h4 class="confirmation-title">Ar tikrai norite pakeisti užsakymo datas?</h4>
+                <div class="dates-info">
+                    <p class="date-label">Užsakymo datas bus pakeistos į:</p>
+                    <div class="dates"></div>
+                </div>
+                <div class="checkbox-container">
+                    <button type="button" id="confirmDatesChange" class="btn btn-primary confirmChanges mr-2">
+                        Pakeisti
+                    </button>
+                    <div class="invalid-feedback">Pažymėkite, jog patvirtinate datų pakeitimą</div>
+                </div>
             </div>
         </div>
-
         <div id="sendOrderColumn" class="col-4 ms-5 infoBeforeSuccessfulOrder" style="display: block">
             <h2>Užsakymo Forma</h2>
             <form id="orderForm" class="needs-validation" novalidate>
                 <div class="row">
                     <div class="form-group col-6">
                         <label for="customerName">Vardas:</label>
-                        <input name="customerName" type="text" class="form-control" id="customerName" placeholder="Įveskite vardą" required>
+                        <input name="customerName" type="text" class="form-control" id="customerName"
+                               placeholder="Įveskite vardą" required>
                         <div class="invalid-feedback customerNameInValidFeedback"></div>
                     </div>
                     <div class="form-group col-6">
                         <label for="customerSurname">Pavardė:</label>
-                        <input name="customerSurname" type="text" class="form-control" id="customerSurname" placeholder="Įveskite pavardę" required>
+                        <input name="customerSurname" type="text" class="form-control" id="customerSurname"
+                               placeholder="Įveskite pavardę" required>
                         <div class="invalid-feedback customerSurnameInValidFeedback"></div>
                     </div>
                 </div>
                 <div class="form-group mt-3">
                     <label for="customerPhoneNumber">Telefono Numeris:</label>
-                    <input name="customerPhoneNumber" type="tel" class="form-control" id="customerPhoneNumber" placeholder="Įveskite telefono numerį">
+                    <input name="customerPhoneNumber" type="tel" class="form-control" id="customerPhoneNumber"
+                           placeholder="Įveskite telefono numerį">
                     <div class="invalid-feedback customerPhoneNumberInValidFeedback"></div>
                 </div>
                 <div class="form-group mt-3">
                     <label for="customerEmail">El. Paštas:</label>
-                    <input name="customerEmail" type="email" class="form-control" id="customerEmail" placeholder="Įveskite el. paštą" required>
+                    <input name="customerEmail" type="email" class="form-control" id="customerEmail"
+                           placeholder="Įveskite el. paštą" required>
                     <div class="invalid-feedback customerEmailInValidFeedback"></div>
                 </div>
                 <div class="row mt-3">
                     <div class="form-group col-6">
                         <label for="customerDeliveryCity">Pristatymo Miestas:</label>
-                        <input name="customerDeliveryCity" type="text" class="form-control" id="customerDeliveryCity"
+                        <input name="customerDeliveryCity" type="text" class="form-control"
+                               id="customerDeliveryCity"
                                placeholder="Įveskite pristatymo miestą" required>
                         <div class="invalid-feedback customerDeliveryCityInValidFeedback"></div>
                     </div>
                     <div class="form-group col-6">
                         <label for="customerDeliveryPostCode">Pašto Kodas:</label>
-                        <input name="customerDeliveryPostCode" type="text" class="form-control" id="customerDeliveryPostCode" placeholder="Įveskite pašto kodą" required>
+                        <input name="customerDeliveryPostCode" type="text" class="form-control"
+                               id="customerDeliveryPostCode" placeholder="Įveskite pašto kodą" required>
                         <div class="invalid-feedback customerDeliveryPostCodeInValidFeedback"></div>
                     </div>
                 </div>
                 <div class="form-group mt-3">
                     <label for="customerDeliveryAddress">Pristatymo Adresas:</label>
-                    <input name="customerDeliveryAddress" class="form-control" id="customerDeliveryAddress" placeholder="Įveskite pristatymo adresą" required>
+                    <input name="customerDeliveryAddress" class="form-control" id="customerDeliveryAddress"
+                           placeholder="Įveskite pristatymo adresą" required>
                     <div class="invalid-feedback customerDeliveryAddressNameInValidFeedback"></div>
 
                 </div>

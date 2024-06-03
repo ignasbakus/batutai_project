@@ -27,6 +27,7 @@ let today = new Date();
 today.setHours(0, 0, 0, 0);
 today = today.toISOString().split('T')[0];
 let isEventDrop = false; // Flag to prevent double updates
+let reservationSent = false;
 
 document.addEventListener('DOMContentLoaded', function () {
     Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
@@ -90,14 +91,18 @@ document.addEventListener('DOMContentLoaded', function () {
             Trampolines.forEach(function (Trampoline) {
                 draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
                     if (Trampoline.id === AffectedTrampoline.id) {
+                        console.log('patekom i eventAllow')
                         Trampoline.rental_start = dropInfo.startStr
                         Trampoline.rental_end = dropInfo.endStr
+                        if (reservationSent) {
+                            TrampolineOrder.FormSendOrder.Event.DisplayConfirmationElement(dropInfo.startStr, dropInfo.endStr)
+                        }
                     }
                 })
             })
             return CouldBeDropped;
         },
-        eventTimeFormat: { /*like 14:30:00*/
+        eventTimeFormat: {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
@@ -182,14 +187,16 @@ let TrampolineOrder = {
                     if (response.status) {
                         $('form input[type=text], form input[type=number], #createTrampolineModal form textarea').val('');
                         $('form input').removeClass('is-invalid');
+                        $('.infoBeforeSuccessfulOrder').css('display', 'none');
+                        $('#columnAfterSentOrder').css('display', 'block')
+                        $('#thankYouDiv').css('display', 'block').addClass(' d-flex flex-column justify-content-between')
                     }
                     /*Renew fullcalendar occupation*/
                     Occupied = response.Occupied
                     console.log('Occupied create =>', Occupied)
                     if (response.status) {
-                        $('.infoBeforeSuccessfulOrder').css('display', 'none');
-                        $('#thankYouDiv').css('display', 'block').addClass(' d-flex flex-column justify-content-between');
-
+                        reservationSent = true
+                        TrampolineOrder.UpdateOrder.OrderIdToUpdate = response.OrderID
                         Calendar.removeAllEvents()
                         addEvent(Occupied)
                         Availability = response.Events
@@ -206,7 +213,26 @@ let TrampolineOrder = {
                         addEvent(Occupied)
                     }
                 });
+            },
+            DisplayConfirmationElement: function (startDate, endDate) {
+                $('#confirmationContainer').css('display', 'block');
+                $('.dates').html('<p><strong>Pradžia:</strong> ' + startDate + '</p><p><strong>Pabaiga:</strong> ' + endDate + '</p>');
             }
+        }
+    },
+    UpdateOrder: {
+        OrderIdToUpdate: 0,
+        Event: {
+            init: function (){
+                $('#confirmDatesChange').on('click', (event) => {
+                    event.preventDefault()
+                    this.updateOrder()
+                })
+            },
+            updateOrder: function () {
+                console.log('Order id => ', TrampolineOrder.UpdateOrder.OrderIdToUpdate)
+            }
+
         }
     }
 }

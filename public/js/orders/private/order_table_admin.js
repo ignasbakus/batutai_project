@@ -7,16 +7,19 @@ let Variables = {
         this.orderFormInput.forEach(function (inputName) {
             values[inputName] = $('#' + ModalID + ' input[name=' + inputName + ']').val()
         })
+        values.trampolines = trampolines
+        console.log('trampolines admin => ', trampolines)
+        console.log('Values  => ', values)
         return values
     }
 }
 
 let FirstAndLastDays = {
-    formCorrectFirstDate: function (firstVisibleDay){
+    formCorrectFirstDate: function (firstVisibleDay) {
         firstVisibleDay.setUTCHours(firstVisibleDay.getUTCHours() + 3)
         firstVisibleDayOnCalendar = firstVisibleDay.toISOString().split('T')[0]
     },
-    formCorrectLastDay: function (lastVisibleDay){
+    formCorrectLastDay: function (lastVisibleDay) {
         lastVisibleDay.setUTCHours(lastVisibleDay.getUTCHours() + 3)
         lastVisibleDayOnCalendar = lastVisibleDay.toISOString().split('T')[0]
     }
@@ -29,10 +32,10 @@ let firstVisibleDayOnCalendar;
 let lastVisibleDayOnCalendar;
 let isEventDrop = false;
 let trampolineID;
-let lastStartDate, lastEndDate;
+let trampolines;
 
 let CalendarFunctions = {
-    populateFullCalendar: function (InitialDate){
+    populateFullCalendar: function (InitialDate) {
         isEventDrop = true;
         Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
             initialDate: InitialDate,
@@ -54,7 +57,6 @@ let CalendarFunctions = {
                     Calendar.next();
                     CalendarFunctions.updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
                 }
-                $('.confirmation-container').css('display', 'block');
             },
             eventChange: function (changeInfo) {
                 let newStartDate = new Date(changeInfo.event.start);
@@ -78,11 +80,10 @@ let CalendarFunctions = {
             dayMaxEvents: true,
             events: [],
             eventAllow: function (dropInfo, draggedEvent) {
-                let CouldBeDropped = true;
                 let dropStart = new Date(dropInfo.startStr);
                 let dropEnd = new Date(dropInfo.endStr);
 
-                // Check for occupation overlap
+                let CouldBeDropped = true;
                 Occupied.forEach(function (Occupation) {
                     let OccupationStart = new Date(Occupation.start);
                     let OccupationEnd = new Date(Occupation.end);
@@ -91,17 +92,23 @@ let CalendarFunctions = {
                         return false;
                     }
                 });
-
-                // Check trampolines in the dragged event
-                trampolineID.forEach(function (Trampoline) {
-                    draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
-                        if (Trampoline.id === AffectedTrampoline.id) {
-                            Trampoline.rental_start = dropInfo.startStr;
-                            Trampoline.rental_end = dropInfo.endStr;
-                        }
+                if (CouldBeDropped) {
+                    trampolines.forEach(function (Trampoline) {
+                        draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
+                            if (Trampoline.id === AffectedTrampoline.id) {
+                                Trampoline.rental_start = dropInfo.startStr;
+                                Trampoline.rental_end = dropInfo.endStr;
+                                Orders.Modals.updateOrder.Events.DisplayConfirmationElement(dropInfo.startStr, dropInfo.endStr);
+                            }
+                        });
                     });
-                });
-
+                } else {
+                    trampolines.forEach(function (Trampoline) {
+                        Trampoline.rental_start = draggedEvent.startStr;
+                        Trampoline.rental_end = draggedEvent.endStr;
+                        Orders.Modals.updateOrder.Events.DisplayConfirmationElement(draggedEvent.startStr, draggedEvent.endStr);
+                    })
+                }
                 return CouldBeDropped;
             },
             eventTimeFormat: {
@@ -114,7 +121,7 @@ let CalendarFunctions = {
         Calendar.render();
         Orders.Modals.updateOrder.getDataForModal();
     },
-    updateEvents: function (targetStartDate, targetEndDate){
+    updateEvents: function (targetStartDate, targetEndDate) {
         $('#spinner').show();
         $.ajax({
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -136,122 +143,13 @@ let CalendarFunctions = {
             // console.log("always => response : ", instance);
         });
     },
-    addEvent: function (EventsToAdd){
+    addEvent: function (EventsToAdd) {
         EventsToAdd.forEach(function (Event) {
             console.log('Adding event:', Event);
             Calendar.addEvent(Event);
         });
     }
 }
-// function populateFullCalendar(Dates, Occupied, Event, Trampolines) {
-//     // Initialize the FullCalendar with specified options
-//     Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-//         initialDate: Dates.CalendarInitial,
-//         locale: 'lt',
-//         editable: true,
-//         selectable: true,
-//         eventDrop: function (dropInfo) {
-//             isEventDrop = true
-//             let droppedDate = dropInfo.event.start;
-//             let currentMonth = Calendar.getDate().getMonth();
-//             let droppedMonth = droppedDate.getMonth();
-//             if (droppedMonth < currentMonth) {
-//                 Calendar.prev();
-//                 updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar)
-//             } else if (droppedMonth > currentMonth && droppedMonth > lastUpdatedMonth) {
-//                 lastUpdatedMonth = droppedMonth;
-//                 Calendar.next();
-//                 updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
-//             }
-//         },
-//         // eventChange: function(changeInfo) {
-//         // },
-//         dayMaxEvents: true,
-//         events: [],
-//         eventAllow: function (dropInfo, draggedEvent) {
-//             let CouldBeDropped = true;
-//             let dropStart = new Date(dropInfo.startStr);
-//             let dropEnd = new Date(dropInfo.endStr);
-//
-//             // Check for occupation overlap
-//             Occupied.forEach(function (Occupation) {
-//                 let OccupationStart = new Date(Occupation.start);
-//                 let OccupationEnd = new Date(Occupation.end);
-//                 if ((dropStart >= OccupationStart && dropStart < OccupationEnd) || (dropEnd > OccupationStart && dropEnd <= OccupationEnd) || (dropStart <= OccupationStart && dropEnd >= OccupationEnd)) {
-//                     CouldBeDropped = false;
-//                     return false;
-//                 }
-//             });
-//
-//             // Check trampolines in the dragged event
-//
-//             Trampolines.forEach(function (Trampoline) {
-//                 draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
-//                     if (Trampoline.id === AffectedTrampoline.id) {
-//                         Trampoline.rental_start = dropInfo.startStr
-//                         Trampoline.rental_end = dropInfo.endStr
-//                     }
-//                 })
-//             });
-//
-//             return CouldBeDropped;
-//         },
-//         eventTimeFormat: {
-//             hour: '2-digit',
-//             minute: '2-digit',
-//             second: '2-digit',
-//             hour12: false
-//         }
-//     });
-//     Calendar.render();
-//
-//     console.log('Initial Date:', Dates.CalendarInitial);
-//     console.log('Occupied:', Occupied);
-//     console.log('Events:', Event);
-//     // Validate and add events to the calendar
-//     if (Occupied && Array.isArray(Occupied)) {
-//         addEvent(Occupied);
-//         // console.log('Occupied events: ', Occupied)
-//     } else {
-//         console.error('Occupied events data is invalid:', Occupied);
-//     }
-//
-//     if (Event && Array.isArray(Event)) {
-//         addEvent(Event);
-//     } else if (Event && typeof Event === 'object') {
-//         addEvent([Event]);
-//     } else {
-//         console.error('Event data is invalid:', Event);
-//     }
-// }
-// function updateEvents(targetStartDate, targetEndDate) {
-//     $.ajax({
-//         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-//         url: '/orders/public/order/public_calendar/get',
-//         method: 'POST',
-//         data: {
-//             trampoline_id: Variables.getTrampolines().map(t => t.id),
-//             target_start_date: targetStartDate,
-//             target_end_date: targetEndDate
-//         },
-//     }).done((response) => {
-//         Occupied = response.Occupied
-//         if (response.status) {
-//             Calendar.removeAllEvents()
-//             addEvent(Occupied)
-//             Availability = response.Availability
-//             addEvent(Availability)
-//         }
-//     }).always((instance) => {
-//         // console.log("always => response : ", instance);
-//     });
-// }
-// function addEvent(EventsToAdd) {
-//     EventsToAdd.forEach(function (Event) {
-//         console.log('Adding event:', Event);
-//         Calendar.addEvent(Event);
-//     });
-// }
 
 let Orders = {
     init: function () {
@@ -500,7 +398,9 @@ let Orders = {
                     if (response.status) {
                         Occupied = response.Occupied
                         this.fillDataForm(response.order)
-                        trampolineID = response.Trampolines
+                        trampolineID = response.TrampolinesID
+                        trampolines = response.Trampolines
+                        console.log(trampolineID)
                         // Calendar.removeAllEvents()
                         CalendarFunctions.addEvent(response.Occupied)
                         CalendarFunctions.addEvent(response.Events)
@@ -512,39 +412,34 @@ let Orders = {
                     console.log("always => response : ", instance);
                 });
             },
-            // fetchFormDataAndOpenModal: function(OrderID) {
-            //     // Fetch form data
-            //     $.ajax({
-            //         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-            //         dataType: 'json',
-            //         method: "GET",
-            //         url: "/orders/admin/order",
-            //         data: {
-            //             order_id: OrderID
-            //         }
-            //     }).done((response) => {
-            //         console.log("done => response : ", response);
-            //         console.log("done => response.trampoline : ", response.order);
-            //         if (response.status) {
-            //             this.fillDataForm(response.order);
-            //             Orders.Modals.updateOrder.element.show();
-            //         }
-            //         console.log('response => ', response);
-            //     }).always((instance) => {
-            //         console.log("always => response : ", instance);
-            //     });
-            // },
             Events: {
                 init: function () {
                     $('#updateOrderModal .updateOrder').on('click', (event) => {
-                        event.stopPropagation()
-                        this.updateOrder()
+                        event.stopPropagation();
+                        if ($('#confirmationContainer').css('display') === 'none') { // Corrected syntax
+                            this.updateOrder();
+                        } else {
+                            let confirmChangesCheckbox = $('#confirmationContainer .confirmChanges');
+                            if (!confirmChangesCheckbox.is(':checked')) {
+                                confirmChangesCheckbox.addClass('is-invalid');
+                            } else {
+                                confirmChangesCheckbox.removeClass('is-invalid');
+                                this.updateOrder();
+                            }
+                        }
                     })
-                    $('#updateOrderModal .modalClose').on('click', (event) =>{
+                    $('#updateOrderModal .modalClose').on('click', (event) => {
                         event.stopPropagation()
                         console.log('Modal destroyed')
                         $('.confirmation-container').css('display', 'none');
                         Calendar.destroy()
+                        $('#updateOrderForm input').val('')
+                    })
+                    $('#confirmationContainer .confirmationClose').on('click', (event) => {
+                        event.stopPropagation()
+                        $('#confirmationContainer').css('display', 'none')
+                        Calendar.removeAllEvents()
+                        Orders.Modals.updateOrder.getDataForModal()
                     })
                 },
                 updateOrder: function () {
@@ -564,14 +459,18 @@ let Orders = {
                             })
                         }
                         if (response.status) {
-                            $('#updateOrderModal form input[type=text], #updateOrderModal form input[type=number], #updateOrderModal form textarea').val('');
                             $('#updateOrderModal form input').removeClass('is-invalid');
                             Orders.Modals.updateOrder.element.hide()
                             $('.confirmation-container').css('display', 'none');
                             Calendar.destroy()
+                            $('#updateOrderForm input').val('')
                         }
                         Orders.Table.Table.draw()
                     })
+                },
+                DisplayConfirmationElement: function (startDate, endDate) {
+                    $('#confirmationContainer').css('display', 'block');
+                    $('.dates').html('<p><strong>Pradžia:</strong> ' + startDate + '</p><p><strong>Pabaiga:</strong> ' + endDate + '</p>');
                 }
             }
         }

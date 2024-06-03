@@ -197,7 +197,7 @@ class OrderController extends Controller
         $firstVisibleDay = Carbon::parse(\request()->get('firstVisibleDay', null));
         $lastVisibleDay = Carbon::parse(\request()->get('lastVisibleDay', null));
         $NewOrderEventBackgroundColor = 'green';
-        $NewOrderEventTitle = 'Jūsų užsakymas pateiktas';
+        $NewOrderEventTitle = 'Jūsų užsakymas';
         $Order = (new TrampolineOrder())->create((new TrampolineOrderData($request)));
         $trampolines_id = [];
 
@@ -224,7 +224,6 @@ class OrderController extends Controller
             ];
         }
 
-//        dd($Events);
 
         return response()->json([
             'failed_input' => $Order->failedInputs,
@@ -237,7 +236,8 @@ class OrderController extends Controller
                 $firstVisibleDay,
                 $lastVisibleDay
             ),
-            'Events' => $Events
+            'Events' => $Events,
+            'OrderId' => $Order->Order->id
         ]);
     }
 
@@ -274,7 +274,7 @@ class OrderController extends Controller
         try {
             $orderId = request()->get('order_id');
             $order = (new TrampolineOrder())->read($orderId);
-//
+
             if (!$order instanceof \App\Models\Order) {
                 throw new \Exception('Order not found or invalid type');
             }
@@ -287,12 +287,10 @@ class OrderController extends Controller
 
 
             $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
-//            dd((new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get());
-//            dd($Trampolines);
             $event = (object)[
                 'id' => $order->id,
                 'extendedProps' => [
-                    'trampolines' => $order->trampolines->toArray(),
+                    'trampolines' => $Trampolines,
                     'order' => $order,
                     'order_id' => $order->id,
                     'type_custom' => 'orderEvent'
@@ -327,7 +325,8 @@ class OrderController extends Controller
                 'status' => true,
                 'Events' => [$event],
                 'Occupied' => $Occupied,
-                'Trampolines' => $trampolineIds,
+                'TrampolinesID' => $trampolineIds,
+                'Trampolines' => $Trampolines,
                 'order' => $order,
             ]);
         } catch (\Exception $e) {

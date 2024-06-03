@@ -6,6 +6,7 @@ use App\Interfaces\Order;
 use App\Models\Client;
 use App\Models\ClientAddress;
 use App\Models\OrdersTrampoline;
+use App\Models\Trampoline;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -134,9 +135,6 @@ class TrampolineOrder implements Order
         $Order = \App\Models\Order::updateOrCreate(
             [
                 'id' => $trampolineOrderData->orderID
-            ],
-            [
-                /*Visi parametrai*/
             ]
         );
         Client::updateOrCreate(
@@ -160,6 +158,42 @@ class TrampolineOrder implements Order
                 'address_postcode' => $trampolineOrderData->PostCode
             ]
         );
+        $OrderTotalSum = 0;
+        $OrderRentalDuration = 0;
+
+        try {
+            foreach ($trampolineOrderData->Trampolines as $trampoline) {
+                $RentalStart = Carbon::parse($trampoline['rental_start'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_start);
+                $RentalDuration = $RentalStart->diffInDays(Carbon::parse($trampoline['rental_end'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_end));
+                $Trampoline = \App\Models\Trampoline::with('Parameter')->find($trampoline['id']);
+                $this->OrderTrampolines[] = OrdersTrampoline::updateOrCreate(
+                    [
+                        'orders_id' => $Order->id,
+                    ],
+                    [
+                        'rental_start' => Carbon::parse($trampoline['rental_start'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_start)->format('Y-m-d'),
+                        'rental_end' => Carbon::parse($trampoline['rental_end'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_end)->format('Y-m-d'),
+                        'rental_duration' => $RentalDuration,
+                        'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
+                    ]
+                );
+                $OrderTotalSum += $RentalDuration * $Trampoline->Parameter->price;
+                $OrderRentalDuration = $RentalDuration;
+            }
+        } catch (\Exception $exception) {
+            $this->Errors[] = 'Trinant užsakymą įvyko klaida : ' . $exception->getMessage();
+            $this->status = false;
+        }
+        $Order->updateOrCreate(
+            [
+              'id' => $Order->id,
+            ],
+            [
+            'total_sum' => $OrderTotalSum,
+            'rental_duration' => $OrderRentalDuration
+            ]
+        );
+
         $this->status = true;
         $this->Messages[] = 'Užsakymas atnaujintas sėkmingai !';
         return $this;

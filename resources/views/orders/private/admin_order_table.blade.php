@@ -2,9 +2,6 @@
 @section('content')
     <div class="row mb-5">
         <div class="col-4">
-            {{--            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createTrampolineModal">Pridėti--}}
-            {{--                naują batutą--}}
-            {{--            </button>--}}
             <button id="refreshTable" class="btn btn-secondary">
                 Atnaujinti lentelė
             </button>
@@ -110,34 +107,34 @@
                                            required>
                                     <div class="invalid-feedback customerDeliveryAddressNameInValidFeedback"></div>
                                 </div>
-                                <div class="form-check mt-3">
-                                    <input class="form-check-input informClient" name="informClient" type="checkbox"
-                                           value="" id="flexCheckChecked" checked>
-                                    <label class="form-check-label" for="informClient">
-                                        Informuoti klientą
-                                    </label>
-                                </div>
                             </form>
+                            <div class="mt-5">
+                                <div id="confirmationContainer" class="confirmation-container" style="display: none">
+                                    <button class="btn-close close-button confirmationClose" aria-label="Close"></button>
+                                    <h4 class="confirmation-title">Ar tikrai norite pakeisti užsakymo datas?</h4>
+                                    <div class="dates-info">
+                                        <p class="date-label">Užsakymo datas bus pakeistos į:</p>
+                                        <div class="dates"></div>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <label for="confirmChange1" class="d-flex align-items-center">
+                                            <input type="checkbox" id="confirmChange1" class="mr-2 form-check-input confirmChanges" required>
+                                            Patvirtinti pakeitimą
+                                            <div class="invalid-feedback">Pažymėkite, jog patvirtinate datų pakeitimą</div>
+                                        </label>
+                                        <label for="confirmChange2" class="d-flex align-items-center">
+                                            <input type="checkbox" id="confirmChange2" class="mr-2 form-check-input informClient" checked>
+                                            Informuoti klientą
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-2"></div>
                         <div class="col-4">
                             <div id="calendar" style="position: relative;"></div>
                             <div id="spinner" class="spinner-border text-dark" role="status">
                                 <span class="visually-hidden"></span>
-                            </div>
-                            <div class="mt-5">
-                                <div class="confirmation-container" style="display: none">
-                                    <h4 class="confirmation-title">Ar tikrai norite pakeisti užsakymo datas?</h4>
-                                    <div class="dates-info">
-                                        <p class="date-label">Užsakymo datas bus pakeistos į:</p>
-                                        <p><strong>Pradžia:</strong> 2024-06-01</p>
-                                        <p><strong>Pabaiga:</strong> 2024-06-03</p>
-                                    </div>
-                                    <div class="button-container">
-                                        <button class="cancel-btn">Atšaukti</button>
-                                        <button class="confirm-btn">Patvirtinti</button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

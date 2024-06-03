@@ -4,6 +4,8 @@
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
+    position: relative;
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
 
 .confirmation-title {
@@ -18,25 +20,51 @@
     font-weight: bold;
 }
 
-.button-container {
+.checkbox-container {
     margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 8px;
 }
 
-.cancel-btn,
-.confirm-btn {
-    padding: 10px 20px;
+.checkbox-container label {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: #495057;
     margin: 0 10px;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+label[for="showConfirmation"] {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: #495057;
+}
+
+label[for="showConfirmation"] input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s ease; /* Smooth transition for button background color */
 }
 
-.cancel-btn {
-    background-color: #dc3545;
-    color: #fff;
-}
 
-.confirm-btn {
-    background-color: #007bff;
-    color: #fff;
+/* New hover rule for the button to change the container background */
+.close-button:hover + .confirmation-container {
+    background-color: #ffe6e6; /* Light red background color when hovering over the button */
 }

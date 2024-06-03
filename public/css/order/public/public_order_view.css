@@ -6,40 +6,154 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-#thankYouDiv .thankYouHeading {
-    font-size: 24px;
-    color: #007bff;
-    margin-bottom: 15px;
+/*#thankYouDiv .thankYouHeading {*/
+/*    font-size: 24px;*/
+/*    color: #007bff;*/
+/*    margin-bottom: 15px;*/
+/*}*/
+
+/*#thankYouDiv .thankYouParagraph {*/
+/*    font-size: 16px;*/
+/*    color: #333;*/
+/*    margin-bottom: 10px;*/
+/*}*/
+
+/*#thankYouDiv span {*/
+/*    font-weight: bold;*/
+/*    color: #007bff;*/
+/*}*/
+
+/*#thankYouDiv .cancelInfo {*/
+/*    font-size: 14px;*/
+/*    color: #ff0000;*/
+/*    margin-bottom: 10px;*/
+/*}*/
+
+/*#thankYouDiv #payNowButton {*/
+/*    font-size: 18px;*/
+/*    margin-top: 10px;*/
+/*    padding: 10px 20px;*/
+/*    border: none;*/
+/*    border-radius: 5px;*/
+/*    background-color: #007bff;*/
+/*    color: #fff;*/
+/*    transition: background-color 0.3s ease;*/
+/*}*/
+
+/*#thankYouDiv #payNowButton:hover {*/
+/*    background-color: #0056b3;*/
+/*}*/
+
+
+/*body {*/
+/*    background-color: #5165ff;*/
+/*    height: 100vh;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center*/
+/*}*/
+
+.thankYouDiv {
+    background-color: #fff;
+    border-color: #fff;
+
 }
 
-#thankYouDiv .thankYouParagraph {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 10px;
+.theme-color{
+    color: #004cb9;
+}
+hr.new1 {
+    border-top: 2px dashed #fff;
+    margin: 0.4rem 0;
 }
 
-#thankYouDiv span {
-    font-weight: bold;
-    color: #007bff;
-}
 
-#thankYouDiv .cancelInfo {
-    font-size: 14px;
-    color: #ff0000;
-    margin-bottom: 10px;
-}
-
-#thankYouDiv #payNowButton {
-    font-size: 18px;
-    margin-top: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
+.btn-thankYou {
     color: #fff;
-    transition: background-color 0.3s ease;
+    background-color: #004cb9;
+    border-color: #004cb9;
+    padding: 12px 30px;
+    border-radius: 1px;
+    font-size: 17px;
 }
 
-#thankYouDiv #payNowButton:hover {
-    background-color: #0056b3;
+
+.btn-thankYou:hover {
+    color: #fff;
+    background-color: #004cb9;
+    border-color: #004cb9;
+    padding: 12px 30px;
+    border-radius: 1px;
+    font-size: 17px;
+}
+
+.confirmation-container {
+    background-color: #ffffff; /* White background */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for depth */
+    padding: 20px; /* Padding */
+    margin: 0 auto; /* Center the container horizontally */
+}
+
+.confirmation-title {
+    color: #007bff; /* Blue title color */
+    font-size: 20px; /* Larger font size */
+    margin-bottom: 15px; /* Spacing below the title */
+}
+
+.date-label {
+    font-weight: bold; /* Bold label text */
+    margin-bottom: 10px; /* Spacing below the label */
+}
+
+.checkbox-container {
+    display: flex; /* Display children in a row */
+    align-items: center; /* Center align children vertically */
+    justify-content: flex-end; /* Align children to the right */
+    margin-top: 20px; /* Spacing above the container */
+}
+
+.confirmChanges {
+    background-color: #007bff; /* Blue button background color */
+    color: #ffffff; /* White button text color */
+    border: none; /* No button border */
+    border-radius: 5px; /* Rounded button corners */
+    padding: 10px 20px; /* Padding */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Cursor style */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.confirmChanges:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.invalid-feedback {
+    color: #ff0000; /* Red color for invalid feedback */
+    font-size: 14px; /* Font size */
+}
+
+.confirmation-container {
+    position: relative; /* Positioning context for absolute positioning */
+    background-color: #ffffff; /* White background */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for depth */
+    padding: 20px; /* Padding */
+    margin: 0 auto; /* Center the container horizontally */
+}
+
+.close-button {
+    position: absolute; /* Position the close button */
+    top: 10px; /* Distance from the top */
+    right: 10px; /* Distance from the right */
+    border: none; /* No button border */
+    background-color: transparent; /* Transparent background */
+    color: #000000; /* Black button color */
+    font-size: 20px; /* Button size */
+    cursor: pointer; /* Cursor style */
+    transition: color 0.3s ease; /* Smooth transition */
+}
+
+.close-button:hover {
+    color: #ff0000; /* Red button color on hover */
 }
