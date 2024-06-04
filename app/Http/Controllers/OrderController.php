@@ -12,6 +12,7 @@ use App\Trampolines\OccupationTimeFrames;
 use App\Trampolines\TrampolineOrder;
 use App\Trampolines\TrampolineOrderData;
 use Carbon\Carbon;
+use http\Env\Response;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -241,10 +242,74 @@ class OrderController extends Controller
         ]);
     }
 
-    public function orderUpdate(Request $request): JsonResponse
+    public function orderUpdate(): JsonResponse
     {
-        return response()->json((new TrampolineOrder())->update(new TrampolineOrderData($request)));
+        $Order = (new TrampolineOrder())->update(new TrampolineOrderData(\request()));
+//        dd($Order);
+
+        // Ensure Order is initialized
+        if (!isset($Order->Order)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order update failed: Order data not initialized.',
+                'debug' => [
+                    'Order' => $Order,
+                    'request' => \request()->all()
+                ]
+            ], 500);
+        }
+
+        $firstVisibleDay = Carbon::parse(\request()->get('firstVisibleDay', null));
+        $lastVisibleDay = Carbon::parse(\request()->get('lastVisibleDay', null));
+        $trampolines_id = [];
+        foreach (\request()->get('trampolines', []) as $Trampoline) {
+            $trampolines_id[] = $Trampoline['id'];
+        }
+
+        $trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolines_id)->get();
+
+        // Ensure OrderTrampolines is initialized and not empty before accessing it
+        if (!isset($Order->OrderTrampolines) || count($Order->OrderTrampolines) === 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order update failed: Order trampolines data not initialized.',
+                'debug' => [
+                    'Order' => $Order
+                ]
+            ], 500);
+        }
+
+        $Event = [
+            (object)[
+                'id' => $Order->Order->id,
+                'extendedProps' => [
+                    'trampolines' => $trampolines,
+                    'order' => $Order->Order,
+                    'order_id' => $Order->Order->id
+                ],
+                'title' => 'Užsakymas atnaujintas',
+                'start' => $Order->OrderTrampolines[0]->rental_start,
+                'end' => $Order->OrderTrampolines[0]->rental_end,
+                'backgroundColor' => 'green'
+            ]
+        ];
+
+        return response()->json([
+            'Event' => $Event,
+            'failed_input' => $Order->failedInputs,
+            'status' => $Order->status,
+            'Occupied' => (new BaseTrampoline())->getOccupation(
+                $trampolines,
+                OccupationTimeFrames::MONTH,
+                $Order->Order,
+                true,
+                $firstVisibleDay,
+                $lastVisibleDay
+            ),
+            'OrderID' => $Order->Order->id
+        ]);
     }
+
 
     public function orderDelete(Request $request): JsonResponse
     {

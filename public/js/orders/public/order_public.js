@@ -1,3 +1,14 @@
+/* Global variables */
+let firstVisibleDayOnCalendar;
+let lastVisibleDayOnCalendar;
+let Calendar = null;
+let today = new Date();
+let isEventDrop = false;
+let reservationSent = false;
+today.setHours(0, 0, 0, 0);
+today = today.toISOString().split('T')[0];
+
+/* JS classes */
 let Variables = {
     orderFormInput: [
         'customerName', 'customerSurname', 'customerPhoneNumber', 'customerEmail', 'customerDeliveryCity', 'customerDeliveryPostCode', 'customerDeliveryAddress'
@@ -18,20 +29,12 @@ let Variables = {
     },
     getTrampolines: function () {
         return Trampolines
-    }
+    },
 }
-let firstVisibleDayOnCalendar;
-let lastVisibleDayOnCalendar;
-let Calendar = null;
-let today = new Date();
-today.setHours(0, 0, 0, 0);
-today = today.toISOString().split('T')[0];
-let isEventDrop = false; // Flag to prevent double updates
-let reservationSent = false;
-
 document.addEventListener('DOMContentLoaded', function () {
     Calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialDate: Dates.CalendarInitial,
+        // themeSystem: 'bootstrap5',
         locale: 'lt',
         editable: true,
         selectable: true,
@@ -88,18 +91,31 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 }
             });
-            Trampolines.forEach(function (Trampoline) {
-                draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
-                    if (Trampoline.id === AffectedTrampoline.id) {
-                        console.log('patekom i eventAllow')
-                        Trampoline.rental_start = dropInfo.startStr
-                        Trampoline.rental_end = dropInfo.endStr
-                        if (reservationSent) {
-                            TrampolineOrder.FormSendOrder.Event.DisplayConfirmationElement(dropInfo.startStr, dropInfo.endStr)
+            if (CouldBeDropped) {
+                Trampolines.forEach(function (Trampoline) {
+                    console.log('Public trampolines => ', Trampolines)
+                    draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
+                        if (Trampoline.id === AffectedTrampoline.id) {
+                            Trampoline.rental_start = dropInfo.startStr
+                            Trampoline.rental_end = dropInfo.endStr
+                            console.log('public startStr => ', dropInfo.startStr)
+                            console.log('public endStr => ', dropInfo.endStr)
+                            if (reservationSent) {
+                                TrampolineOrder.FormSendOrder.Event.DisplayConfirmationElement(dropInfo.startStr, dropInfo.endStr)
+                            }
                         }
+                    })
+                })
+            } else {
+                Trampolines.forEach(function (Trampoline) {
+                    Trampoline.rental_start = draggedEvent.startStr
+                    Trampoline.rental_end = draggedEvent.endStr
+                    console.log('draggedevent endstr = ', draggedEvent.endStr)
+                    if (reservationSent){
+                        TrampolineOrder.FormSendOrder.Event.DisplayConfirmationElement(draggedEvent.startStr, draggedEvent.endStr)
                     }
                 })
-            })
+            }
             return CouldBeDropped;
         },
         eventTimeFormat: {
@@ -110,11 +126,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     Calendar.render();
-    // updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
-
-
-    // addEvent(Occupied)
-    // addEvent(Availability)
 })
 
 function addEvent(EventsToAdd) {
@@ -148,9 +159,13 @@ function updateEvents(targetStartDate, targetEndDate) {
 
 let TrampolineOrder = {
     init: function () {
-        this.FormSendOrder.Event.init()
+        this.FormSendOrder.init()
+        this.UpdateOrder.init()
     },
     FormSendOrder: {
+        init: function () {
+          this.Event.init()
+        },
         dataForm: {
             element: $('#sendOrderColumn form')
         },
@@ -196,7 +211,7 @@ let TrampolineOrder = {
                     console.log('Occupied create =>', Occupied)
                     if (response.status) {
                         reservationSent = true
-                        TrampolineOrder.UpdateOrder.OrderIdToUpdate = response.OrderID
+                        TrampolineOrder.UpdateOrder.OrderIdToUpdate = response.OrderId
                         Calendar.removeAllEvents()
                         addEvent(Occupied)
                         Availability = response.Events
@@ -221,22 +236,42 @@ let TrampolineOrder = {
         }
     },
     UpdateOrder: {
+        init: function (){
+          this.Event.init()
+        },
         OrderIdToUpdate: 0,
         Event: {
-            init: function (){
-                $('#confirmDatesChange').on('click', (event) => {
+            init: function () {
+                $('#confirmationContainer .confirmDatesChange').on('click', (event) => {
                     event.preventDefault()
                     this.updateOrder()
                 })
             },
             updateOrder: function () {
-                console.log('Order id => ', TrampolineOrder.UpdateOrder.OrderIdToUpdate)
+                // let form_data = Variables.getOrderFormInputs()
+                // form_data.orderID = TrampolineOrder.UpdateOrder.OrderIdToUpdate
+                // form_data.firstVisibleDay = firstVisibleDayOnCalendar
+                // form_data.lastVisibleDay = lastVisibleDayOnCalendar
+                $.ajax({
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    method: "PUT",
+                    url: "/orders/public/order",
+                    data: form_data
+                }).done((response) => {
+                    if (response.status) {
+                        $('#confirmation-container').css('display', 'none');
+                        Calendar.removeAllEvents()
+                        addEvent(response.Occupied)
+                        addEvent(response.Event)
+                    }
+                })
             }
 
         }
     }
 }
 
+/* Document ready function */
 $(document).ready(function () {
     console.log("/js/trampolines/public/order_public.js -> ready!");
     TrampolineOrder.init()

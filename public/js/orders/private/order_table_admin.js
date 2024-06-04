@@ -1,3 +1,14 @@
+/* Global variables */
+let firstVisibleDayOnCalendar;
+let lastVisibleDayOnCalendar;
+let isEventDrop = false;
+let trampolineID;
+let trampolines;
+let today = new Date();
+today.setHours(0, 0, 0, 0);
+today = today.toISOString().split('T')[0];
+
+/* JS classes */
 let Variables = {
     orderFormInput: [
         'customerName', 'customerSurname', 'customerPhoneNumber', 'customerEmail', 'customerDeliveryCity', 'customerDeliveryPostCode', 'customerDeliveryAddress'
@@ -13,7 +24,6 @@ let Variables = {
         return values
     }
 }
-
 let FirstAndLastDays = {
     formCorrectFirstDate: function (firstVisibleDay) {
         firstVisibleDay.setUTCHours(firstVisibleDay.getUTCHours() + 3)
@@ -24,16 +34,6 @@ let FirstAndLastDays = {
         lastVisibleDayOnCalendar = lastVisibleDay.toISOString().split('T')[0]
     }
 }
-
-let today = new Date();
-today.setHours(0, 0, 0, 0);
-today = today.toISOString().split('T')[0];
-let firstVisibleDayOnCalendar;
-let lastVisibleDayOnCalendar;
-let isEventDrop = false;
-let trampolineID;
-let trampolines;
-
 let CalendarFunctions = {
     populateFullCalendar: function (InitialDate) {
         isEventDrop = true;
@@ -94,10 +94,13 @@ let CalendarFunctions = {
                 });
                 if (CouldBeDropped) {
                     trampolines.forEach(function (Trampoline) {
+                        console.log('admin trampolines => ', trampolines)
                         draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
                             if (Trampoline.id === AffectedTrampoline.id) {
                                 Trampoline.rental_start = dropInfo.startStr;
                                 Trampoline.rental_end = dropInfo.endStr;
+                                console.log('admin startStr => ', dropInfo.startStr)
+                                console.log('admin endStr => ', dropInfo.endStr)
                                 Orders.Modals.updateOrder.Events.DisplayConfirmationElement(dropInfo.startStr, dropInfo.endStr);
                             }
                         });
@@ -150,7 +153,6 @@ let CalendarFunctions = {
         });
     }
 }
-
 let Orders = {
     init: function () {
         this.Modals.deleteOrder.init()
@@ -434,6 +436,7 @@ let Orders = {
                         $('.confirmation-container').css('display', 'none');
                         Calendar.destroy()
                         $('#updateOrderForm input').val('')
+                        Orders.Table.Table.draw()
                     })
                     $('#confirmationContainer .confirmationClose').on('click', (event) => {
                         event.stopPropagation()
@@ -445,11 +448,13 @@ let Orders = {
                 updateOrder: function () {
                     let form_data = Variables.getOrderFormInputs('updateOrderModal')
                     form_data.orderID = Orders.Modals.updateOrder.orderIdToUpdate
+                    form_data.firstVisibleDay = firstVisibleDayOnCalendar
+                    form_data.lastVisibleDay = lastVisibleDayOnCalendar
                     $.ajax({
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         method: "PUT",
                         url: "/orders/admin/order",
-                        data: form_data
+                        data: form_data,
                     }).done((response) => {
                         if (response.status === false) {
                             $('#updateOrderModal form input').removeClass('is-invalid');
@@ -460,12 +465,11 @@ let Orders = {
                         }
                         if (response.status) {
                             $('#updateOrderModal form input').removeClass('is-invalid');
-                            Orders.Modals.updateOrder.element.hide()
                             $('.confirmation-container').css('display', 'none');
-                            Calendar.destroy()
-                            $('#updateOrderForm input').val('')
+                            Calendar.removeAllEvents();
+                            CalendarFunctions.addEvent(response.Occupied)
+                            CalendarFunctions.addEvent(response.Event)
                         }
-                        Orders.Table.Table.draw()
                     })
                 },
                 DisplayConfirmationElement: function (startDate, endDate) {
@@ -477,6 +481,7 @@ let Orders = {
     }
 }
 
+/* Document ready function */
 $(document).ready(function () {
     Orders.init();
     console.log("/js/orders/private/order_table_admin.js -> ready!");

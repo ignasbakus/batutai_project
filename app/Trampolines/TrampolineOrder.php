@@ -131,12 +131,16 @@ class TrampolineOrder implements Order
             $this->failedInputs = $trampolineOrderData->failedInputs;
             $this->status = false;
             return $this;
+
         }
         $Order = \App\Models\Order::updateOrCreate(
             [
                 'id' => $trampolineOrderData->orderID
             ]
         );
+
+        $this->Order = $Order;
+
         Client::updateOrCreate(
             [
                 'id' => $Order->client_id

@@ -40,10 +40,9 @@
                     <div class="dates"></div>
                 </div>
                 <div class="checkbox-container">
-                    <button type="button" id="confirmDatesChange" class="btn btn-primary confirmChanges mr-2">
+                    <button type="button" class="btn btn-primary confirmChanges mr-2 confirmDatesChange">
                         Pakeisti
                     </button>
-                    <div class="invalid-feedback">Pažymėkite, jog patvirtinate datų pakeitimą</div>
                 </div>
             </div>
         </div>
