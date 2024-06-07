@@ -245,7 +245,7 @@ let TrampolineOrder = {
                         $('form input').removeClass('is-invalid');
                         $('.infoBeforeSuccessfulOrder').css('display', 'none');
                         $('#columnAfterSentOrder').css('display', 'block')
-                        $('#thankYouDiv').css('display', 'block').addClass(' d-flex flex-column justify-content-between')
+                        $('#thankYouDiv').addClass(' d-flex flex-column justify-content-between')
                     }
                     TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied
                     TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Events
@@ -272,6 +272,7 @@ let TrampolineOrder = {
             },
             DisplayConfirmationElement: function (startDate, endDate) {
                 $('#confirmationContainer').css('display', 'block');
+                $('#footer').removeClass('fixed-bottom').addClass('sticky-bottom')
                 $('.dates').html('<p><strong>Pradžia:</strong> ' + startDate + '</p><p><strong>Pabaiga:</strong> ' + endDate + '</p>');
             }
         }
@@ -290,6 +291,7 @@ let TrampolineOrder = {
                 $('#confirmationContainer .confirmationClose').on('click', (event) => {
                     event.stopPropagation()
                     $('#confirmationContainer').css('display', 'none');
+                    $('#footer').removeClass('sticky-bottom').addClass('fixed-bottom')
                     CalendarFunctions.Calendar.calendar.removeAllEvents()
                     CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate)
                     CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.EventFromCreate)
@@ -309,6 +311,8 @@ let TrampolineOrder = {
                 }).done((response) => {
                     if (response.status) {
                         $('#confirmationContainer').css('display', 'none');
+                        $('#footer').removeClass('sticky-bottom').addClass('fixed-bottom')
+                        $('#thankYouDiv').html(response.view)
                         CalendarFunctions.Calendar.calendar.removeAllEvents()
                         CalendarFunctions.addEvent(response.Occupied)
                         CalendarFunctions.addEvent(response.Event)

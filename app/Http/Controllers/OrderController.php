@@ -251,7 +251,7 @@ class OrderController extends Controller
             'OrderId' => $Order->Order->id,
             'view' => \view('orders.public.order_info', [
                 'Order' => (new Order())->newQuery()->with('trampolines')->with('client')
-                    ->with('address')->whereIn('id', $Order->Order->id, [])->get(),
+                    ->with('address')->find($Order->Order->id), // Changed to find()
             ])->render()
         ]);
     }
@@ -331,7 +331,11 @@ class OrderController extends Controller
             'failed_input' => $Order->failedInputs,
             'status' => $Order->status,
             'Occupied' => $Occupied,
-            'OrderID' => $Order->Order->id
+            'OrderID' => $Order->Order->id,
+            'view' => \view('orders.public.order_info', [
+                'Order' => (new Order())->newQuery()->with('trampolines')->with('client')
+                    ->with('address')->find($Order->Order->id),
+            ])->render()
         ]);
     }
 
