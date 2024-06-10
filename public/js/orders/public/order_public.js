@@ -6,7 +6,7 @@ let isEventDrop = false;
 let reservationSent = false;
 let today = new Date();
 today.setHours(0, 0, 0, 0);
-today.setHours(today.getHours() + 3); // Adjust for timezone offset
+today.setHours(today.getHours() + 3);
 today = today.toISOString().split('T')[0];
 
 /* JS classes */
@@ -14,20 +14,15 @@ let Variables = {
     orderFormInput: [
         'customerName', 'customerSurname', 'customerPhoneNumber', 'customerEmail', 'customerDeliveryCity', 'customerDeliveryPostCode', 'customerDeliveryAddress'
     ],
-    formInputValues: {}, // New object to store form input values
+    formInputValues: {},
     getOrderFormInputs: function () {
         let values = {};
         this.orderFormInput.forEach(function (inputName) {
             values[inputName] = $('#orderForm input[name="' + inputName + '"]').val();
         });
         values.trampolines = Trampolines;
-
-        // Store the values in the formInputValues object
         this.formInputValues = values;
-
-        // Output for debugging purposes
-        console.log('Stored form input values:', this.formInputValues);
-
+        console.log('values => ', values)
         return values;
     },
     getTrampolines: function () {
@@ -36,6 +31,9 @@ let Variables = {
 }
 let CalendarFunctions = {
     Calendar: {
+        initialFirstCalendarDay: 0,
+        initialLastCalendarDay: 0,
+        initialDatesSet: false,
         initialize: function () {
             this.calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialDate: Dates.CalendarInitial,
@@ -50,11 +48,8 @@ let CalendarFunctions = {
                     let droppedDate = dropInfo.event.start;
                     let currentMonth = this.getDate().getMonth();
                     let droppedMonth = droppedDate.getMonth();
-
-                    console.log('Dropped date =>', droppedDate)
-                    console.log('Dropped month =>', droppedMonth)
                     console.log('current month =>', currentMonth)
-
+                    console.log('dropped month =>', droppedMonth)
                     if (droppedMonth < currentMonth) {
                         this.prev();
                         if (reservationSent) {
@@ -67,9 +62,10 @@ let CalendarFunctions = {
                         if (reservationSent) {
                             CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar)
                         } else {
-                            CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
+                            CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar)
                         }
                     }
+                    isEventDrop = false
                 },
                 dayMaxEvents: true,
                 events: [],
@@ -82,8 +78,17 @@ let CalendarFunctions = {
                     lastVisibleDayOnCalendar = lastCalendarVisibleDate.toISOString().split('T')[0];
                     console.log('First calendar day => ', firstVisibleDayOnCalendar);
                     console.log('Last calendar day => ', lastVisibleDayOnCalendar);
+                    if (!CalendarFunctions.Calendar.initialDatesSet) {
+                        CalendarFunctions.Calendar.initialFirstCalendarDay = firstVisibleDayOnCalendar;
+                        CalendarFunctions.Calendar.initialLastCalendarDay = lastVisibleDayOnCalendar;
+                        CalendarFunctions.Calendar.initialDatesSet = true;
+                    }
                     if (!isEventDrop) {
-                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
+                        if (reservationSent) {
+                            CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
+                        } else {
+                            CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar);
+                        }
                     }
                     isEventDrop = false;
                 },
@@ -110,24 +115,29 @@ let CalendarFunctions = {
                     });
                     if (CouldBeDropped) {
                         Trampolines.forEach(function (Trampoline) {
-                            console.log('Public trampolines => ', Trampolines)
+                            console.log('dragged event trampolines before = ', draggedEvent.extendedProps.trampolines)
+
                             draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
                                 if (Trampoline.id === AffectedTrampoline.id) {
                                     Trampoline.rental_start = dropInfo.startStr
                                     Trampoline.rental_end = dropInfo.endStr
-                                    console.log('public startStr => ', dropInfo.startStr)
-                                    console.log('public endStr => ', dropInfo.endStr)
+                                    AffectedTrampoline.rental_start = dropInfo.startStr
+                                    AffectedTrampoline.rental_end = dropInfo.endStr
+                                    console.log('Trampoline rental start => ', Trampoline.rental_start)
+                                    console.log('Trampoline rental end => ', Trampoline.rental_end)
                                     if (reservationSent) {
                                         TrampolineOrder.FormSendOrder.Event.DisplayConfirmationElement(dropInfo.startStr, dropEndForDisplay)
                                     }
                                 }
                             })
                         })
+                        // @todo Pasiziureti
+                        console.log('dragged event trampolines after = ', draggedEvent.extendedProps.trampolines)
                     } else {
                         Trampolines.forEach(function (Trampoline) {
                             Trampoline.rental_start = draggedEvent.startStr
                             Trampoline.rental_end = draggedEvent.endStr
-                            console.log('draggedevent endstr = ', draggedEvent.endStr)
+                            // console.log('draggedevent endstr = ', draggedEvent.endStr)
                             if (reservationSent) {
                                 TrampolineOrder.FormSendOrder.Event.DisplayConfirmationElement(draggedEvent.startStr, draggedEndForDisplay)
                             }
@@ -143,6 +153,9 @@ let CalendarFunctions = {
                 }
             });
             this.calendar.render();
+        },
+        goToInitialDates: function () {
+            this.calendar.gotoDate(this.initialFirstCalendarDay);
         }
     },
     addEvent: function (EventsToAdd) {
@@ -169,6 +182,7 @@ let CalendarFunctions = {
                 this.addEvent(Occupied)
                 Availability = response.Availability
                 this.addEvent(Availability)
+                Trampolines = response.Trampolines
             }
         }).always((instance) => {
             // console.log("always => response : ", instance);
@@ -187,6 +201,10 @@ let CalendarFunctions = {
         }).done((response) => {
             if (response.status) {
                 this.Calendar.calendar.removeAllEvents()
+                // @todo Sumazinti tarpa
+                // @todo Kad confirmation boxas neatsirastu antra karta
+                // console.log(response.Availability)
+                // TrampolineOrder.FormSendOrder.Event.DisplayConfirmationElement(response.Availability[0].start, response.Availability[0].end)
                 this.addEvent(response.Occupied);
                 this.addEvent(response.Availability);
             }
@@ -227,6 +245,7 @@ let TrampolineOrder = {
                 let form_data = Variables.getOrderFormInputs()
                 form_data.firstVisibleDay = firstVisibleDayOnCalendar
                 form_data.lastVisibleDay = lastVisibleDayOnCalendar
+                console.log('form data PODT => ', form_data)
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     method: "POST",
@@ -236,6 +255,7 @@ let TrampolineOrder = {
                     if (response.status === false) {
                         $('form input').removeClass('is-invalid');
                         Object.keys(response.failed_input).forEach(function (FailedInput) {
+                            console.log('Failed input =>', FailedInput)
                             $('form .' + FailedInput + 'InValidFeedback').text(response.failed_input[FailedInput][0]);
                             $('form input[name=' + FailedInput + ']').addClass('is-invalid');
                         })
@@ -272,7 +292,7 @@ let TrampolineOrder = {
             },
             DisplayConfirmationElement: function (startDate, endDate) {
                 $('#confirmationContainer').css('display', 'block');
-                $('#footer').removeClass('fixed-bottom').addClass('sticky-bottom')
+                // $('#footer').removeClass('fixed-bottom').addClass('sticky-bottom')
                 $('.dates').html('<p><strong>Pradžia:</strong> ' + startDate + '</p><p><strong>Pabaiga:</strong> ' + endDate + '</p>');
             }
         }
@@ -291,7 +311,7 @@ let TrampolineOrder = {
                 $('#confirmationContainer .confirmationClose').on('click', (event) => {
                     event.stopPropagation()
                     $('#confirmationContainer').css('display', 'none');
-                    $('#footer').removeClass('sticky-bottom').addClass('fixed-bottom')
+                    CalendarFunctions.Calendar.goToInitialDates();
                     CalendarFunctions.Calendar.calendar.removeAllEvents()
                     CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate)
                     CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.EventFromCreate)
@@ -299,10 +319,10 @@ let TrampolineOrder = {
             },
             updateOrder: function () {
                 let form_data = Variables.formInputValues
-                console.log('form data = ', form_data)
                 form_data.orderID = TrampolineOrder.UpdateOrder.OrderIdToUpdate
                 form_data.firstVisibleDay = firstVisibleDayOnCalendar
                 form_data.lastVisibleDay = lastVisibleDayOnCalendar
+                console.log('form data PUT => ', form_data)
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     method: "PUT",
@@ -311,11 +331,13 @@ let TrampolineOrder = {
                 }).done((response) => {
                     if (response.status) {
                         $('#confirmationContainer').css('display', 'none');
-                        $('#footer').removeClass('sticky-bottom').addClass('fixed-bottom')
+                        // $('#footer').removeClass('sticky-bottom').addClass('fixed-bottom')
                         $('#thankYouDiv').html(response.view)
                         CalendarFunctions.Calendar.calendar.removeAllEvents()
                         CalendarFunctions.addEvent(response.Occupied)
                         CalendarFunctions.addEvent(response.Event)
+                        TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied
+                        TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Event
                     }
                 })
             }

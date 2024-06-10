@@ -227,7 +227,7 @@ class BaseTrampoline implements Trampoline
 
         $availableDates = [];
         $occupiedDates = $this->getOccupation($Trampolines, OccupationTimeFrames::MONTH, new Order(), false, $fromDate,$tillDate);
-//        Log::info('Occuppied dates => ', $occupiedDates);
+//        dd($occupiedDates);
         $isDateRangeOccupied = function (Carbon $start, Carbon $end) use ($occupiedDates) {
             foreach ($occupiedDates as $occupiedDate) {
                 $occupiedStartDate = Carbon::parse($occupiedDate->rental_start);
@@ -240,18 +240,10 @@ class BaseTrampoline implements Trampoline
         };
         $todayStart = $fromDate->copy();
         $todayEnd = $todayStart->copy()->addDay();
-//        Log::info('From date after => ', $fromDate->toArray());
-//        Log::info('today start => ', $todayStart->toArray());
-//        Log::info('today end => ', $todayEnd->toArray());
         while ($isDateRangeOccupied($todayStart, $todayEnd)) {
-//            Log::info('Day start is not free => ',$todayStart->toArray());
-//            Log::info('Day end is not free => ',$todayEnd->toArray());
             $todayStart->addDay();
             $todayEnd->addDay();
         }
-
-//        Log::info('This day start is free => ', $todayStart->toArray());
-//        Log::info('This day end is free => ', $todayEnd->toArray());
 
         if ($FullCalendarFormat && (empty($Order->trampolines) || !isset($Order->trampolines[0]))) {
             $availableDates[] = (object)[

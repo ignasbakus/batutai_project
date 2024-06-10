@@ -118,19 +118,3 @@ hr.new1 {
 .close-button:hover {
     color: #ff0000; /* Red button color on hover */
 }
-
-#page-container {
-    position: relative;
-    min-height: 100vh;
-}
-
-#content-wrap {
-    padding-bottom: 3.5rem;    /* Footer height */
-}
-
-#footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 3.5rem;            /* Footer height */
-}

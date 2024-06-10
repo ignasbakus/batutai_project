@@ -88,6 +88,7 @@ class OrderController extends Controller
 //        Log::info('FromDate sent to getAvailability', $targetFromDate->toArray());
         if ($targetFromDate < Carbon::now()) {
             $Availability = (new BaseTrampoline())->getAvailability($Trampolines, (new Order()), Carbon::now()->startOfDay(), true);
+//            dd($Availability);
             $Occupied = (new BaseTrampoline())->getOccupation(
                 $Trampolines,
                 OccupationTimeFrames::MONTH,
@@ -112,6 +113,8 @@ class OrderController extends Controller
             $trampoline->rental_start = Carbon::parse($Availability[0]->start)->format('Y-m-d');
             $trampoline->rental_end = Carbon::parse($Availability[0]->end)->format('Y-m-d');
         }
+
+//        dd($Trampolines);
 
         return response()->json([
             'status' => true,
@@ -243,16 +246,22 @@ class OrderController extends Controller
             );
         }
 
+        if ($Order->status) {
+            $orderView = \view('orders.public.order_info', [
+                'Order' => (new Order())->newQuery()->with('trampolines')->with('client')
+                    ->with('address')->find($Order->Order->id),
+            ])->render();
+        } else {
+            $orderView = null;
+        }
+
         return response()->json([
             'failed_input' => $Order->failedInputs,
             'status' => $Order->status,
             'Occupied' => $Occupied,
             'Events' => $Events,
             'OrderId' => $Order->Order->id,
-            'view' => \view('orders.public.order_info', [
-                'Order' => (new Order())->newQuery()->with('trampolines')->with('client')
-                    ->with('address')->find($Order->Order->id), // Changed to find()
-            ])->render()
+            'view' => $orderView
         ]);
     }
 
