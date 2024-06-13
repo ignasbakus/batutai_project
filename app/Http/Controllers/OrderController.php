@@ -69,24 +69,14 @@ class OrderController extends Controller
     public function publicUpdateCalendar(): JsonResponse
     {
         $trampolineIds = \request()->get('trampoline_id', []);
-        $targetFromDate = Carbon::parse(\request()->get('target_start_date', null));
-        $targetTillDate = Carbon::parse(\request()->get('target_end_date', null));
+        $firstVisibleDay = Carbon::parse(\request()->get('first_visible_day', null));
+        $lastVisibleDay = Carbon::parse(\request()->get('last_visible_day', null));
+        $firstMonthDay = Carbon::parse(\request()->get('first_month_day', null));
 
-//        dd($targetFromDate, $targetTillDate);
 
         $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
 
-//        $Occupied = (new BaseTrampoline())->getOccupation(
-//            $Trampolines,
-//            OccupationTimeFrames::MONTH,
-//            new Order(),
-//            true,
-//            $targetFromDate,
-//            $targetTillDate
-//        );
-
-//        Log::info('FromDate sent to getAvailability', $targetFromDate->toArray());
-        if ($targetFromDate < Carbon::now()) {
+        if ($firstVisibleDay < Carbon::now()) {
             $Availability = (new BaseTrampoline())->getAvailability($Trampolines, (new Order()), Carbon::now()->startOfDay(), true);
 //            dd($Availability);
             $Occupied = (new BaseTrampoline())->getOccupation(
@@ -95,17 +85,17 @@ class OrderController extends Controller
                 new Order(),
                 true,
                 Carbon::now()->startOfDay(),
-                $targetTillDate
+                $lastVisibleDay
             );
         } else {
-            $Availability = (new BaseTrampoline())->getAvailability($Trampolines, (new Order()), $targetFromDate, true);
+            $Availability = (new BaseTrampoline())->getAvailability($Trampolines, (new Order()), $firstMonthDay, true);
             $Occupied = (new BaseTrampoline())->getOccupation(
                 $Trampolines,
                 OccupationTimeFrames::MONTH,
                 new Order(),
                 true,
-                $targetFromDate,
-                $targetTillDate
+                $firstVisibleDay,
+                $lastVisibleDay
             );
         }
 
@@ -134,8 +124,9 @@ class OrderController extends Controller
             if (!$order instanceof \App\Models\Order) {
                 throw new \Exception('Order not found or invalid type');
             }
-            $targetFromDate = Carbon::parse(\request()->get('target_start_date', null));
-            $targetTillDate = Carbon::parse(\request()->get('target_end_date', null));
+            $targetFromDate = Carbon::parse(\request()->get('first_visible_day', null));
+            $targetTillDate = Carbon::parse(\request()->get('last_visible_day', null));
+            $firstMonthDay = Carbon::parse(\request()->get('first_month_day', null));
             $trampolineIds = $order->trampolines()->pluck('trampolines_id');
 
             $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
@@ -151,7 +142,7 @@ class OrderController extends Controller
                     $targetTillDate
                 );
             } else {
-                $Availability = (new BaseTrampoline())->getAvailability($Trampolines, $order, $targetFromDate, true);
+                $Availability = (new BaseTrampoline())->getAvailability($Trampolines, $order, $firstMonthDay, true);
                 $Occupied = (new BaseTrampoline())->getOccupation(
                     $Trampolines,
                     OccupationTimeFrames::MONTH,

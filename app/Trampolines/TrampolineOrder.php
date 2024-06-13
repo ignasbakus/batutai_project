@@ -224,7 +224,7 @@ class TrampolineOrder implements Order
 
             $order = \App\Models\Order::find($orderID);
 
-            Mail::to($order->client->email)->send(new OrderDeleted($order));
+//            Mail::to($order->client->email)->send(new OrderDeleted($order));
 
             $order->trampolines()->delete();
             $order->client()->delete();

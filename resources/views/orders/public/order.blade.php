@@ -80,14 +80,8 @@
                     </div>
                 </form>
             </div>
-            <div class="col-2"></div>
+            <div class="col-1"></div>
             <div class="col me-5">
-                <!--select class="form-select showTrampolineSelect" aria-label="Default select example" style="display: none">
-                <option selected>Pasirinkite batutą ...</option>
-{{--                @foreach($Trampolines as $Trampoline)--}}
-                {{--                    <option value="{{$Trampoline->id}}">{{$Trampoline->title}} / {{$Trampoline->description}}</option>--}}
-                {{--                @endforeach--}}
-                </select-->
                 <div id="calendar"></div>
             </div>
         </div>

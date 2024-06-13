@@ -36,7 +36,12 @@ class TrampolinesController extends Controller
             //5 => '',
             //6 => '',
         ];
-        $Trampolines = (new Trampoline)->with('Parameter')->orderBy('id', 'asc')->get();
+        $Trampolines = (new Trampoline)->with('Parameter')
+            ->whereHas('Parameter', function($query) {
+                $query->where('activity', 1);
+            })
+            ->orderBy('id', 'asc')
+            ->get();
         foreach ($Trampolines as $Index => $trampoline) {
             if ($Index == 0) {
                 $trampoline->active = 1;
