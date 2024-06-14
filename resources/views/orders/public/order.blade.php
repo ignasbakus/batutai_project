@@ -74,7 +74,10 @@
                     </div>
                     <div class="row">
                         <div class="col-2 infoBeforeSuccessfulOrder" style="display: block">
-                            <button class="btn btn-primary mt-3 createOrder">Siųsti</button>
+                            <button class="btn btn-primary mt-3 createOrder" id="createOrderButton">
+                                <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                                <span id="buttonText">Siųsti</span>
+                            </button>
                         </div>
                         <div class="col-6"></div>
                     </div>

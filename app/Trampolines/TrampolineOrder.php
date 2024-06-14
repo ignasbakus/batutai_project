@@ -10,6 +10,7 @@ use App\Models\ClientAddress;
 use App\Models\OrdersTrampoline;
 use App\Models\Trampoline;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
+use Illuminate\Database\QueryException;
 
 class TrampolineOrder implements Order
 {
@@ -36,38 +38,56 @@ class TrampolineOrder implements Order
         $this->receivedParams = [];
         $this->Errors = [];
         $this->Messages = [];
+        $this->Order = new \App\Models\Order();
+    }
+
+    public static function canRegisterOrder(TrampolineOrderData $trampolineOrderData): array
+    {
+        foreach ($trampolineOrderData->Trampolines as $trampoline) {
+            $trampolineId = $trampoline['id'];
+            $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
+            $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
+
+            // Check for identical start and end dates
+            $identicalDates = DB::table('orders_trampolines')
+                ->where('trampolines_id', $trampolineId)
+                ->where('rental_start', $rentalStart)
+                ->where('rental_end', $rentalEnd)
+                ->exists();
+
+            if ($identicalDates) {
+                return ['status' => false, 'message' => 'Duplicate entry for the given rental period.'];
+            }
+
+            // Check for overlapping rental periods
+            $overlap = DB::table('orders_trampolines')
+                ->where('trampolines_id', $trampolineId)
+                ->where(function ($query) use ($rentalStart, $rentalEnd) {
+                    $query->whereBetween('rental_start', [$rentalStart, $rentalEnd])
+                        ->orWhereBetween('rental_end', [$rentalStart, $rentalEnd])
+                        ->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
+                            $query->where('rental_start', '<=', $rentalStart)
+                                ->where('rental_end', '>=', $rentalEnd);
+                        });
+                })
+                ->exists();
+
+            if ($overlap) {
+                return ['status' => false, 'message' => 'A trampoline cannot be reserved for overlapping rental periods.'];
+            }
+        }
+        return ['status' => true];
     }
 
     public function create(TrampolineOrderData $trampolineOrderData): static
     {
-        if (!$trampolineOrderData->ValidationStatus) {
-            $this->failedInputs = $trampolineOrderData->failedInputs;
+        $checkResult = self::canRegisterOrder($trampolineOrderData);
+        if (!$checkResult['status']) {
             $this->status = false;
-            try {
-                $Trampoline = (object)[
-                    'rental_start' => $trampolineOrderData->Trampolines[0]['rental_start'],
-                    'rental_end' => $trampolineOrderData->Trampolines[0]['rental_end']
-                ];
-            } catch (\Exception) {
-                $Trampoline = (object)[
-                    'rental_start' => Carbon::parse(request()->get('trampolines')[0]['rental_start']),
-                    'rental_end' => Carbon::parse(request()->get('trampolines')[0]['rental_end'])
-
-//                    'rental_start' => Carbon::parse(request()->get('orderInputs')['trampolines'][0]['rental_start']),
-
-                ];
-            }
-
-            $fakeOrder = new \App\Models\Order();
-            $fakeOrder->id = 0;
-            $fakeOrder->OrderTrampolines = [$Trampoline];
-
-            $this->Order = $fakeOrder;
-
-//            dd($this);
-
+            $this->failedInputs->add('dates', $checkResult['message']);
             return $this;
         }
+
         $Client = (new Client())->updateOrCreate(
             [
                 'phone' => $trampolineOrderData->CustomerPhone,
@@ -79,6 +99,7 @@ class TrampolineOrder implements Order
                 'phone' => $trampolineOrderData->CustomerPhone
             ]
         );
+
         $ClientAddress = ClientAddress::updateOrCreate(
             [
                 'clients_id' => $Client->id,
@@ -95,49 +116,83 @@ class TrampolineOrder implements Order
                 'address_country' => ''
             ]
         );
-        /*Pakartotinis batutu prieinamumo patikrinimas !*/
-        $this->Order = \App\Models\Order::create([
-            'order_number' => Str::uuid(),
-            'order_date' => Carbon::now()->format('Y-m-d H:i:s'),
-            'rental_duration' => 0,
-            'delivery_address_id' => $ClientAddress->id,
-            'advance_sum' => 0,
-            'total_sum' => 0,
-            'client_id' => $Client->id
-        ]);
-        $OrderTotalSum = 0;
-        $OrderRentalDuration = 0;
-        foreach ($trampolineOrderData->Trampolines as $trampoline) {
-            $RentalStart = Carbon::parse($trampoline['rental_start']);
-            $RentalDuration = $RentalStart->diffInDays(Carbon::parse($trampoline['rental_end']));
-            $Trampoline = \App\Models\Trampoline::with('Parameter')->find($trampoline['id']);
-            $this->OrderTrampolines[] = OrdersTrampoline::create([
-                'orders_id' => $this->Order->id,
-                'trampolines_id' => $Trampoline->id,
-                'rental_start' => Carbon::parse($trampoline['rental_start'])->format('Y-m-d'),
-                'rental_end' => Carbon::parse($trampoline['rental_end'])->format('Y-m-d'),
-                'rental_duration' => $RentalDuration,
-                'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
+
+        DB::beginTransaction();
+
+        try {
+            $this->Order = \App\Models\Order::create([
+                'order_number' => Str::uuid(),
+                'order_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                'rental_duration' => 0,
+                'delivery_address_id' => $ClientAddress->id,
+                'advance_sum' => 0,
+                'total_sum' => 0,
+                'client_id' => $Client->id
             ]);
-            $OrderTotalSum += $RentalDuration * $Trampoline->Parameter->price;
-            $OrderRentalDuration = $RentalDuration;
+
+            $OrderTotalSum = 0;
+            $OrderRentalDuration = 0;
+
+            foreach ($trampolineOrderData->Trampolines as $trampoline) {
+                $RentalStart = Carbon::parse($trampoline['rental_start']);
+                $RentalEnd = Carbon::parse($trampoline['rental_end']);
+                $RentalDuration = $RentalStart->diffInDays($RentalEnd);
+                $Trampoline = \App\Models\Trampoline::with('Parameter')->find($trampoline['id']);
+
+                try {
+                    $this->OrderTrampolines[] = OrdersTrampoline::create([
+                        'orders_id' => $this->Order->id,
+                        'trampolines_id' => $Trampoline->id,
+                        'rental_start' => $RentalStart->format('Y-m-d'),
+                        'rental_end' => $RentalEnd->format('Y-m-d'),
+                        'rental_duration' => $RentalDuration,
+                        'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
+                    ]);
+
+                    $OrderTotalSum += $RentalDuration * $Trampoline->Parameter->price;
+                    $OrderRentalDuration = $RentalDuration;
+                } catch (QueryException $e) {
+                    if ($e->errorInfo[1] == 1062) {
+                        DB::rollBack();
+                        $this->status = false;
+                        $this->failedInputs->add('dates', 'Duplicate entry for the given rental period');
+                        return $this;
+                    }
+                    throw $e;
+                }
+            }
+
+            $this->Order->update([
+                'total_sum' => $OrderTotalSum,
+                'rental_duration' => $OrderRentalDuration
+            ]);
+
+            DB::commit();
+
+            $this->Order->load('trampolines');
+
+            $this->status = true;
+
+            return $this;
+        } catch (QueryException $e) {
+            if ($e->errorInfo[1] == 1062) {
+                DB::rollBack();
+                $this->status = false;
+                $this->failedInputs->add('dates', 'Duplicate entry for the given rental period');
+                return $this;
+            }
+            DB::rollBack();
+            Log::error('An error occurred while creating the order', ['error' => $e->getMessage()]);
+            $this->status = false;
+            return $this;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('An error occurred while creating the order', ['error' => $e->getMessage()]);
+            $this->status = false;
+            return $this;
         }
-        $this->Order->update([
-            'total_sum' => $OrderTotalSum,
-            'rental_duration' => $OrderRentalDuration
-        ]);
-
-        $this->Order->load('trampolines');
-
-        $this->status = true;
-//        $test = $this->Order->trampolines;
-//        dd($test->pivot->rental_start);
-        /*Create interface NotificationsInterface [base methods : notify , checkStatus]*/
-        /*Create class EmailNotification -> implements NotificationsInterface []*/
-//        Mail::to($Client->email)->send(new OrderPlaced($this->Order));
-
-        return $this;
     }
+
 
     public function update(TrampolineOrderData $trampolineOrderData): static
     {
@@ -205,11 +260,11 @@ class TrampolineOrder implements Order
         }
         $Order->updateOrCreate(
             [
-              'id' => $Order->id,
+                'id' => $Order->id,
             ],
             [
-            'total_sum' => $OrderTotalSum,
-            'rental_duration' => $OrderRentalDuration
+                'total_sum' => $OrderTotalSum,
+                'rental_duration' => $OrderRentalDuration
             ]
         );
 //        dd($this);
@@ -240,6 +295,6 @@ class TrampolineOrder implements Order
 
     public function read($orderID): Model|Collection|Builder|array|null
     {
-        return \App\Models\Order::with('trampolines','client', 'address')->find($orderID);
+        return \App\Models\Order::with('trampolines', 'client', 'address')->find($orderID);
     }
 }

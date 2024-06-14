@@ -32,7 +32,6 @@ let Variables = {
         return Trampolines;
     },
 };
-
 let CalendarFunctions = {
     Calendar: {
         initialize: function () {
@@ -84,6 +83,8 @@ let CalendarFunctions = {
                     firstVisibleDayOnCalendar = firstCalendarVisibleDate.toISOString().split('T')[0];
                     lastVisibleDayOnCalendar = lastCalendarVisibleDate.toISOString().split('T')[0];
                     console.log('First month day => ', firstMonthDay)
+                    console.log('isEventDrop => ', isEventDrop)
+                    console.log('isCancelButtonClicked => ', isCancelButtonClicked)
                     if (!isEventDrop && !isCancelButtonClicked) {
                         if (reservationSent) {
                             CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
@@ -112,7 +113,9 @@ let CalendarFunctions = {
                     Occupied.forEach(function (Occupation) {
                         let OccupationStart = new Date(Occupation.start);
                         let OccupationEnd = new Date(Occupation.end);
-                        if ((dropStart >= OccupationStart && dropStart < OccupationEnd) || (dropEnd > OccupationStart && dropEnd <= OccupationEnd) || (dropStart <= OccupationStart && dropEnd >= OccupationEnd)) {
+                        if ((dropStart >= OccupationStart && dropStart < OccupationEnd) ||
+                            (dropEnd > OccupationStart && dropEnd <= OccupationEnd) ||
+                            (dropStart <= OccupationStart && dropEnd >= OccupationEnd)) {
                             CouldBeDropped = false;
                             return false;
                         }
@@ -125,23 +128,20 @@ let CalendarFunctions = {
                                     console.log('drop info endSTr = ', dropInfo.endStr);
                                     Trampoline.rental_start = dropInfo.startStr;
                                     Trampoline.rental_end = dropInfo.endStr;
-                                    AffectedTrampoline.rental_start = dropInfo.startStr;
-                                    AffectedTrampoline.rental_end = dropInfo.endStr;
-                                    console.log('Trampoline rental start => ', Trampoline.rental_start);
-                                    console.log('Trampoline rental end => ', Trampoline.rental_end);
+                                    // AffectedTrampoline.rental_start = dropInfo.startStr;
+                                    // AffectedTrampoline.rental_end = dropInfo.endStr;
                                     if (reservationSent) {
-                                        $('#confirmationContainer').css('display', 'block');
+                                        TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement()
                                     }
                                 }
                             });
                         });
-                        console.log('dragged event trampolines after = ', draggedEvent.extendedProps.trampolines);
                     } else {
                         Trampolines.forEach(function (Trampoline) {
                             Trampoline.rental_start = draggedEvent.startStr;
                             Trampoline.rental_end = draggedEvent.endStr;
                             if (reservationSent) {
-                                $('#confirmationContainer').css('display', 'block');
+                                TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement()
                             }
                         });
                     }
@@ -157,7 +157,7 @@ let CalendarFunctions = {
             this.calendar.render();
         },
         goToInitialDates: function () {
-            this.calendar.gotoDate(eventDay);
+            this.calendar.gotoDate(eventDay)
         },
     },
     addEvent: function (EventsToAdd) {
@@ -208,7 +208,6 @@ let CalendarFunctions = {
         });
     },
 };
-
 let TrampolineOrder = {
     init: function () {
         this.FormSendOrder.init();
@@ -264,8 +263,8 @@ let TrampolineOrder = {
                     }
                     TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
                     TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Events;
-                    eventDay = response.Events[0].start
                     if (response.status) {
+                        eventDay = response.Events[0].start
                         reservationSent = true;
                         TrampolineOrder.UpdateOrder.OrderIdToUpdate = response.OrderId;
                         CalendarFunctions.Calendar.calendar.removeAllEvents();

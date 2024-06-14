@@ -109,29 +109,27 @@
                                 </div>
                             </form>
                             <div class="mt-5">
-                                <div id="confirmationContainer" class="confirmation-container" style="display: none">
-                                    <button class="btn-close close-button confirmationClose" aria-label="Close"></button>
+                                <div id="confirmationContainer" class="confirmation-container ms-lg-5 mt-3" style="display: none">
                                     <h4 class="confirmation-title">Ar tikrai norite pakeisti užsakymo datas?</h4>
-                                    <div class="dates-info">
-                                        <p class="date-label">Užsakymo datas bus pakeistos į:</p>
-                                        <div class="dates"></div>
-                                    </div>
-                                    <div class="checkbox-container">
-                                        <label for="confirmChange1" class="d-flex align-items-center">
-                                            <input type="checkbox" id="confirmChange1" class="mr-2 form-check-input confirmChanges" required>
-                                            Patvirtinti pakeitimą
-                                            <div class="invalid-feedback">Pažymėkite, jog patvirtinate datų pakeitimą</div>
-                                        </label>
-                                        <label for="confirmChange2" class="d-flex align-items-center">
-                                            <input type="checkbox" id="confirmChange2" class="mr-2 form-check-input informClient" checked>
-                                            Informuoti klientą
-                                        </label>
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <button type="button" class="btn btn-secondary confirmationClose">Atšaukti</button>
+                                        <div class="checkbox-container d-flex flex-column align-items-end">
+                                            <label for="confirmChange1" class="d-flex align-items-center">
+                                                <input type="checkbox" id="confirmChange1" class="mr-2 form-check-input confirmChanges" required>
+                                                Patvirtinti pakeitimą
+                                                <div class="invalid-feedback">Pažymėkite, jog patvirtinate datų pakeitimą</div>
+                                            </label>
+                                            <label for="confirmChange2" class="d-flex align-items-center mt-2">
+                                                <input type="checkbox" id="confirmChange2" class="mr-2 form-check-input informClient" checked>
+                                                Informuoti klientą
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-2"></div>
-                        <div class="col-4">
+                        <div class="col-1"></div>
+                        <div class="col me-5">
                             <div id="calendar" style="position: relative;"></div>
                             <div id="spinner" class="spinner-border text-dark" role="status">
                                 <span class="visually-hidden"></span>

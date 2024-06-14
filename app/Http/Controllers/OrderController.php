@@ -190,6 +190,7 @@ class OrderController extends Controller
         $NewOrderEventTitle = 'Jūsų užsakymas';
         $Order = (new TrampolineOrder())->create((new TrampolineOrderData(\request())));
 //        dd($Order);
+//        dd($Order);
         $trampolines_id = [];
 
         foreach (\request()->get('trampolines', []) as $Trampoline) {

@@ -1,11 +1,23 @@
+@php
+    use Carbon\Carbon
+@endphp
 <div class="px-4 py-5">
     <h5 class="text-uppercase">{{$Order->client->name}} {{$Order->client->surname}}</h5>
     <h4 class="mt-5 theme-color mb-5">Ačiū už jūsų rezervaciją!</h4>
     @if($Order->trampolines->isNotEmpty())
         <div class="d-flex justify-content-between mb-5">
-            <span class="font-weight-bold">Rezervuotos dienos</span>
+            @if($Order->trampolines->first()->rental_duration <= 1)
+                <span class="font-weight-bold">Rezervuota diena</span>
+            @else
+                <span class="font-weight-bold">Rezervuotos dienos</span>
+            @endif
             <span class="font-weight-bold">{{$Order->trampolines->first()->rental_start}}</span>
-            <span class="font-weight-bold">{{$Order->trampolines->first()->rental_end}}</span>
+            @if($Order->trampolines->first()->rental_duration > 1)
+                @php
+                    $rentalEnd = Carbon::parse($Order->trampolines->first()->rental_end)->subDay()
+                @endphp
+                <span class="font-weight-bold">{{ $rentalEnd->format('Y-m-d') }}</span>
+            @endif
         </div>
     @endif
     <span></span>
