@@ -138,12 +138,14 @@ let Trampolines = {
                     })
                 },
                 addTrampoline: function () {
+                    $('#overlay').css('display', 'flex')
                     $.ajax({
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         method: "POST",
                         url: "/trampolines/admin/trampoline",
                         data: Variables.getTrampolineFormInputs('createTrampolineModal')
                     }).done((response) => {
+                        $('#overlay').hide();
                         console.log("response : ", response);
                         if (response.status === false) {
 
@@ -222,6 +224,7 @@ let Trampolines = {
                 }
             },
             prepareModal: function (TrampolineID) {
+                $('#overlay').css('display', 'flex')
                 console.log('Trampolines.Modals.updateTrampoline.prepareModal(' + TrampolineID + ')')
                 this.trampolineIdToUpdate = TrampolineID
                 $.ajax({
@@ -233,6 +236,7 @@ let Trampolines = {
                         trampoline_id: TrampolineID
                     }
                 }).done((response) => {
+                    $('#overlay').hide();
                     console.log("done => response : ", response);
                     console.log("done => response.trampoline : ", response.trampoline);
                     if (response.status) {
@@ -252,6 +256,7 @@ let Trampolines = {
                     })
                 },
                 updateTrampoline: function () {
+                    $('#overlay').css('display', 'flex')
                     let form_data = Variables.getTrampolineFormInputs('updateTrampolineModal')
                     form_data.trampolineID = Trampolines.Modals.updateTrampoline.trampolineIdToUpdate
                     $.ajax({
@@ -260,6 +265,7 @@ let Trampolines = {
                         url: "/trampolines/admin/trampoline",
                         data: form_data
                     }).done((response) => {
+                        $('#overlay').hide();
                         if (response.status === false) {
                             $('#updateTrampolineModal form input').removeClass('is-invalid');
                             Object.keys(response.failed_input).forEach(function (FailedInput) {
@@ -281,6 +287,7 @@ let Trampolines = {
             trampolineIdToDelete: 0,
             element: new bootstrap.Modal('#removeTrampolineModal'),
             prepareModal: function (TrampolineID) {
+                $('#overlay').css('display', 'flex')
                 this.trampolineIdToDelete = TrampolineID
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -291,6 +298,7 @@ let Trampolines = {
                         trampoline_id: TrampolineID
                     }
                 }).done((response) => {
+                    $('#overlay').hide();
                     if (response.status) {
                         $('#removeTrampolineModal .modal-body p').
                         html('Ar tikrai norite ištrinti batutą "' + response.trampoline.title + '"?');
@@ -306,6 +314,7 @@ let Trampolines = {
                     })
                 },
                 removeTrampoline: function (TrampolineID) {
+                    $('#overlay').css('display', 'flex')
                     console.log('removeTrampoline TrampolineID => ',TrampolineID);
                     $.ajax({
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -315,6 +324,7 @@ let Trampolines = {
                             trampolineID: TrampolineID
                         }
                     }).done((response) => {
+                        $('#overlay').hide();
                         if (response.status) {
                             Trampolines.Modals.deleteTrampoline.element.hide()
                         }

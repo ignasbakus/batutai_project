@@ -2,6 +2,7 @@
 let firstVisibleDayOnCalendar;
 let lastVisibleDayOnCalendar;
 let isEventDrop = false;
+let shouldUpdateEvents = false;
 let isCancelButtonClicked = false;
 let modalPopulated = false;
 let trampolineID;
@@ -56,6 +57,7 @@ let CalendarFunctions = {
                 },
                 eventDrop: function (dropInfo) {
                     isEventDrop = true;
+                    shouldUpdateEvents = true;  // Set the flag to true
                     let droppedDate = dropInfo.event.start;
                     let currentMonth = this.getDate().getMonth();
                     let droppedMonth = droppedDate.getMonth();
@@ -72,6 +74,8 @@ let CalendarFunctions = {
                         CalendarFunctions.updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                     }
                     isEventDrop = false
+                    shouldUpdateEvents = false
+
                 },
                 datesSet: function (info) {
                     let firstDayMonth = new Date(info.view.currentStart)
@@ -86,7 +90,7 @@ let CalendarFunctions = {
                     console.log('Last calendar day => ', lastVisibleDayOnCalendar);
                     console.log('first month day => ', firstMonthDay)
 
-                    if (!isEventDrop && !isCancelButtonClicked && modalPopulated) {
+                    if (!isCancelButtonClicked && modalPopulated) {
                         CalendarFunctions.updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
                         Orders.Modals.updateOrder.Events.DisplayConfirmationElement('block')
                     }
@@ -156,7 +160,7 @@ let CalendarFunctions = {
         }
     },
     updateEvents: function (firstVisibleDay, lastVisibleDay, firstMonthDay) {
-        $('#spinner').show();
+        $('#overlay').css('display', 'flex')
         $.ajax({
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             url: '/orders/admin/order/private_calendar/get',
@@ -168,12 +172,12 @@ let CalendarFunctions = {
                 first_month_day: firstMonthDay
             },
         }).done((response) => {
+            $('#overlay').hide();
             if (response.status) {
                 this.Calendar.calendar.removeAllEvents()
                 this.addEvent(response.Occupied);
                 this.addEvent(response.Availability);
                 trampolines = response.Trampolines
-                $('#spinner').hide();
             }
         }).always((instance) => {
             // console.log("always => response : ", instance);
@@ -306,7 +310,7 @@ let Orders = {
                     })
                 },
                 removeOrder: function (OrderID) {
-                    console.log('removeOrder OrderID => ', OrderID);
+                    $('#overlay').css('display', 'flex')
                     $.ajax({
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         method: "DELETE",
@@ -315,6 +319,7 @@ let Orders = {
                             orderID: OrderID
                         }
                     }).done((response) => {
+                        $('#overlay').hide();
                         if (response.status) {
                             Orders.Modals.deleteOrder.element.hide()
                         }
@@ -330,6 +335,9 @@ let Orders = {
                 this.Events.init()
                 document.getElementById('updateOrderModal').addEventListener('shown.bs.modal', event => {
                 })
+                document.getElementById('updateOrderModal').addEventListener('hidden.bs.modal', function () {
+                    modalPopulated = false;
+                });
             },
             orderIdToUpdate: 0,
             element: new bootstrap.Modal('#updateOrderModal'),
@@ -386,7 +394,7 @@ let Orders = {
                 this.getInitialDatesCalendar()
             },
             getInitialDatesCalendar: function () {
-                $('#spinner').show();
+                $('#overlay').css('display', 'flex')
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     dataType: 'json',
@@ -417,6 +425,7 @@ let Orders = {
                         target_end_date: lastVisibleDayOnCalendar
                     }
                 }).done((response) => {
+                    $('#overlay').hide();
                     if (response.status) {
                         this.OccupiedWhenCancelled = response.Occupied
                         this.EventWhenCancelled = response.Events
@@ -427,8 +436,8 @@ let Orders = {
                         trampolines = response.Trampolines
                         CalendarFunctions.addEvent(response.Occupied)
                         CalendarFunctions.addEvent(response.Events)
-                        $('#spinner').hide();
                         modalPopulated = true
+                        trampolines = response.Trampolines
                     } else {
                         console.error("Failed to fetch data: ", response.message);
                     }
@@ -454,10 +463,12 @@ let Orders = {
                     })
                     $('#updateOrderModal .modalClose').on('click', (event) => {
                         event.stopPropagation()
+                        $('#updateOrderModal form input').removeClass('is-invalid');
                         this.DisplayConfirmationElement('none')
                         CalendarFunctions.Calendar.calendar.destroy()
                         $('#updateOrderForm input').val('')
                         Orders.Table.Table.draw()
+                        shouldUpdateEvents = false;
                     })
                     $('#confirmationContainer .confirmationClose').on('click', (event) => {
                         event.preventDefault()
@@ -471,6 +482,7 @@ let Orders = {
                     })
                 },
                 updateOrder: function () {
+                    $('#overlay').css('display', 'flex')
                     let form_data = Variables.getOrderFormInputs('updateOrderModal')
                     form_data.orderID = Orders.Modals.updateOrder.orderIdToUpdate
                     form_data.firstVisibleDay = firstVisibleDayOnCalendar
@@ -481,10 +493,11 @@ let Orders = {
                         url: "/orders/admin/order",
                         data: form_data,
                     }).done((response) => {
+                        $('#overlay').hide();
                         if (response.status === false) {
                             $('#updateOrderModal form input').removeClass('is-invalid');
-                            Object.keys(response.failedInputs).forEach(function (FailedInput) {
-                                $('#updateOrderModal form .' + FailedInput + 'InValidFeedback').text(response.failedInputs[FailedInput][0]);
+                            Object.keys(response.failed_input).forEach(function (FailedInput) {
+                                $('#updateOrderModal form .' + FailedInput + 'InValidFeedback').text(response.failed_input[FailedInput][0]);
                                 $('#updateOrderModal form input[name=' + FailedInput + ']').addClass('is-invalid');
                             })
                         }

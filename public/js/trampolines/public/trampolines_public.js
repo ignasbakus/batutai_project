@@ -74,6 +74,7 @@ let Trampolines = {
         })
     },
     getTrampolinesView: function () {
+        $('#overlay').css('display', 'flex')
         $.ajax({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -84,6 +85,7 @@ let Trampolines = {
                 chosenTrampolines: Trampolines.chosen
             }
         }).done((response) => {
+            $('#overlay').hide();
             console.log("response : ", response);
             console.log(Trampolines.chosen)
             $('#SelectedTrampolines').html(response.view)

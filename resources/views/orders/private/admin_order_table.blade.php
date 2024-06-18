@@ -131,9 +131,6 @@
                         <div class="col-1"></div>
                         <div class="col me-5">
                             <div id="calendar" style="position: relative;"></div>
-                            <div id="spinner" class="spinner-border text-dark" role="status">
-                                <span class="visually-hidden"></span>
-                            </div>
                         </div>
                     </div>
                 </div>

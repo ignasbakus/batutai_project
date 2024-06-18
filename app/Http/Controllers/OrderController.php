@@ -75,6 +75,7 @@ class OrderController extends Controller
 
 
         $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
+//        dd($Trampolines);
 
         if ($firstVisibleDay < Carbon::now()) {
             $Availability = (new BaseTrampoline())->getAvailability($Trampolines, (new Order()), Carbon::now()->startOfDay(), true);
@@ -130,6 +131,7 @@ class OrderController extends Controller
             $trampolineIds = $order->trampolines()->pluck('trampolines_id');
 
             $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
+//            dd($Trampolines);
 
             if ($targetFromDate < Carbon::now()) {
                 $Availability = (new BaseTrampoline())->getAvailability($Trampolines, $order, Carbon::now()->startOfDay(), true);
@@ -267,12 +269,8 @@ class OrderController extends Controller
         if (!isset($Order->Order)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Order update failed: Order data not initialized.',
-                'debug' => [
-                    'Order' => $Order,
-                    'request' => \request()->all()
-                ]
-            ], 500);
+                'failed_input' => $Order->failedInputs,
+            ]);
         }
 
         $firstVisibleDay = Carbon::parse(\request()->get('firstVisibleDay', null));
@@ -287,11 +285,8 @@ class OrderController extends Controller
         if (!isset($Order->OrderTrampolines) || count($Order->OrderTrampolines) === 0) {
             return response()->json([
                 'status' => false,
-                'message' => 'Order update failed: Order trampolines data not initialized.',
-                'debug' => [
-                    'Order' => $Order
-                ]
-            ], 500);
+                'failed_input' => $Order->failedInputs,
+            ]);
         }
 
         $Event = [
@@ -371,7 +366,7 @@ class OrderController extends Controller
         try {
             $orderId = request()->get('order_id');
             $order = (new TrampolineOrder())->read($orderId);
-
+//            dd($order);
             if (!$order instanceof \App\Models\Order) {
                 throw new \Exception('Order not found or invalid type');
             }
@@ -379,25 +374,19 @@ class OrderController extends Controller
             $targetFromDate = Carbon::parse(request()->get('target_start_date', null));
             $targetTillDate = Carbon::parse(request()->get('target_end_date', null));
 
-            Log::info('Target from date =>', $targetFromDate->toArray());
-            Log::info('Target till date =>', $targetTillDate->toArray());
 
 
             $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
+
+            foreach ($Trampolines as $trampoline) {
+                $orderTrampoline = $order->trampolines->firstWhere('trampolines_id', $trampoline->id);
+                if ($orderTrampoline) {
+                    $trampoline->rental_start = Carbon::parse($orderTrampoline->rental_start)->format('Y-m-d');
+                    $trampoline->rental_end = Carbon::parse($orderTrampoline->rental_end)->format('Y-m-d');
+                }
+            }
+
 //            dd($Trampolines);
-            $event = (object)[
-                'id' => $order->id,
-                'extendedProps' => [
-                    'trampolines' => $Trampolines,
-                    'order' => $order,
-                    'order_id' => $order->id,
-                    'type_custom' => 'orderEvent'
-                ],
-                'title' => 'Kliento užsakymas',
-                'start' => Carbon::parse($order->trampolines->first()->rental_start)->format('Y-m-d'),
-                'end' => Carbon::parse($order->trampolines->first()->rental_end)->format('Y-m-d'),
-                'backgroundColor' => 'green'
-            ];
 
             if ($targetFromDate < Carbon::now()) {
                 $Occupied = (new BaseTrampoline())->getOccupation(
@@ -418,6 +407,22 @@ class OrderController extends Controller
                     $targetTillDate
                 );
             }
+
+            $event = (object)[
+                'id' => $order->id,
+                'extendedProps' => [
+                    'trampolines' => $Trampolines,
+                    'order' => $order,
+                    'order_id' => $order->id,
+                    'type_custom' => 'orderEvent'
+                ],
+                'title' => 'Kliento užsakymas',
+                'start' => Carbon::parse($order->trampolines->first()->rental_start)->format('Y-m-d'),
+                'end' => Carbon::parse($order->trampolines->first()->rental_end)->format('Y-m-d'),
+                'backgroundColor' => 'green'
+            ];
+
+
 
             return response()->json([
                 'status' => true,

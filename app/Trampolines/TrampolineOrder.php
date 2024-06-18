@@ -47,33 +47,31 @@ class TrampolineOrder implements Order
             $trampolineId = $trampoline['id'];
             $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
             $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
-
-            // Check for identical start and end dates
-            $identicalDates = DB::table('orders_trampolines')
-                ->where('trampolines_id', $trampolineId)
-                ->where('rental_start', $rentalStart)
-                ->where('rental_end', $rentalEnd)
-                ->exists();
-
-            if ($identicalDates) {
-                return ['status' => false, 'message' => 'Duplicate entry for the given rental period.'];
-            }
-
-            // Check for overlapping rental periods
-            $overlap = DB::table('orders_trampolines')
+            $overlappingRentals = DB::table('orders_trampolines')
                 ->where('trampolines_id', $trampolineId)
                 ->where(function ($query) use ($rentalStart, $rentalEnd) {
-                    $query->whereBetween('rental_start', [$rentalStart, $rentalEnd])
-                        ->orWhereBetween('rental_end', [$rentalStart, $rentalEnd])
-                        ->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
-                            $query->where('rental_start', '<=', $rentalStart)
-                                ->where('rental_end', '>=', $rentalEnd);
-                        });
+                    $query->where(function ($query) use ($rentalStart) {
+                        // rental_start is between existing rental_start and rental_end
+                        $query->where('rental_start', '<=', $rentalStart)
+                            ->where('rental_end', '>', $rentalStart)
+                            ->where('rental_end', '!=', DB::raw("DATE_ADD('$rentalStart', INTERVAL 0 SECOND)"));
+                    })->orWhere(function ($query) use ($rentalEnd) {
+                        // rental_end is between existing rental_start and rental_end
+                        $query->where('rental_start', '<', $rentalEnd)
+                            ->where('rental_end', '>=', $rentalEnd)
+                            ->where('rental_start', '!=', DB::raw("DATE_ADD('$rentalEnd', INTERVAL 0 SECOND)"));
+                    })->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
+                        // existing rental period is entirely within the new rental period
+                        $query->where('rental_start', '>=', $rentalStart)
+                            ->where('rental_end', '<=', $rentalEnd);
+                    });
+                })
+                ->orWhere(function ($query) use ($rentalStart, $rentalEnd){
+                    $query->where('rental_start', $rentalStart)->where('rental_end', $rentalEnd);
                 })
                 ->exists();
-
-            if ($overlap) {
-                return ['status' => false, 'message' => 'A trampoline cannot be reserved for overlapping rental periods.'];
+            if ($overlappingRentals) {
+                return ['status' => false, 'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'];
             }
         }
         return ['status' => true];
@@ -84,10 +82,17 @@ class TrampolineOrder implements Order
         $checkResult = self::canRegisterOrder($trampolineOrderData);
         if (!$checkResult['status']) {
             $this->status = false;
-            $this->failedInputs->add('dates', $checkResult['message']);
+            $this->failedInputs->add('error', $checkResult['message']);
             return $this;
         }
 
+        if (!$trampolineOrderData->ValidationStatus) {
+            $this->failedInputs = $trampolineOrderData->failedInputs;
+            $this->status = false;
+            return $this;
+        }
+
+//        Log::info($trampolineOrderData->CustomerPhone->toArray());
         $Client = (new Client())->updateOrCreate(
             [
                 'phone' => $trampolineOrderData->CustomerPhone,
@@ -193,14 +198,50 @@ class TrampolineOrder implements Order
         }
     }
 
-
     public function update(TrampolineOrderData $trampolineOrderData): static
     {
+        $order = \App\Models\Order::find($trampolineOrderData->orderID);
+        if (!$order) {
+            $this->status = false;
+            $this->failedInputs->add('error', 'Order not found.');
+            return $this;
+        }
+        $datesChanged = false;
+
+        foreach ($trampolineOrderData->Trampolines as $trampoline) {
+            $existingTrampoline = $order->trampolines()->where('trampolines_id', $trampoline['id'])->first();
+
+            if ($existingTrampoline) {
+                $existingRentalStart = Carbon::parse($existingTrampoline->rental_start)->format('Y-m-d');
+                $existingRentalEnd = Carbon::parse($existingTrampoline->rental_end)->format('Y-m-d');
+                $newRentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
+                $newRentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
+
+                if ($existingRentalStart !== $newRentalStart || $existingRentalEnd !== $newRentalEnd) {
+                    $datesChanged = true;
+                    break;
+                }
+            } else {
+                $datesChanged = true;
+                break;
+            }
+        }
+
+        if ($datesChanged) {
+            $checkResult = self::canRegisterOrder($trampolineOrderData);
+            if (!$checkResult['status']) {
+                $this->status = false;
+                $this->failedInputs->add('error', $checkResult['message']);
+                return $this;
+            }
+        }
+
+
         if (!$trampolineOrderData->ValidationStatus) {
             $this->failedInputs = $trampolineOrderData->failedInputs;
             $this->status = false;
+//            dd($this);
             return $this;
-
         }
         $Order = \App\Models\Order::updateOrCreate(
             [

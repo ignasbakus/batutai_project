@@ -23,6 +23,12 @@
     </style>
 </head>
 <body>
+<div id="overlay"
+     style="display: none; position: fixed; top: 0; left: 0; height: 100vh; width: 100vw; background: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div id="spinnerSendOrder" class="spinner-border text-primary" role="status">
+        <span class="sr-only"></span>
+    </div>
+</div>
 <div id="page-container">
     <nav class="navbar navbar-expand-lg navbar-lightblue mb-3">
         <div class="container-fluid">

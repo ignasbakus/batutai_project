@@ -19,7 +19,6 @@ let Variables = {
     ],
     getOrderFormInputs: function () {
         let values = {};
-        console.log('Trampolines => ', Trampolines);
         this.orderFormInput.forEach(function (inputName) {
             values[inputName] = $('#orderForm input[name="' + inputName + '"]').val();
         });
@@ -90,6 +89,7 @@ let CalendarFunctions = {
                             CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                             TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
                         } else {
+                            console.log('naudojamas next mygtukas')
                             CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                         }
                     }
@@ -166,6 +166,7 @@ let CalendarFunctions = {
         });
     },
     updateEventsPublic: function (firstVisibleDay, lastVisibleDay, firstMonthDay) {
+        $('#overlay').css('display', 'flex')
         $.ajax({
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             url: '/orders/public/order/public_calendar/get',
@@ -177,6 +178,7 @@ let CalendarFunctions = {
                 first_month_day: firstMonthDay
             },
         }).done((response) => {
+            $('#overlay').hide();
             Occupied = response.Occupied;
             if (response.status) {
                 this.Calendar.calendar.removeAllEvents();
@@ -188,6 +190,7 @@ let CalendarFunctions = {
         });
     },
     updateEventsPrivate: function (firstVisibleDay, lastVisibleDay, firstMonthDay) {
+        $('#overlay').css('display', 'flex')
         $.ajax({
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             url: '/orders/admin/order/private_calendar/get',
@@ -199,6 +202,7 @@ let CalendarFunctions = {
                 first_month_day: firstMonthDay
             },
         }).done((response) => {
+            $('#overlay').hide();
             if (response.status) {
                 this.Calendar.calendar.removeAllEvents();
                 this.addEvent(response.Occupied);
@@ -240,13 +244,14 @@ let TrampolineOrder = {
                 let form_data = Variables.getOrderFormInputs();
                 form_data.firstVisibleDay = firstVisibleDayOnCalendar;
                 form_data.lastVisibleDay = lastVisibleDayOnCalendar;
-                console.log('form data POST => ', form_data);
+                $('#overlay').css('display', 'flex')
                 $.ajax({
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                     method: 'POST',
                     url: '/orders/public/order',
                     data: form_data,
                 }).done((response) => {
+                    $('#overlay').hide();
                     if (response.status === false) {
                         $('form input').removeClass('is-invalid');
                         Object.keys(response.failed_input).forEach(function (FailedInput) {
@@ -254,6 +259,10 @@ let TrampolineOrder = {
                             $('form .' + FailedInput + 'InValidFeedback').text(response.failed_input[FailedInput][0]);
                             $('form input[name=' + FailedInput + ']').addClass('is-invalid');
                         });
+                        // CalendarFunctions.Calendar.calendar.removeAllEvents()
+                        $('#alertMessage').text(response.failed_input.error[0])
+                        $('#customAlert').show().css('display', 'flex');
+                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
                     }
                     if (response.status) {
                         $('form input').removeClass('is-invalid');
@@ -309,6 +318,7 @@ let TrampolineOrder = {
                 });
             },
             updateOrder: function () {
+                $('#overlay').css('display', 'flex')
                 let form_data = Variables.getOrderFormInputs();
                 form_data.orderID = TrampolineOrder.UpdateOrder.OrderIdToUpdate;
                 form_data.firstVisibleDay = firstVisibleDayOnCalendar;
@@ -320,6 +330,7 @@ let TrampolineOrder = {
                     url: '/orders/public/order',
                     data: form_data,
                 }).done((response) => {
+                    $('#overlay').hide();
                     if (response.status) {
                         eventDay = response.Event[0].start
                         console.log('event day = ', eventDay)
@@ -330,6 +341,11 @@ let TrampolineOrder = {
                         CalendarFunctions.addEvent(response.Event);
                         TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
                         TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Event;
+                    }
+                    if (!response.status) {
+                        $('#alertMessage').text(response.failed_input.error[0])
+                        $('#customAlert').show().css('display', 'flex');
+                        CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
                     }
                 });
             },

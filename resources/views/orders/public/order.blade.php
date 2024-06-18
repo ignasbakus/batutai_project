@@ -74,8 +74,7 @@
                     </div>
                     <div class="row">
                         <div class="col-2 infoBeforeSuccessfulOrder" style="display: block">
-                            <button class="btn btn-primary mt-3 createOrder" id="createOrderButton">
-                                <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                            <button class="btn btn-primary mt-3 createOrder d-flex align-items-center justify-content-center" id="createOrderButton">
                                 <span id="buttonText">Siųsti</span>
                             </button>
                         </div>
@@ -86,6 +85,10 @@
             <div class="col-1"></div>
             <div class="col me-5">
                 <div id="calendar"></div>
+            </div>
+            <div class="alert alert-warning alert-dismissible fade show custom-alert" id="customAlert" role="alert" style="display: none;">
+                <span id="alertMessage"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="hideAlert()"></button>
             </div>
         </div>
     </div>

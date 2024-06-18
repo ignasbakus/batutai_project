@@ -114,3 +114,30 @@ hr.new1 {
 .close-button:hover {
     color: #ff0000; /* Red button color on hover */
 }
+
+#spinnerSendOrder {
+    margin-left: 10px; /* Adjust as needed */
+}
+
+.custom-alert {
+    position: fixed;
+    top: 20px;
+    right: -350px; /* Start hidden off the right side */
+    width: 300px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 1050; /* Ensure it appears above other elements */
+    border-radius: 10px;
+    transition: right 0.5s ease; /* Smooth slide-in effect */
+}
+.custom-alert.show {
+    right: 20px; /* Slide in to the right position */
+}
+.custom-alert .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}

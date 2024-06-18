@@ -2,6 +2,7 @@
 
 namespace App\Trampolines;
 
+use App\Models\OrdersTrampoline;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -23,7 +24,7 @@ class TrampolineOrderData
     public bool $ValidationStatus;
     public MessageBag $failedInputs;
 
-    public function __construct(Request $request = null)
+    public function __construct(Request $request = null, array $RawData = null)
     {
         $this->Trampolines = [];
         $this->failedInputs = new MessageBag();
@@ -50,10 +51,12 @@ class TrampolineOrderData
                 'customerDeliveryAddress.required' => 'Adresas privalomas',
                 'customerDeliveryAddress.min' => 'Adresas per trumpas'
             ]);
+//            dd($validator->errors());
             if($validator->fails()) {
                 Log::info('Didnt pass validator');
                 $this->ValidationStatus = false;
                 $this->failedInputs = $validator->errors();
+//                dd($this);
                 return $this;
             } else {
                 $this->ValidationStatus = true;
@@ -65,6 +68,7 @@ class TrampolineOrderData
                 $this->CustomerSurname = $request->get('customerSurname', '');
                 $this->CustomerEmail = $request->get('customerEmail', '');
                 $this->CustomerPhone = $request->get('customerPhoneNumber', '');
+                Log::info('Request data: ', $request->all());
                 //order form -> client address
                 $this->City = $request->get('customerDeliveryCity', '');
                 $this->PostCode = $request->get('customerDeliveryPostCode', '');
@@ -72,6 +76,10 @@ class TrampolineOrderData
                 //Trampolines -> [{id:xxx,rent_start:YYYY-MM-DD,rent_end:YYYY-MM-DD}]
                 $this->Trampolines = $request->get('trampolines', []);
             }
+        } else {
+            $this->ValidationStatus = true;
+            $this->orderID = $RawData['orderID'] ?? 0;
+            $this->Trampolines = $RawData['trampolines'] ?? [];
         }
     }
 }
