@@ -197,8 +197,9 @@ let CalendarFunctions = {
 };
 let TrampolineOrder = {
     init: function () {
-        this.UpdateOrder.init();
         $('#thankYouDiv').html(view);
+        this.UpdateOrder.init();
+        this.CancelOrder.init()
         Variables.setClientDetails(Client);
         Variables.setClientAddressDetails(ClientAddress);
     },
@@ -334,10 +335,43 @@ let TrampolineOrder = {
             },
         },
     },
-};
+    CancelOrder: {
+        init: function () {
+            this.Event.init()
+        },
+        Event: {
+            init: function () {
+                $('#orderButtons .cancelOrder').on('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.cancelOrder();
+                });
+            },
+            cancelOrder: function () {
+                $('#overlay').css('display', 'flex');
+                $.ajax({
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    method: 'PUT',
+                    url: '/orders/public/order/view/{order_number}',
+                    data: {
+                        order_id: Order_id
+                    },
+                }).done((response) => {
+                    $('#overlay').hide();
+                    if (response.status) {
+                        $('#dateChangeAlertMessage').text('Užsakymas atšauktas!');
+                        $('#successfulDateChangeAlert').show().css('display', 'flex');
+                        console.log("atsakymas atsauktas")
+                    }
+                })
+            }
+        }
+    },
+}
 
-/* Document ready function */
 $(document).ready(function () {
     console.log("/js/trampolines/public/order_public.js -> ready!");
     TrampolineOrder.init();
 });
+
+/* Document ready function */

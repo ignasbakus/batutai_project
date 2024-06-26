@@ -109,7 +109,6 @@ class DataTablesProcessing
                     $this->data[] = $ROW;
                     break;
                 case 'orders' :
-//                    Log::info('Collection item -> ', $CollectionItem->toArray());
                     $TrampolineNames = '';
                     foreach ($CollectionItem->trampolines as $Trampoline) {
                         $TrampolineNames .= 'Batutas ' . $Trampoline->trampoline->title . '<br>';
@@ -127,7 +126,7 @@ class DataTablesProcessing
                         $CollectionItem->rental_duration,
                         $CollectionItem->total_sum,
                         $CollectionItem->advance_sum,
-                        $CollectionItem->advance_status,
+                        $CollectionItem->order_status,
                         '
                   <button data-orderid="' . $CollectionItem->id . '" class="btn orderShow">
                     <svg width="20" height="20" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">

@@ -39,7 +39,8 @@
         <span class="font-weight-bold">Galutinė mokama suma</span>
         <span class="font-weight-bold theme-color">{{ number_format($Order->total_sum - $Order->advance_sum, 2) }} €</span>
     </div>
-    <div class="text-center mt-5">
+    <div id="orderButtons" class="text-center mt-5 d-flex justify-content-between">
         <button class="btn btn-primary btn-thankYou">Apmokėti avansą</button>
+        <button class="btn btn-cancel-order cancelOrder">atsaukti užsakymą</button>
     </div>
 </div>

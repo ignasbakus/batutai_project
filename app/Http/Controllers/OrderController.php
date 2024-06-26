@@ -365,10 +365,11 @@ class OrderController extends Controller
 
     public function orderDelete(): JsonResponse
     {
-        //$DeleteResult = (new TrampolineOrder())->delete((new TrampolineOrderData()));
-//        dd($request);
-        $deleteResult = (new TrampolineOrder())->delete(\request()->input('orderID'));
-        return response()->json($deleteResult);
+        return response()->json((new TrampolineOrder())->delete(\request()->input('orderID')));
+    }
+    public function orderCancel(): JsonResponse
+    {
+        return response()->json((new TrampolineOrder())->cancel(\request()->input('order_id')));
     }
 
     public function initializeOrderUpdateCalendar(): JsonResponse

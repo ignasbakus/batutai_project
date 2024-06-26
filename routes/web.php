@@ -42,7 +42,7 @@ Route::controller(OrderController::class)->prefix('orders')->group(function () {
             //http://locahost:8000/orders/public/order/view [CRUD] with UUID
             Route::get('/view/{order_number}', 'publicGetIndexViaEmail')->name('publicGetIndexViaEmail');
             //Route::post('/view/{order_number}', 'orderInsert');
-            //Route::put('/view/{order_number}', 'orderUpdate');
+            Route::put('/view/{order_number}', 'orderCancel');
             //Route::delete('/view/{order_number}', 'orderDelete');
         });
     });

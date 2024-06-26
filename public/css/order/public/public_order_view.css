@@ -26,23 +26,7 @@ hr.new1 {
     margin: 0.4rem 0;
 }
 
-.btn-thankYou {
-    color: #fff;
-    background-color: #004cb9;
-    border-color: #004cb9;
-    padding: 12px 30px;
-    border-radius: 1px;
-    font-size: 17px;
-}
 
-.btn-thankYou:hover {
-    color: #fff;
-    background-color: #004cb9;
-    border-color: #004cb9;
-    padding: 12px 30px;
-    border-radius: 1px;
-    font-size: 17px;
-}
 
 .confirmation-container {
     background-color: #ffffff; /* White background */
@@ -141,3 +125,39 @@ hr.new1 {
     top: 10px;
     right: 10px;
 }
+
+.btn-thankYou {
+    background-color: #6c5ce7; /* Similar to the purple button */
+    color: #ffffff;
+    border: none;
+    border-radius: 30px; /* Rounded corners */
+    padding: 10px 20px; /* Padding */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Cursor style */
+    transition: background-color 0.3s ease; /* Smooth transition */
+    margin-right: auto; /* Align to the left */
+}
+
+.btn-thankYou:hover {
+    background-color: #5a47c7; /* Darker purple on hover */
+}
+
+.btn-cancel-order {
+    background-color: #ffffff; /* White background */
+    color: #6c757d; /* Grey text */
+    border: 2px solid #ced4da; /* Grey border */
+    border-radius: 30px; /* Rounded corners */
+    padding: 10px 20px; /* Padding */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Cursor style */
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
+    margin-left: auto; /* Align to the right */
+}
+
+.btn-cancel-order:hover {
+    background-color: #dc3545; /* Red background on hover */
+    color: #ffffff; /* White text on hover */
+    border-color: #dc3545; /* Red border on hover */
+}
+
+

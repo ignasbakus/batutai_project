@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('orders_trampolines', function (Blueprint $table) {
-            $table->unique(['trampolines_id','rental_start', 'rental_end'], 'checkIfDateExists');
-            $table->unique(['trampolines_id','rental_start'], 'checkIfRentalStartExists');
-            $table->unique(['trampolines_id','rental_end'], 'checkIfRentalEndExists');
-        });
+//        Schema::table('orders_trampolines', function (Blueprint $table) {
+//            $table->unique(['trampolines_id','rental_start', 'rental_end'], 'checkIfDateExists');
+//            $table->unique(['trampolines_id','rental_start'], 'checkIfRentalStartExists');
+//            $table->unique(['trampolines_id','rental_end'], 'checkIfRentalEndExists');
+//        });
     }
 
     /**
@@ -23,6 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-//        Schema::dropIfExists('orders_trampolines');
+//        Schema::table('orders_trampolines', function (Blueprint $table) {
+//            $table->unique(['trampolines_id', 'rental_start', 'rental_end'], 'checkIfDateExists');
+//            $table->unique(['trampolines_id', 'rental_start'], 'checkIfRentalStartExists');
+//            $table->unique(['trampolines_id', 'rental_end'], 'checkIfRentalEndExists');
+//        });
     }
 };

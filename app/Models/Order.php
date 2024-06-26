@@ -17,7 +17,7 @@ class Order extends Model
         'rental_duration',
         'delivery_address_id',
         'advance_sum',
-        'advance_status',
+        'order_status',
         'total_sum',
         'client_id'
     ];

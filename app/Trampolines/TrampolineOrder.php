@@ -48,8 +48,10 @@ class TrampolineOrder implements Order
             $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
             $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
             $orderId = $trampolineOrderData->orderID ?? null; // check if orderID exists
+
             $overlappingRentals = DB::table('orders_trampolines')
                 ->where('trampolines_id', $trampolineId)
+                ->where('is_active', 1) // Only consider active orders
                 ->when($orderId, function ($query, $orderId) {
                     // exclude the current order from the check if orderID exists
                     return $query->where('orders_id', '!=', $orderId);
@@ -71,16 +73,22 @@ class TrampolineOrder implements Order
                             ->where('rental_end', '<=', $rentalEnd);
                     });
                 })
-                ->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
-                    $query->where('rental_start', $rentalStart)->where('rental_end', $rentalEnd);
-                })
                 ->exists();
+
+            // Debug output to check the result of the query
+//            dd($overlappingRentals);
+
             if ($overlappingRentals) {
-                return ['status' => false, 'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'];
+                return [
+                    'status' => false,
+                    'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'
+                ];
             }
         }
         return ['status' => true];
     }
+
+
 
     public static function calculateAdvanceSum($totalSum): float
     {
@@ -104,7 +112,6 @@ class TrampolineOrder implements Order
             return $this;
         }
 
-//        Log::info($trampolineOrderData->CustomerPhone->toArray());
         $Client = (new Client())->updateOrCreate(
             [
                 'phone' => $trampolineOrderData->CustomerPhone,
@@ -144,7 +151,7 @@ class TrampolineOrder implements Order
                 'delivery_address_id' => $ClientAddress->id,
                 'advance_sum' => 0,
                 'total_sum' => 0,
-                'advance_status' => false,
+                'order_status' => 'Neapmokėtas',
                 'client_id' => $Client->id
             ]);
 
@@ -157,34 +164,25 @@ class TrampolineOrder implements Order
                 $RentalDuration = $RentalStart->diffInDays($RentalEnd);
                 $Trampoline = \App\Models\Trampoline::with('Parameter')->find($trampoline['id']);
 
-                try {
-                    $this->OrderTrampolines[] = OrdersTrampoline::create([
-                        'orders_id' => $this->Order->id,
-                        'trampolines_id' => $Trampoline->id,
-                        'rental_start' => $RentalStart->format('Y-m-d'),
-                        'rental_end' => $RentalEnd->format('Y-m-d'),
-                        'rental_duration' => $RentalDuration,
-                        'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
-//                        'advance_status' => false
-                    ]);
+                $this->OrderTrampolines[] = OrdersTrampoline::create([
+                    'orders_id' => $this->Order->id,
+                    'trampolines_id' => $Trampoline->id,
+                    'rental_start' => $RentalStart->format('Y-m-d'),
+                    'rental_end' => $RentalEnd->format('Y-m-d'),
+                    'rental_duration' => $RentalDuration,
+                    'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
+                    'is_active' => 1
+                ]);
 
-                    $OrderTotalSum += $RentalDuration * $Trampoline->Parameter->price;
-                    $OrderRentalDuration = $RentalDuration;
-                } catch (QueryException $e) {
-                    if ($e->errorInfo[1] == 1062) {
-                        DB::rollBack();
-                        $this->status = false;
-                        $this->failedInputs->add('dates', 'Duplicate entry for the given rental period');
-                        return $this;
-                    }
-                    throw $e;
-                }
+                $OrderTotalSum += $RentalDuration * $Trampoline->Parameter->price;
+                $OrderRentalDuration = $RentalDuration;
             }
-            $advanceSUm = self::calculateAdvanceSum($OrderTotalSum);
+
+            $advanceSum = self::calculateAdvanceSum($OrderTotalSum);
             $this->Order->update([
                 'total_sum' => $OrderTotalSum,
                 'rental_duration' => $OrderRentalDuration,
-                'advance_sum' => $advanceSUm
+                'advance_sum' => $advanceSum
             ]);
 
             DB::commit();
@@ -193,27 +191,22 @@ class TrampolineOrder implements Order
 
             $this->status = true;
 
-            Mail::to($this->Order->client->email)->send(new OrderPlaced($this->Order));
-
             return $this;
         } catch (QueryException $e) {
-            if ($e->errorInfo[1] == 1062) {
-                DB::rollBack();
-                $this->status = false;
-                $this->failedInputs->add('dates', 'Duplicate entry for the given rental period');
-                return $this;
-            }
             DB::rollBack();
             Log::error('An error occurred while creating the order', ['error' => $e->getMessage()]);
             $this->status = false;
+            $this->failedInputs->add('error', 'An error occurred while creating the order.');
             return $this;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('An error occurred while creating the order', ['error' => $e->getMessage()]);
             $this->status = false;
+            $this->failedInputs->add('error', 'An error occurred while creating the order.');
             return $this;
         }
     }
+
 
     public function update(TrampolineOrderData $trampolineOrderData): static
     {
@@ -353,11 +346,10 @@ class TrampolineOrder implements Order
     {
         return \App\Models\Order::with('trampolines', 'client', 'address')->find($orderID);
     }
-
     public function deleteUnpaidOrders(): static
     {
         $now = Carbon::now();
-        $unpaidOrders = \App\Models\Order::where('advance_status', 0)->get();
+        $unpaidOrders = \App\Models\Order::where('order_status', 'Neapmokėtas')->get();
         foreach ($unpaidOrders as $order) {
             $orderDate = Carbon::parse($order->order_date);
             if (abs($now->diffInHours($orderDate, false)) > 48) {
@@ -368,6 +360,23 @@ class TrampolineOrder implements Order
                 $this->Messages[] = 'Neapmokėti užsakymai ištrinti sėkmingai !';
             }
         }
+        return $this;
+    }
+
+    public function cancel($orderID): static{
+        $order = \App\Models\Order::find($orderID);
+        $orderTrampolines = OrdersTrampoline::where('orders_id', $orderID)->get();
+        if (!$order) {
+            $this->status = false;
+            $this->failedInputs->add('error', 'Order not found.');
+            return $this;
+        }
+        $order->update(['order_status' => 'Atšauktas']);
+        foreach ($orderTrampolines as $orderTrampoline) {
+            $orderTrampoline->update(['is_active' => 0]);
+        }
+        $this->status = true;
+        $this->Messages[] = 'Užsakymas atšauktas sėkmingai !';
         return $this;
     }
 }

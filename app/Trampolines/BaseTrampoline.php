@@ -140,11 +140,12 @@ class BaseTrampoline implements Trampoline
 
         foreach ($Trampolines as $trampoline) {
             $Query = (new OrdersTrampoline())->newQuery();
-            $Query->where('trampolines_id', $trampoline->id);
-            $Query->where(function (Builder $builder) use ($getOccupationTill, $getOccupationFrom) {
-                $builder->whereBetween('rental_start', [$getOccupationFrom->format('Y-m-d'), $getOccupationTill->format('Y-m-d')]);
-                $builder->orWhereBetween('rental_end', [$getOccupationFrom->copy()->addDay()->format('Y-m-d'), $getOccupationTill->copy()->addDay()->format('Y-m-d')]);
-            });
+            $Query->where('trampolines_id', $trampoline->id)
+                ->where('is_active', 1) // Ensure only active trampolines are considered
+                ->where(function (Builder $builder) use ($getOccupationTill, $getOccupationFrom) {
+                    $builder->whereBetween('rental_start', [$getOccupationFrom->format('Y-m-d'), $getOccupationTill->format('Y-m-d')])
+                        ->orWhereBetween('rental_end', [$getOccupationFrom->copy()->addDay()->format('Y-m-d'), $getOccupationTill->copy()->addDay()->format('Y-m-d')]);
+                });
             $occupiedDatesForTrampoline = $Query->get();
 //            dd($occupiedDatesForTrampoline);
             if ($FullCalendarFormat) {

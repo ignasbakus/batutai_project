@@ -15,6 +15,7 @@ class OrdersTrampoline extends Model
         'rental_start',
         'rental_end',
         'rental_duration',
+        'is_active',
         'total_sum',
     ];
 
