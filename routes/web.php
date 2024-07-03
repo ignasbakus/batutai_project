@@ -6,14 +6,10 @@ use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrampolinesController;
 
-Route::post('/webhook/initiated', [WebhookController::class, 'handleInitiated']);
-Route::post('/webhook/opened', [WebhookController::class, 'handleOpened']);
-Route::post('/webhook/processing', [WebhookController::class, 'handleProcessing']);
-Route::post('/webhook/completed', [WebhookController::class, 'handleCompleted']);
-Route::post('/webhook/canceled', [WebhookController::class, 'handleCanceled']);
-Route::post('/webhook/expired', [WebhookController::class, 'handleExpired']);
-
-
+Route::controller(WebhookController::class)->group(function () {
+    Route::post('/webhook/montonio', 'paymentResponse');
+//    Route::post('/webhook/montonio/pending', 'paymentPending');
+});
 
 Route::controller(ClientsController::class)->group(function () {
     Route::get('/clients', 'index')->name('clients');
@@ -42,11 +38,11 @@ Route::controller(OrderController::class)->prefix('orders')->group(function () {
         Route::get('/', 'publicGetIndex'); //http://locahost:8000/orders/public
         /* Route for new orders/customers */
         Route::prefix('order')->group(function () {
+            Route::post('generate_url', 'generatePaymentUrl');
             Route::post('public_calendar/get', 'publicUpdateCalendar');
             //http://locahost:8000/orders/public/order [CRUD] without UUID
             Route::get('/', 'orderGet');
             Route::post('/', 'orderInsert');
-
             Route::put('/', 'orderUpdate');
             Route::delete('/', 'orderDelete');
 

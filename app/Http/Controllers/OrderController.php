@@ -225,8 +225,8 @@ class OrderController extends Controller
         $NewOrderEventBackgroundColor = 'green';
         $NewOrderEventTitle = 'Jūsų užsakymas';
         $Order = (new TrampolineOrder())->create((new TrampolineOrderData(\request())));
-        (new MontonioPaymentsService())->createPaymentLink($Order->Order->id);
-        $PaymentLink = (new MontonioPaymentsService())->retrievePaymentLink($Order->Order->id);
+//        (new MontonioPaymentsService())->createPaymentLink($Order->Order->id);
+//        $PaymentLink = (new MontonioPaymentsService())->retrievePaymentLink($Order->Order->id);
         $trampolines_id = [];
 
         foreach (\request()->get('trampolines', []) as $Trampoline) {
@@ -286,7 +286,7 @@ class OrderController extends Controller
             'status' => $Order->status,
             'Occupied' => $Occupied,
             'Events' => $Events,
-            'PaymentLink' => $PaymentLink,
+//            'PaymentLink' => $PaymentLink,
             'OrderId' => $Order->Order->id,
             'view' => $orderView
         ]);
@@ -374,7 +374,7 @@ class OrderController extends Controller
     }
     public function orderCancel(): JsonResponse
     {
-        $cancelledOrder = (new TrampolineOrder())->cancel(\request()->input('order_id'));
+        $cancelledOrder = (new TrampolineOrder())->cancelOrder(\request()->input('order_id'));
         if ($cancelledOrder->status) {
             return response()->json([
                 'status' => true,
@@ -489,5 +489,15 @@ class OrderController extends Controller
 //            'status' => true,
 //            'unpaidOrders' => $unpaidOrders
 //        ]);
+    }
+    public function generatePaymentUrl(): JsonResponse
+    {
+        $orderId = request()->get('order_id');
+        (new MontonioPaymentsService())->createOrder($orderId);
+        $paymentLink = (new MontonioPaymentsService())->retrievePaymentLink($orderId);
+        return response()->json([
+            'status' => true,
+            'paymentLink' => $paymentLink
+        ]);
     }
 }

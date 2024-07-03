@@ -320,10 +320,7 @@ let TrampolineOrder = {
                         CalendarFunctions.addEvent(response.Occupied);
                         CalendarFunctions.addEvent(response.Events);
                         $('#thankYouDiv').html(response.view);
-                        // $('#orderButtons .payAdvance').data('payment-url', response.PaymentLink)
-                        $('#orderButtons .payAdvance').click(function() {
-                            window.location.href = response.PaymentLink;
-                        });
+                        TrampolineOrder.PaymentLink.init()
                         TrampolineOrder.CancelOrder.init();
                     } else {
                         CalendarFunctions.Calendar.calendar.getEvents().forEach(function (event) {
@@ -436,14 +433,39 @@ let TrampolineOrder = {
             }
         }
     },
-    Events: {
-        // init: function () {
-        //     $('#orderButtons .payAdvance').on('click', function () {
-        //
-        //     }
-        // },
+    PaymentLink: {
+        init: function () {
+            this.Event.init();
+        },
+        Event: {
+            init: function () {
+                $('#orderButtons .payAdvance').click(function () {
+                    TrampolineOrder.PaymentLink.Event.generatePaymentLink()
+                });
+            },
+            generatePaymentLink: function () {
+                $('#overlay').css('display', 'flex');
+                $.ajax({
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        method: 'POST',
+                        url: '/orders/public/order/generate_url',
+                        data: {
+                            order_id: TrampolineOrder.UpdateOrder.OrderIdToUpdate
+                        }
+                    },
+                ).done((response) => {
+                    $('#overlay').hide();
+                    if (response.status) {
+                        window.open(response.paymentLink, '_blank');
+                    }
+                }).fail((jqXHR, textStatus, errorThrown) => {
+                    $('#overlay').hide();
+                    alert('Request failed: ' + textStatus);
+                });
+            }
+        }
     }
-};
+}
 
 /* Document ready function */
 $(document).ready(function () {

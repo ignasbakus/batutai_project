@@ -14,7 +14,8 @@ class MontonioPaymentCreationLog extends Model
         'order_id',
         'client_id',
         'payload',
-        'payment_creation_response'
+        'payment_creation_response',
+        'uuid'
     ];
 
     public function order(): BelongsTo

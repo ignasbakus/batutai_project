@@ -2,62 +2,55 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\MontonioPaymentWebhooksLog;
+use App\MontonioPayments\MontonioPaymentsService;
+use App\Trampolines\TrampolineOrder;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
-    public function handleInitiated(Request $request): \Illuminate\Http\JsonResponse
+    public function paymentResponse(): JsonResponse
     {
-        Log::info('Payment Link Created:', $request->all());
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Payment link created successfully.'
-        ], 200);
-    }
+        //$responseData = json_decode(\request()->getContent(), true);
+        //$orderToken = json_decode(\request()->getContent(), true)['orderToken'];
+        Log::info('Order token ->' . json_decode(\request()->getContent(), true)['orderToken']);
+        JWT::$leeway = 60 * 5;
+        $decoded = JWT::decode(
+            json_decode(\request()->getContent(), true)['orderToken'],
+            new Key(config('montonio.secret_key'), 'HS256'),
+        );
 
-    public function handleOpened(Request $request): \Illuminate\Http\JsonResponse
-    {
-        Log::info('Payment Link Opened:', $request->all());
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Payment link opened successfully.'
-        ], 200);
-    }
+        $retrieveUuidAndOrderId = (new MontonioPaymentsService())->retrieveUuidAndOrderId($decoded->uuid);
 
-    public function handleProcessing(Request $request): \Illuminate\Http\JsonResponse
-    {
-        Log::info('Payment Processing:', $request->all());
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Payment processing.'
-        ], 200);
-    }
+        MontonioPaymentWebhooksLog::create([
+            'order_id' => $retrieveUuidAndOrderId->order_id,
+            'callback_response' => json_encode($decoded),
+        ]);
 
-    public function handleCompleted(Request $request): \Illuminate\Http\JsonResponse
-    {
-        Log::info('Payment Completed:', $request->all());
+        if (
+            $decoded->uuid === $retrieveUuidAndOrderId->uuid &&
+            $decoded->accessKey === config('montonio.access_key')
+        )
+        switch ($decoded->paymentStatus) {
+            case 'PAID':
+                (new MontonioPaymentsService())->orderPaid($retrieveUuidAndOrderId->order_id);
+                break;
+            case 'PENDING':
+                Log::info('Payment status -> PENDING');
+                break;
+            case 'ABANDONED':
+                Log::info('Payment status -> ABANDONED');
+                break;
+            default:
+                Log::info('Payment failed');
+                break;
+        }
         return response()->json([
             'status' => 'success',
-            'message' => 'Payment completed successfully.'
-        ], 200);
-    }
-
-    public function handleCanceled(Request $request): \Illuminate\Http\JsonResponse
-    {
-        Log::info('Payment Link Canceled:', $request->all());
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Payment link canceled.'
-        ], 200);
-    }
-
-    public function handleExpired(Request $request): \Illuminate\Http\JsonResponse
-    {
-        Log::info('Payment Link Expired:', $request->all());
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Payment link expired.'
+            'message' => 'Received webhook : ' . $decoded->paymentStatus,
         ], 200);
     }
 }

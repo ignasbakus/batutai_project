@@ -23,15 +23,13 @@ use Illuminate\Database\QueryException;
 
 class TrampolineOrder implements Order
 {
-
     public array $Errors;
     public array $receivedParams;
     public array $Messages;
     public bool $status;
     public \App\Models\Order $Order;
     public array $OrderTrampolines;
-    public \Illuminate\Support\MessageBag $failedInputs;
-
+    public MessageBag $failedInputs;
     public function __construct()
     {
         $this->failedInputs = new MessageBag();
@@ -40,63 +38,6 @@ class TrampolineOrder implements Order
         $this->Messages = [];
         $this->Order = new \App\Models\Order();
     }
-
-    public static function canRegisterOrder(TrampolineOrderData $trampolineOrderData): array
-    {
-        foreach ($trampolineOrderData->Trampolines as $trampoline) {
-            $trampolineId = $trampoline['id'];
-            $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
-            $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
-            $orderId = $trampolineOrderData->orderID ?? null; // check if orderID exists
-
-            $overlappingRentals = DB::table('orders_trampolines')
-                ->where('trampolines_id', $trampolineId)
-                ->where('is_active', 1) // Only consider active orders
-                ->when($orderId, function ($query, $orderId) {
-                    // exclude the current order from the check if orderID exists
-                    return $query->where('orders_id', '!=', $orderId);
-                })
-                ->where(function ($query) use ($rentalStart, $rentalEnd) {
-                    $query->where(function ($query) use ($rentalStart) {
-                        // rental_start is between existing rental_start and rental_end
-                        $query->where('rental_start', '<=', $rentalStart)
-                            ->where('rental_end', '>', $rentalStart)
-                            ->where('rental_end', '!=', DB::raw("DATE_ADD('$rentalStart', INTERVAL 0 SECOND)"));
-                    })->orWhere(function ($query) use ($rentalEnd) {
-                        // rental_end is between existing rental_start and rental_end
-                        $query->where('rental_start', '<', $rentalEnd)
-                            ->where('rental_end', '>=', $rentalEnd)
-                            ->where('rental_start', '!=', DB::raw("DATE_ADD('$rentalEnd', INTERVAL 0 SECOND)"));
-                    })->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
-                        // existing rental period is entirely within the new rental period
-                        $query->where('rental_start', '>=', $rentalStart)
-                            ->where('rental_end', '<=', $rentalEnd);
-                    });
-                })
-                ->exists();
-
-            // Debug output to check the result of the query
-//            dd($overlappingRentals);
-
-            if ($overlappingRentals) {
-                return [
-                    'status' => false,
-                    'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'
-                ];
-            }
-        }
-        return ['status' => true];
-    }
-
-
-
-    public static function calculateAdvanceSum($totalSum): float
-    {
-        $advancePercentage = config('trampolines.advance_percentage');
-        $advancePayment = $totalSum * $advancePercentage;
-        return round($advancePayment, -1);
-    }
-
     public function create(TrampolineOrderData $trampolineOrderData): static
     {
         $checkResult = self::canRegisterOrder($trampolineOrderData);
@@ -206,8 +147,6 @@ class TrampolineOrder implements Order
             return $this;
         }
     }
-
-
     public function update(TrampolineOrderData $trampolineOrderData): static
     {
         if (!$trampolineOrderData->ValidationStatus) {
@@ -322,7 +261,6 @@ class TrampolineOrder implements Order
         $this->Messages[] = 'Užsakymas atnaujintas sėkmingai !';
         return $this;
     }
-
     public function delete($orderID): static
     {
         try {
@@ -342,10 +280,61 @@ class TrampolineOrder implements Order
         }
         return $this;
     }
-
     public function read($orderID): Model|Collection|Builder|array|null
     {
         return \App\Models\Order::with('trampolines', 'client', 'address')->find($orderID);
+    }
+    public static function canRegisterOrder(TrampolineOrderData $trampolineOrderData): array
+    {
+        foreach ($trampolineOrderData->Trampolines as $trampoline) {
+            $trampolineId = $trampoline['id'];
+            $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
+            $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
+            $orderId = $trampolineOrderData->orderID ?? null; // check if orderID exists
+
+            $overlappingRentals = DB::table('orders_trampolines')
+                ->where('trampolines_id', $trampolineId)
+                ->where('is_active', 1) // Only consider active orders
+                ->when($orderId, function ($query, $orderId) {
+                    // exclude the current order from the check if orderID exists
+                    return $query->where('orders_id', '!=', $orderId);
+                })
+                ->where(function ($query) use ($rentalStart, $rentalEnd) {
+                    $query->where(function ($query) use ($rentalStart) {
+                        // rental_start is between existing rental_start and rental_end
+                        $query->where('rental_start', '<=', $rentalStart)
+                            ->where('rental_end', '>', $rentalStart)
+                            ->where('rental_end', '!=', DB::raw("DATE_ADD('$rentalStart', INTERVAL 0 SECOND)"));
+                    })->orWhere(function ($query) use ($rentalEnd) {
+                        // rental_end is between existing rental_start and rental_end
+                        $query->where('rental_start', '<', $rentalEnd)
+                            ->where('rental_end', '>=', $rentalEnd)
+                            ->where('rental_start', '!=', DB::raw("DATE_ADD('$rentalEnd', INTERVAL 0 SECOND)"));
+                    })->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
+                        // existing rental period is entirely within the new rental period
+                        $query->where('rental_start', '>=', $rentalStart)
+                            ->where('rental_end', '<=', $rentalEnd);
+                    });
+                })
+                ->exists();
+
+            // Debug output to check the result of the query
+//            dd($overlappingRentals);
+
+            if ($overlappingRentals) {
+                return [
+                    'status' => false,
+                    'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'
+                ];
+            }
+        }
+        return ['status' => true];
+    }
+    public static function calculateAdvanceSum($totalSum): float
+    {
+        $advancePercentage = config('trampolines.advance_percentage');
+        $advancePayment = $totalSum * $advancePercentage;
+        return round($advancePayment, -1);
     }
     public function deleteUnpaidOrders(): static
     {
@@ -363,8 +352,7 @@ class TrampolineOrder implements Order
         }
         return $this;
     }
-
-    public function cancel($orderID): static{
+    public function cancelOrder($orderID): static{
         $order = \App\Models\Order::find($orderID);
         $orderTrampolines = OrdersTrampoline::where('orders_id', $orderID)->get();
         $orderRentalStart = Carbon::parse($orderTrampolines->first()->rental_start)->format('Y-m-d');
@@ -387,5 +375,21 @@ class TrampolineOrder implements Order
         $this->status = true;
         $this->Messages[] = 'Užsakymas atšauktas sėkmingai !';
         return $this;
+    }
+    public function updateOrderStatus($orderId): array
+    {
+        $order = \App\Models\Order::find($orderId);
+        if (!$order) {
+            return [
+                'status' => false,
+                'message' => 'Order not found.'
+            ];
+        }
+
+        $order->update(['order_status' => 'Apmokėtas']);
+        return [
+            'status' => true,
+            'message' => 'Order status updated to Apmokėta successfully.'
+        ];
     }
 }

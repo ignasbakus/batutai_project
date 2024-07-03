@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('montonio_payment_creation_logs', function (Blueprint $table) {
+        Schema::create('montonio_payment_webhooks_logs', function (Blueprint $table) {
             $table->id();
             $table->integer('order_id');
             $table->integer('client_id')->nullable()->default(null);
-            $table->json('payment_creation_response');
-            $table->json('payload');
-            $table->string('uuid', 255);
+            $table->json('callback_response');
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('montonio_payment_creation_logs');
+        Schema::dropIfExists('montonio_payment_webhooks_logs');
     }
 };
