@@ -58,13 +58,15 @@ class OrderController extends Controller
 
     public function publicGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
+
         return view('orders.public.order', [
             'Availability' => [],
             'Occupied' => [],
             'Trampolines' => (new Trampoline())->newQuery()->whereIn('id', \request()->get('trampoline_id', []))->get(),
             'Dates' => (object)[
                 'CalendarInitial' => Carbon::now()->format('Y-m-d')
-            ]
+            ],
+            'AdvancePercentage' => config('trampolines.advance_percentage'),
         ]);
     }
     public function publicGetIndexViaEmail($order_number): \Illuminate\Contracts\Foundation\Application|Factory|View|Application

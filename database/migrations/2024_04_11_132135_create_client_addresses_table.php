@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('address_street', 256);
             $table->string('address_town', 50);
             $table->string('address_postcode', 15);
-            $table->string('address_country', 50);
+            $table->string('address_country', 50)->nullable()->default(null);
 
             $table->timestamps();
         });

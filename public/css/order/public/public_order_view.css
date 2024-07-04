@@ -26,8 +26,6 @@ hr.new1 {
     margin: 0.4rem 0;
 }
 
-
-
 .confirmation-container {
     background-color: #ffffff; /* White background */
     border-radius: 10px; /* Rounded corners */
@@ -160,4 +158,80 @@ hr.new1 {
     border-color: #dc3545; /* Red border on hover */
 }
 
+.modal-header.bg-primary {
+    background-color: #007bff;
+    color: white;
+}
 
+.modal-header .btn-close {
+    background-color: #ffffff;
+}
+
+.order-summary {
+    margin-top: 1rem;
+}
+
+.order-summary .d-flex {
+    margin-bottom: 0.5rem;
+}
+
+.order-summary .trampoline-name {
+    text-transform: capitalize;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.order-summary h5 {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+}
+
+.order-summary hr {
+    border-top: 1px solid #ddd;
+}
+
+.order-summary .d-flex.py-2 {
+    padding: 0.5rem 0;
+}
+
+.text-center i {
+    color: #ff6f61;
+}
+
+.reservation-dates-container {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.reservation-dates-title {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.reservation-dates {
+    font-size: 1.1rem;
+    color: #555;
+}
+
+#viewOrderButton:disabled {
+    background-color: #cccccc; /* Light gray background */
+    cursor: not-allowed; /* Change cursor to indicate disabled state */
+    opacity: 0.6; /* Slightly transparent */
+}

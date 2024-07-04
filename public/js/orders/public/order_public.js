@@ -5,7 +5,7 @@ let lastVisibleDayOnCalendar;
 let firstMonthDay;
 let Calendar = null;
 let isEventDrop = false;
-let reservationSent = false;
+// let reservationSent = false;
 let isFirstLoad = true; // Add flag for initial load
 let isNavigating = false; // Add flag for navigation
 let skippedMonth = null; // Add this global variable to track the skipped month
@@ -52,18 +52,18 @@ let CalendarFunctions = {
                     let droppedMonth = droppedDate.getMonth();
                     if (droppedMonth < currentMonth) {
                         this.prev();
-                        if (reservationSent) {
-                            CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        } else {
+                        // if (reservationSent) {
+                        //     CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+                        // } else {
                             CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        }
+                        // }
                     } else if (droppedMonth > currentMonth) {
                         this.next();
-                        if (reservationSent) {
-                            CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        } else {
+                        // if (reservationSent) {
+                        //     CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+                        // } else {
                             CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        }
+                        // }
                     }
                     isEventDrop = false;
                 },
@@ -86,12 +86,12 @@ let CalendarFunctions = {
                     console.log('Last Visible Day: ', lastVisibleDayOnCalendar);
 
                     if (!isEventDrop && !isCancelButtonClicked && !isNavigating) {
-                        if (reservationSent) {
-                            CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                            TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
-                        } else {
+                        // if (reservationSent) {
+                            // CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+                            // TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
+                        // } else {
                             CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        }
+                        // }
                     }
 
                     isEventDrop = false;
@@ -103,11 +103,7 @@ let CalendarFunctions = {
                         let prevMonth = new Date(CalendarView.currentStart);
                         prevMonth.setMonth(prevMonth.getMonth() - 1);
 
-                        if (prevMonth.getMonth() === skippedMonth.getMonth() && prevMonth.getFullYear() === skippedMonth.getFullYear()) {
-                            prevButton.disabled = true;
-                        } else {
-                            prevButton.disabled = false;
-                        }
+                        prevButton.disabled = prevMonth.getMonth() === skippedMonth.getMonth() && prevMonth.getFullYear() === skippedMonth.getFullYear();
                     }
                 },
                 eventAllow: function (dropInfo, draggedEvent) {
@@ -139,9 +135,9 @@ let CalendarFunctions = {
                                 if (Trampoline.id === AffectedTrampoline.id) {
                                     Trampoline.rental_start = dropInfo.startStr;
                                     Trampoline.rental_end = dropInfo.endStr;
-                                    if (reservationSent) {
-                                        TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
-                                    }
+                                    // if (reservationSent) {
+                                    //     TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
+                                    // }
                                 }
                             });
                         });
@@ -149,9 +145,9 @@ let CalendarFunctions = {
                         Trampolines.forEach(function (Trampoline) {
                             Trampoline.rental_start = draggedEvent.startStr;
                             Trampoline.rental_end = draggedEvent.endStr;
-                            if (reservationSent) {
-                                TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
-                            }
+                            // if (reservationSent) {
+                            //     TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
+                            // }
                         });
                     }
                     return CouldBeDropped;
@@ -224,38 +220,40 @@ let CalendarFunctions = {
             }
         });
     },
-    updateEventsPrivate: function (firstVisibleDay, lastVisibleDay, firstMonthDay, hasFailedUpdate = false) {
-        $('#overlay').css('display', 'flex');
-        $.ajax({
-            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-            url: '/orders/admin/order/private_calendar/get',
-            method: 'POST',
-            data: {
-                order_id: TrampolineOrder.UpdateOrder.OrderIdToUpdate,
-                first_visible_day: firstVisibleDay,
-                last_visible_day: lastVisibleDay,
-                first_month_day: firstMonthDay
-            },
-        }).done((response) => {
-            $('#overlay').hide();
-            if (response.status) {
-                Occupied = response.Occupied;
-                this.Calendar.calendar.removeAllEvents();
-                this.addEvent(response.Occupied);
-                this.addEvent(response.Availability);
-                Trampolines = response.Trampolines;
-                if (hasFailedUpdate) {
-                    TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
-                }
-            }
-        });
-    },
+    // updateEventsPrivate: function (firstVisibleDay, lastVisibleDay, firstMonthDay, hasFailedUpdate = false) {
+    //     $('#overlay').css('display', 'flex');
+    //     $.ajax({
+    //         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+    //         url: '/orders/admin/order/private_calendar/get',
+    //         method: 'POST',
+    //         data: {
+    //             order_id: TrampolineOrder.UpdateOrder.OrderIdToUpdate,
+    //             first_visible_day: firstVisibleDay,
+    //             last_visible_day: lastVisibleDay,
+    //             first_month_day: firstMonthDay
+    //         },
+    //     }).done((response) => {
+    //         $('#overlay').hide();
+    //         if (response.status) {
+    //             Occupied = response.Occupied;
+    //             this.Calendar.calendar.removeAllEvents();
+    //             this.addEvent(response.Occupied);
+    //             this.addEvent(response.Availability);
+    //             Trampolines = response.Trampolines;
+    //             if (hasFailedUpdate) {
+    //                 TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
+    //             }
+    //         }
+    //     });
+    // },
 };
 
 let TrampolineOrder = {
     init: function () {
         this.FormSendOrder.init();
-        this.UpdateOrder.init();
+        // this.UpdateOrder.init();
+        this.ViewOrderModal.init()
+        this.FormSendOrder.checkFormValidity(); // Initial check
     },
     FormSendOrder: {
         init: function () {
@@ -275,9 +273,12 @@ let TrampolineOrder = {
                         $('.showTrampolineSelect').hide();
                     }
                 });
-                $('.createOrder').on('click', (event) => {
-                    event.preventDefault();
-                    this.addOrder();
+                $('#orderForm .viewOrderButton').on('click', function (event) {
+                    event.preventDefault(); // Prevent the default form submission behavior
+                    TrampolineOrder.ViewOrderModal.element.show();
+                });
+                $('#orderForm input, #orderForm select').on('input change', function () {
+                    TrampolineOrder.FormSendOrder.checkFormValidity();
                 });
             },
             addOrder: function () {
@@ -293,6 +294,7 @@ let TrampolineOrder = {
                 }).done((response) => {
                     $('#overlay').hide();
                     if (response.status === false) {
+                        TrampolineOrder.ViewOrderModal.element.hide()
                         $('form input').removeClass('is-invalid');
                         Object.keys(response.failed_input).forEach(function (FailedInput) {
                             $('form .' + FailedInput + 'InValidFeedback').text(response.failed_input[FailedInput][0]);
@@ -304,144 +306,156 @@ let TrampolineOrder = {
                             CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                         }
                     }
+                    // if (response.status) {
+                    //     // $('form input').removeClass('is-invalid');
+                    //     // $('.infoBeforeSuccessfulOrder').css('display', 'none');
+                    //     // $('#columnAfterSentOrder').css('display', 'block');
+                    //     // $('#thankYouDiv').addClass(' d-flex flex-column justify-content-between');
+                    // }
+                    // TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
+                    // TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Events;
                     if (response.status) {
-                        $('form input').removeClass('is-invalid');
-                        $('.infoBeforeSuccessfulOrder').css('display', 'none');
-                        $('#columnAfterSentOrder').css('display', 'block');
-                        $('#thankYouDiv').addClass(' d-flex flex-column justify-content-between');
-                    }
-                    TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
-                    TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Events;
-                    if (response.status) {
-                        eventDay = response.Events[0].start;
-                        reservationSent = true;
-                        TrampolineOrder.UpdateOrder.OrderIdToUpdate = response.OrderId;
-                        CalendarFunctions.Calendar.calendar.removeAllEvents();
-                        CalendarFunctions.addEvent(response.Occupied);
-                        CalendarFunctions.addEvent(response.Events);
-                        $('#thankYouDiv').html(response.view);
-                        TrampolineOrder.PaymentLink.init()
-                        TrampolineOrder.CancelOrder.init();
-                    } else {
-                        CalendarFunctions.Calendar.calendar.getEvents().forEach(function (event) {
-                            if (event.extendedProps.type_custom === 'occ') {
-                                event.remove();
-                            } else {
-                                event.setProp('backgroundColor', '#808000');
-                                event.setProp('title', 'Neužsakyta');
-                            }
-                        });
-                        CalendarFunctions.addEvent(Occupied);
+                        TrampolineOrder.PaymentLink.OrderIdToCreateLinkFor = response.OrderId;
+                        TrampolineOrder.PaymentLink.Event.generatePaymentLink()
+                        // eventDay = response.Events[0].start;
+                        // reservationSent = true;
+                        // CalendarFunctions.Calendar.calendar.removeAllEvents();
+                        // CalendarFunctions.addEvent(response.Occupied);
+                        // CalendarFunctions.addEvent(response.Events);
+                        // $('#thankYouDiv').html(response.view);
+                        // TrampolineOrder.PaymentLink.init()
+                        // TrampolineOrder.CancelOrder.init();
+                        // } else {
+                        //     CalendarFunctions.Calendar.calendar.getEvents().forEach(function (event) {
+                        //         if (event.extendedProps.type_custom === 'occ') {
+                        //             event.remove();
+                        //         } else {
+                        //             event.setProp('backgroundColor', '#808000');
+                        //             event.setProp('title', 'Neužsakyta');
+                        //         }
+                        //     });
+                        //     CalendarFunctions.addEvent(Occupied);
                     }
                 });
             },
         },
-    },
-    UpdateOrder: {
-        init: function () {
-            this.Event.init();
-        },
-        OrderIdToUpdate: 0,
-        Event: {
-            init: function () {
-                $('#confirmationContainer .confirmDatesChange').on('click', (event) => {
-                    event.stopPropagation();
-                    this.updateOrder();
-                });
-                $('#confirmationContainer .confirmationClose').on('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    isCancelButtonClicked = true;
-                    $('#confirmationContainer').css('display', 'none');
-                    CalendarFunctions.Calendar.goToInitialDates();
-                    CalendarFunctions.Calendar.calendar.removeAllEvents();
-                    CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate);
-                    CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.EventFromCreate);
-                });
-            },
-            updateOrder: function () {
-                $('#overlay').css('display', 'flex');
-                let form_data = Variables.getOrderFormInputs();
-                form_data.orderID = TrampolineOrder.UpdateOrder.OrderIdToUpdate;
-                form_data.firstVisibleDay = firstVisibleDayOnCalendar;
-                form_data.lastVisibleDay = lastVisibleDayOnCalendar;
-                $.ajax({
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    method: 'PUT',
-                    url: '/orders/public/order',
-                    data: form_data,
-                }).done((response) => {
-                    $('#overlay').hide();
-                    if (response.status) {
-                        eventDay = response.Event[0].start;
-                        $('#dateChangeAlertMessage').text('Rezervacijos dienos sėkmingai atnaujintos!');
-                        $('#successfulDateChangeAlert').show().css('display', 'flex');
-                        $('#confirmationContainer').css('display', 'none');
-                        $('#thankYouDiv').html(response.view);
-                        CalendarFunctions.Calendar.calendar.removeAllEvents();
-                        CalendarFunctions.addEvent(response.Occupied);
-                        CalendarFunctions.addEvent(response.Event);
-                        TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
-                        TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Event;
-                    }
-                    if (!response.status) {
-                        $('#failedAlertMessage').text(response.failed_input.error[0]);
-                        $('#failedAlert').show().css('display', 'flex');
-                        CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay, true);
-                    }
-                });
-            },
-            DisplayConfirmationElement: function () {
-                $('#confirmationContainer').css('display', 'block');
-            },
-        },
-    },
-    CancelOrder: {
-        init: function () {
-            this.Event.init();
-        },
-        element: new bootstrap.Modal('#cancelOrderModal'),
-        Event: {
-            init: function () {
-                $('#cancelOrderModal .cancelOrderModalButton').on('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.cancelOrder();
-                });
-            },
-            cancelOrder: function () {
-                $('#overlay').css('display', 'flex');
-                $.ajax({
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    method: 'PUT',
-                    url: '/orders/public/order/view/{order_number}',
-                    data: {
-                        order_id: TrampolineOrder.UpdateOrder.OrderIdToUpdate
-                    },
-                }).done((response) => {
-                    $('#overlay').hide();
-                    TrampolineOrder.CancelOrder.element.hide();
-                    if (response.status) {
-                        $('#content-wrap').replaceWith($(response.view).find('#content-wrap'));
-                    }
-                    if (!response.status) {
-                        console.log('patekom');
-                        $('#failedAlertMessage').text(response.failed_inputs.error[0]);
-                        $('#failedAlert').show().css('display', 'flex');
-                    }
-                });
-            }
+        checkFormValidity: function () {
+            let isValid = true;
+            $('#orderForm input[required]').each(function () {
+                if ($(this).val().trim() === '') {
+                    isValid = false;
+                    return false; // Exit loop if any required input is empty
+                }
+            });
+            $('#viewOrderButton').prop('disabled', !isValid);
         }
     },
+    // UpdateOrder: {
+    //     init: function () {
+    //         this.Event.init();
+    //     },
+    //     OrderIdToUpdate: 0,
+    //     Event: {
+    //         init: function () {
+    //             $('#confirmationContainer .confirmDatesChange').on('click', (event) => {
+    //                 event.stopPropagation();
+    //                 this.updateOrder();
+    //             });
+    //             $('#confirmationContainer .confirmationClose').on('click', (event) => {
+    //                 event.preventDefault();
+    //                 event.stopPropagation();
+    //                 isCancelButtonClicked = true;
+    //                 $('#confirmationContainer').css('display', 'none');
+    //                 CalendarFunctions.Calendar.goToInitialDates();
+    //                 CalendarFunctions.Calendar.calendar.removeAllEvents();
+    //                 CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate);
+    //                 CalendarFunctions.addEvent(TrampolineOrder.FormSendOrder.Event.EventFromCreate);
+    //             });
+    //         },
+    //         updateOrder: function () {
+    //             $('#overlay').css('display', 'flex');
+    //             let form_data = Variables.getOrderFormInputs();
+    //             form_data.orderID = TrampolineOrder.UpdateOrder.OrderIdToUpdate;
+    //             form_data.firstVisibleDay = firstVisibleDayOnCalendar;
+    //             form_data.lastVisibleDay = lastVisibleDayOnCalendar;
+    //             $.ajax({
+    //                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+    //                 method: 'PUT',
+    //                 url: '/orders/public/order',
+    //                 data: form_data,
+    //             }).done((response) => {
+    //                 $('#overlay').hide();
+    //                 if (response.status) {
+    //                     eventDay = response.Event[0].start;
+    //                     $('#dateChangeAlertMessage').text('Rezervacijos dienos sėkmingai atnaujintos!');
+    //                     $('#successfulDateChangeAlert').show().css('display', 'flex');
+    //                     $('#confirmationContainer').css('display', 'none');
+    //                     $('#thankYouDiv').html(response.view);
+    //                     CalendarFunctions.Calendar.calendar.removeAllEvents();
+    //                     CalendarFunctions.addEvent(response.Occupied);
+    //                     CalendarFunctions.addEvent(response.Event);
+    //                     TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
+    //                     TrampolineOrder.FormSendOrder.Event.EventFromCreate = response.Event;
+    //                 }
+    //                 if (!response.status) {
+    //                     $('#failedAlertMessage').text(response.failed_input.error[0]);
+    //                     $('#failedAlert').show().css('display', 'flex');
+    //                     CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay, true);
+    //                 }
+    //             });
+    //         },
+    //         DisplayConfirmationElement: function () {
+    //             $('#confirmationContainer').css('display', 'block');
+    //         },
+    //     },
+    // },
+    // CancelOrder: {
+    //     init: function () {
+    //         this.Event.init();
+    //     },
+    //     element: new bootstrap.Modal('#cancelOrderModal'),
+    //     Event: {
+    //         init: function () {
+    //             $('#cancelOrderModal .cancelOrderModalButton').on('click', (event) => {
+    //                 event.preventDefault();
+    //                 event.stopPropagation();
+    //                 this.cancelOrder();
+    //             });
+    //         },
+    //         cancelOrder: function () {
+    //             $('#overlay').css('display', 'flex');
+    //             $.ajax({
+    //                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+    //                 method: 'PUT',
+    //                 url: '/orders/public/order/view/{order_number}',
+    //                 data: {
+    //                     order_id: TrampolineOrder.UpdateOrder.OrderIdToUpdate
+    //                 },
+    //             }).done((response) => {
+    //                 $('#overlay').hide();
+    //                 TrampolineOrder.CancelOrder.element.hide();
+    //                 if (response.status) {
+    //                     $('#content-wrap').replaceWith($(response.view).find('#content-wrap'));
+    //                 }
+    //                 if (!response.status) {
+    //                     console.log('patekom');
+    //                     $('#failedAlertMessage').text(response.failed_inputs.error[0]);
+    //                     $('#failedAlert').show().css('display', 'flex');
+    //                 }
+    //             });
+    //         }
+    //     }
+    // },
     PaymentLink: {
+        OrderIdToCreateLinkFor: 0,
         init: function () {
             this.Event.init();
         },
         Event: {
             init: function () {
-                $('#orderButtons .payAdvance').click(function () {
-                    TrampolineOrder.PaymentLink.Event.generatePaymentLink()
-                });
+                // $('#orderButtons .payAdvance').click(function () {
+                //     TrampolineOrder.PaymentLink.Event.generatePaymentLink()
+                // });
             },
             generatePaymentLink: function () {
                 $('#overlay').css('display', 'flex');
@@ -450,18 +464,121 @@ let TrampolineOrder = {
                         method: 'POST',
                         url: '/orders/public/order/generate_url',
                         data: {
-                            order_id: TrampolineOrder.UpdateOrder.OrderIdToUpdate
+                            order_id: TrampolineOrder.PaymentLink.OrderIdToCreateLinkFor
                         }
                     },
                 ).done((response) => {
                     $('#overlay').hide();
                     if (response.status) {
-                        window.open(response.paymentLink, '_blank');
+                        window.location.href = response.paymentLink;
                     }
                 }).fail((jqXHR, textStatus, errorThrown) => {
                     $('#overlay').hide();
                     alert('Request failed: ' + textStatus);
                 });
+            }
+        }
+    },
+    ViewOrderModal: {
+        init: function () {
+            this.Event.init();
+        },
+        element: new bootstrap.Modal('#viewOrderModal'),
+        Event: {
+            init: function () {
+                $('#viewOrderModal').on('show.bs.modal', function () {
+                    $('.trampoline-name').each(function () {
+                        const originalName = $(this).data('original-name');
+                        if (originalName) {
+                            $(this).text(originalName);
+                        }
+                    });
+                    TrampolineOrder.ViewOrderModal.Event.updateAdvanceSum()
+                });
+                $('#viewOrderModalButtons .payForOrderAdvance').on('click', function (event) {
+                    event.preventDefault();
+                    TrampolineOrder.FormSendOrder.Event.addOrder()
+                })
+            },
+            updateAdvanceSum: function () {
+                let totalSum = 0;
+                let reservationDays = 0;
+                let startDateText = '';
+                let endDateText = '';
+
+                // Calculate reservation days for the specific event
+                const events = CalendarFunctions.Calendar.calendar.getEvents();
+                console.log("All events: ", events);
+                let reservationEvent = events.find(event => event.extendedProps.type_custom === "trampolineEvent");
+
+                if (reservationEvent) {
+                    console.log("Reservation event found: ", reservationEvent);
+                    let startDate = new Date(reservationEvent.start);
+                    let endDate = new Date(reservationEvent.end);
+                    console.log("Original start date: ", startDate);
+                    console.log("Original end date: ", endDate);
+
+                    // Adjust for Lithuanian time zone (+3 hours)
+                    startDate.setHours(startDate.getHours() + 3);
+                    endDate.setHours(endDate.getHours() + 3);
+                    console.log("Adjusted start date: ", startDate);
+                    console.log("Adjusted end date: ", endDate);
+
+                    // Adjust end date by subtracting one day
+                    endDate.setDate(endDate.getDate() - 1);
+                    console.log("Final end date: ", endDate);
+
+                    reservationDays = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1; // Convert milliseconds to days and add 1 for inclusive days
+                    console.log("Calculated reservation days: ", reservationDays);
+
+                    // Format the dates for display
+                    startDateText = startDate.toISOString().split('T')[0];
+                    endDateText = endDate.toISOString().split('T')[0];
+                }
+
+                // Update trampoline items with days and calculate total sum
+                $('.trampoline-item').each(function () {
+                    const price = parseFloat($(this).data('price'));
+                    const trampolineNameElement = $(this).find('.trampoline-name');
+                    let originalName = trampolineNameElement.data('original-name');
+
+                    if (!originalName) {
+                        originalName = trampolineNameElement.text();
+                        trampolineNameElement.data('original-name', originalName);
+                    }
+
+                    if (reservationDays > 1) {
+                        trampolineNameElement.text(`${originalName} (${reservationDays} d.)`);
+                    } else {
+                        trampolineNameElement.text(originalName);
+                    }
+
+                    const totalPrice = price * reservationDays;
+                    console.log("Total price for ", originalName, ": ", totalPrice);
+                    $(this).find('.trampoline-price').text(totalPrice.toFixed(2));
+                    totalSum += totalPrice;
+                });
+
+                // Calculate advance payment
+                const advancePayment = Math.round((totalSum * AdvancePercentage) / 10) * 10;
+                const finalPayment = totalSum - advancePayment;
+
+                // Debugging logs
+                console.log("Total Sum: ", totalSum);
+                console.log("Reservation Days: ", reservationDays);
+                console.log("Advance Payment: ", advancePayment);
+                console.log("Final Payment: ", finalPayment);
+
+                // Update the modal with the calculated values
+                $('#advance-payment').text(advancePayment.toFixed(2));
+                $('#final-payment').text(finalPayment.toFixed(2));
+                if (reservationDays > 1) {
+                    $('#reservation-dates').text(`${startDateText} - ${endDateText}`);
+                    $('#reservation-label').text('Rezervuotos dienos:');
+                } else {
+                    $('#reservation-dates').text(`${startDateText}`);
+                    $('#reservation-label').text('Rezervuota diena:');
+                }
             }
         }
     }
@@ -472,4 +589,5 @@ $(document).ready(function () {
     console.log("/js/trampolines/public/order_public.js -> ready!");
     TrampolineOrder.init();
     CalendarFunctions.Calendar.initialize();
+    console.log('Trampolines ->', Trampolines);
 });

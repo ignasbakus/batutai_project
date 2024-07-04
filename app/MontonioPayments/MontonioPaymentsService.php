@@ -81,7 +81,7 @@ class MontonioPaymentsService
             'accessKey' => $accessKey,
             'merchantReference' => $order->order_number,
             'returnUrl' => 'http://localhost:8000/orders/public/order/view/' . $order->order_number,
-            'notificationUrl' => 'https://af3f-85-206-23-106.ngrok-free.app/webhook/montonio',
+            'notificationUrl' => 'https://3f5a-78-60-128-20.ngrok-free.app/webhook/montonio',
             'currency' => 'EUR',
             'grandTotal' => (float)$grandTotal,
             'locale' => 'lt',
