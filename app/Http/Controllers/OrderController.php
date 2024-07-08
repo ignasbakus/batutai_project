@@ -78,7 +78,7 @@ class OrderController extends Controller
         $orderId = $order->id;
         $orderTrampolines = OrdersTrampoline::where('orders_id', $orderId)->where('is_active', 1)->first();
 
-        if (!$order || !$orderTrampolines) {
+        if (!$order || !$orderTrampolines || $order->order_status !== 'Apmokėtas') {
             return view('orders.public.order_not_found');
         }
         $client = $order->client()->first();

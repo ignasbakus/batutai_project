@@ -71,16 +71,18 @@ class MontonioPaymentsService
         $accessKey = config('montonio.access_key');
         $secretKey = config('montonio.secret_key');
         $apiUrl = config('montonio.api_url') . 'orders';
+        $returnUrl = config('montonio.return_url');
         $order = Order::find($orderId);
         $client = \App\Models\Client::find($order->client_id);
 
         $grandTotal = number_format((float)$order->advance_sum, 2, '.', '');
         Log::info('apiUrl ->', [$apiUrl]);
-
+        Log::info('returnUrl ->', [$returnUrl]);
+        Log::info('Return URL: ' . $returnUrl . $order->order_number);
         $payload = [
             'accessKey' => $accessKey,
             'merchantReference' => $order->order_number,
-            'returnUrl' => 'http://localhost:8000/orders/public/order/waiting_confirmation/view/' . $order->order_number,
+            'returnUrl' => $returnUrl . $order->order_number,
             'notificationUrl' => 'https://1c75-85-206-23-106.ngrok-free.app/webhook/montonio',
             'currency' => 'EUR',
             'grandTotal' => (float)$grandTotal,
