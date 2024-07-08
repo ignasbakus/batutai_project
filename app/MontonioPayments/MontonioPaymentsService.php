@@ -77,9 +77,9 @@ class MontonioPaymentsService
         $client = \App\Models\Client::find($order->client_id);
 
         $grandTotal = number_format((float)$order->advance_sum, 2, '.', '');
-        Log::info('apiUrl ->', [$apiUrl]);
-        Log::info('returnUrl ->', [$returnUrl]);
-        Log::info('Return URL: ' . $returnUrl . $order->order_number);
+//        Log::info('apiUrl ->', [$apiUrl]);
+//        Log::info('returnUrl ->', [$returnUrl]);
+//        Log::info('Return URL: ' . $returnUrl . $order->order_number);
         $payload = [
             'accessKey' => $accessKey,
             'merchantReference' => $order->order_number,

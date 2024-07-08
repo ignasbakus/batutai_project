@@ -130,16 +130,14 @@ class TrampolineOrder implements Order
 
             $this->Order->load('trampolines');
 
+            Log::info(config('mail.send_email'));
             $this->status = true;
+            if (config('mail.send_email') === true){
+                Mail::to($this->Order->client->email)->send(new OrderPlaced($this->Order));
+            }
 
             return $this;
-        } catch (QueryException $e) {
-            DB::rollBack();
-            Log::error('An error occurred while creating the order', ['error' => $e->getMessage()]);
-            $this->status = false;
-            $this->failedInputs->add('error', 'An error occurred while creating the order.');
-            return $this;
-        } catch (\Exception $e) {
+        } catch (QueryException|\Exception $e) {
             DB::rollBack();
             Log::error('An error occurred while creating the order', ['error' => $e->getMessage()]);
             $this->status = false;

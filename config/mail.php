@@ -2,6 +2,8 @@
 
 return [
 
+    'send_email' => env('SEND_EMAILS', false),
+
     /*
     |--------------------------------------------------------------------------
     | Default Mailer
