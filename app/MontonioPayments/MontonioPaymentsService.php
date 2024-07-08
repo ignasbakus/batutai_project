@@ -72,6 +72,7 @@ class MontonioPaymentsService
         $secretKey = config('montonio.secret_key');
         $apiUrl = config('montonio.api_url') . 'orders';
         $returnUrl = config('montonio.return_url');
+        $notificationUrl = config('montonio.webhook_url');
         $order = Order::find($orderId);
         $client = \App\Models\Client::find($order->client_id);
 
@@ -83,7 +84,7 @@ class MontonioPaymentsService
             'accessKey' => $accessKey,
             'merchantReference' => $order->order_number,
             'returnUrl' => $returnUrl . $order->order_number,
-            'notificationUrl' => 'https://1c75-85-206-23-106.ngrok-free.app/webhook/montonio',
+            'notificationUrl' => $notificationUrl,
             'currency' => 'EUR',
             'grandTotal' => (float)$grandTotal,
             'locale' => 'lt',
