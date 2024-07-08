@@ -134,7 +134,8 @@ class TrampolineOrder implements Order
             $this->status = true;
             if (config('mail.send_email') === true){
                 $sendResult = Mail::to($this->Order->client->email)->send(new OrderPlaced($this->Order));
-                Log::info('sendResult = '.json_encode($sendResult->toString()));
+                Log::info('sendResult = '.json_encode($sendResult->getDebug()));
+
             }
             return $this;
         } catch (QueryException|\Exception $e) {
