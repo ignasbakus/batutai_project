@@ -77,9 +77,6 @@ class MontonioPaymentsService
         $client = \App\Models\Client::find($order->client_id);
 
         $grandTotal = number_format((float)$order->advance_sum, 2, '.', '');
-//        Log::info('apiUrl ->', [$apiUrl]);
-//        Log::info('returnUrl ->', [$returnUrl]);
-//        Log::info('Return URL: ' . $returnUrl . $order->order_number);
         $payload = [
             'accessKey' => $accessKey,
             'merchantReference' => $order->order_number,
@@ -88,6 +85,7 @@ class MontonioPaymentsService
             'currency' => 'EUR',
             'grandTotal' => (float)$grandTotal,
             'locale' => 'lt',
+            'expiresIn' => 5,
             'billingAddress'    => [
                 'firstName'    => $client->name,
                 'lastName'     => $client->surname,
@@ -179,7 +177,6 @@ class MontonioPaymentsService
 
     public function orderAbandoned($orderId): void
     {
-        Log::info('Iš webhoooko patekom į MontonioPaymentService');
         (new TrampolineOrder())->cancelOrder($orderId, true);
     }
 }

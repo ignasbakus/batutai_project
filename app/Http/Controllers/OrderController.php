@@ -116,13 +116,20 @@ class OrderController extends Controller
         $order = Order::where('order_number', $order_number)->firstOrFail();
         if ($order->order_status === 'Apmokėtas') {
             return response()->json([
-                'status' => 'true',
+                'status' => true,
+                'paid' => true,
                 'order_number' => $order_number,
                 'private_page' => url('/orders/public/order/view/' . $order_number)
             ]);
         }
+        if ($order->order_status === 'Atšauktas, nes neapmokėtas') {
+            return response()->json([
+                'status' => true,
+                'paid' => false
+            ]);
+        }
 
-        return response()->json(['status' => 'false']);
+        return response()->json(['status' => false]);
     }
     public function publicUpdateCalendar(): JsonResponse
     {
@@ -247,9 +254,9 @@ class OrderController extends Controller
         $lastVisibleDay = Carbon::parse(\request()->get('lastVisibleDay', null));
         $NewOrderEventBackgroundColor = 'green';
         $NewOrderEventTitle = 'Jūsų užsakymas';
+//        dd(\request()->all());
         $Order = (new TrampolineOrder())->create((new TrampolineOrderData(\request())));
-//        (new MontonioPaymentsService())->createPaymentLink($Order->Order->id);
-//        $PaymentLink = (new MontonioPaymentsService())->retrievePaymentLink($Order->Order->id);
+//        dd($Order);
         $trampolines_id = [];
 
         foreach (\request()->get('trampolines', []) as $Trampoline) {

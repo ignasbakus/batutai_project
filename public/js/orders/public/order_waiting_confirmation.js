@@ -12,9 +12,12 @@ let checkOrderStatus = {
                 method: 'GET',
                 url: `/orders/public/order/check_payment_status/view/${order_number}`,
             }).done((response) => {
-                if (response.status === 'true') {
+                if (response.status && response.paid) {
                     window.location.href = response.private_page;
-                }``
+                } else if (response.status && !response.paid) {
+                    $('#successPayment').css('display', 'none')
+                    $('#failedPayment').css('display', 'block')
+                }
             });
         },
         startPolling: function () {

@@ -12,7 +12,7 @@
             </div>
         </div>
         <div class="row ">
-            <div class="col-4">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4">
                 <div id="trampolinesCarousel" class="carousel slide" data-bs-theme="dark">
                     <div class="carousel-inner">
                         @foreach($Trampolines as $Trampoline)
@@ -48,14 +48,17 @@
                 </button>
             </div>
             <div class="col-1"></div>
-            <div class="col-7">
-                Jusu pasirinkti batutai
+            <div class="col-12 col-sm-12 col-md-12 col-lg-7 col-xl-7 col-xxl-7">
+                <div class="text-center mt-3">
+                    <h3>Jusu pasirinkti batutai</h3>
+                </div>
                 <ul id="SelectedTrampolines" class="list-group"></ul>
                 <div class="row mt-3 ">
                     <div class="col-8"></div>
                     <div class="col-4 text-end">
-                        <div id="toOrderButton"></div>
-                        <button name="sendToOrder" id="sendToOrder" type="button" class="btn btn-primary w-75">Užsakyti
+                        <button class="btn btn-primary mt-3 d-flex align-items-center justify-content-center
+                            sendToOrderButton w-75" id="sendToOrderButton" disabled>
+                            <span id="buttonText">Užsakyti</span>
                         </button>
                     </div>
                 </div>

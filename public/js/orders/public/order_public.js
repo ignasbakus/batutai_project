@@ -52,18 +52,10 @@ let CalendarFunctions = {
                     let droppedMonth = droppedDate.getMonth();
                     if (droppedMonth < currentMonth) {
                         this.prev();
-                        // if (reservationSent) {
-                        //     CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        // } else {
-                            CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        // }
+                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                     } else if (droppedMonth > currentMonth) {
                         this.next();
-                        // if (reservationSent) {
-                        //     CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        // } else {
-                            CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        // }
+                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                     }
                     isEventDrop = false;
                 },
@@ -71,6 +63,7 @@ let CalendarFunctions = {
                 events: [],
                 datesSet: function (info) {
                     let CalendarView = info.view;
+                    console.log('CalendarView:', CalendarView)
                     let firstDayMonth = new Date(CalendarView.currentStart);
                     let firstCalendarVisibleDate = new Date(info.start);
                     let lastCalendarVisibleDate = new Date(info.end);
@@ -81,30 +74,22 @@ let CalendarFunctions = {
                     firstVisibleDayOnCalendar = firstCalendarVisibleDate.toISOString().split('T')[0];
                     lastVisibleDayOnCalendar = lastCalendarVisibleDate.toISOString().split('T')[0];
 
-                    console.log('First Month Day: ', firstMonthDay);
-                    console.log('First Visible Day: ', firstVisibleDayOnCalendar);
-                    console.log('Last Visible Day: ', lastVisibleDayOnCalendar);
-
-                    if (!isEventDrop && !isCancelButtonClicked && !isNavigating) {
-                        // if (reservationSent) {
-                            // CalendarFunctions.updateEventsPrivate(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                            // TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
-                        // } else {
-                            CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        // }
+                    let currentStart = new Date(CalendarView.currentStart);
+                    let prevButton = document.querySelector('.fc-prev-button');
+                    let todayButton = document.querySelector('.fc-today-button');
+                    if (skippedMonth) {
+                        let prevMonth = new Date(currentStart);
+                        prevMonth.setMonth(prevMonth.getMonth() - 1);
+                        prevButton.disabled = prevMonth.getMonth() === skippedMonth;
+                        todayButton.disabled = true
+                    } else {
+                        prevButton.disabled = false;
                     }
-
+                    if (!isNavigating && !isEventDrop && !isCancelButtonClicked) {
+                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+                    }
                     isEventDrop = false;
                     isCancelButtonClicked = false;
-
-                    // Disable navigation to the skipped month
-                    if (skippedMonth) {
-                        let prevButton = document.querySelector('.fc-prev-button');
-                        let prevMonth = new Date(CalendarView.currentStart);
-                        prevMonth.setMonth(prevMonth.getMonth() - 1);
-
-                        prevButton.disabled = prevMonth.getMonth() === skippedMonth.getMonth() && prevMonth.getFullYear() === skippedMonth.getFullYear();
-                    }
                 },
                 eventAllow: function (dropInfo, draggedEvent) {
                     let CouldBeDropped = true;
@@ -116,8 +101,6 @@ let CalendarFunctions = {
                     draggedEndMinusOneHour.setDate(draggedEndMinusOneHour.getDate() - 1);
                     dropEndMinusOneHour.setUTCHours(dropEndMinusOneHour.getUTCHours() + 3);
                     draggedEndMinusOneHour.setUTCHours(draggedEndMinusOneHour.getUTCHours() + 3);
-                    let dropEndForDisplay = dropEndMinusOneHour.toISOString().split('T')[0];
-                    let draggedEndForDisplay = draggedEndMinusOneHour.toISOString().split('T')[0];
 
                     Occupied.forEach(function (Occupation) {
                         let OccupationStart = new Date(Occupation.start);
@@ -135,9 +118,6 @@ let CalendarFunctions = {
                                 if (Trampoline.id === AffectedTrampoline.id) {
                                     Trampoline.rental_start = dropInfo.startStr;
                                     Trampoline.rental_end = dropInfo.endStr;
-                                    // if (reservationSent) {
-                                    //     TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
-                                    // }
                                 }
                             });
                         });
@@ -145,9 +125,6 @@ let CalendarFunctions = {
                         Trampolines.forEach(function (Trampoline) {
                             Trampoline.rental_start = draggedEvent.startStr;
                             Trampoline.rental_end = draggedEvent.endStr;
-                            // if (reservationSent) {
-                            //     TrampolineOrder.UpdateOrder.Event.DisplayConfirmationElement();
-                            // }
                         });
                     }
                     return CouldBeDropped;
@@ -166,7 +143,6 @@ let CalendarFunctions = {
         },
     },
     addEvent: function (EventsToAdd) {
-        console.log("Adding Events: ", EventsToAdd); // Log the events being added
         EventsToAdd.forEach(function (Event) {
             CalendarFunctions.Calendar.calendar.addEvent(Event);
         });
@@ -186,66 +162,42 @@ let CalendarFunctions = {
         }).done((response) => {
             $('#overlay').hide();
             Occupied = response.Occupied;
+            let Availability = response.Availability;
+            Trampolines = response.Trampolines;
             if (response.status) {
-                console.log('Availability = ', response.Availability);
-                console.log('Occupied = ', Occupied);
                 this.Calendar.calendar.removeAllEvents();
                 this.addEvent(Occupied);
-                Availability = response.Availability;
                 this.addEvent(Availability);
-                Trampolines = response.Trampolines;
 
-                // Check if the first available date is in a different month and navigate accordingly
+                // Handle navigation logic for first load and availability check
                 if (isFirstLoad && Availability.length > 0) {
                     let firstAvailableDate = new Date(Availability[0].start);
-                    let currentMonth = new Date(firstVisibleDay).getMonth();
                     let availableMonth = firstAvailableDate.getMonth();
+                    let currentMonth = new Date(firstMonthDay).getMonth();
                     if (availableMonth > currentMonth) {
-                        isNavigating = true; // Set navigating flag to true
+                        // Set navigating flag to true
+                        isNavigating = true;
+                        skippedMonth = new Date(firstMonthDay).getMonth();
+                        // Navigate to next month
                         this.Calendar.calendar.next();
+
                         // Recalculate the dates after navigation
                         let newCalendarView = this.Calendar.calendar.view;
                         let newFirstDayMonth = new Date(newCalendarView.currentStart);
                         newFirstDayMonth.setUTCHours(newFirstDayMonth.getUTCHours() + 3);
-                        firstMonthDay = newFirstDayMonth.toISOString().split('T')[0];
+                        let firstMonthDayNew = newFirstDayMonth.toISOString().split('T')[0];
 
-                        this.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                        isNavigating = false; // Reset navigating flag after update
+                        // Update events for the new month
+                        this.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDayNew);
+
+                        // Reset navigating flag after update
+                        isNavigating = false;
                     }
-                    isFirstLoad = false; // Set flag to false after first load
-
-                    // Set skippedMonth to prevent navigation to this month
-                    skippedMonth = new Date(firstVisibleDayOnCalendar);
+                    isFirstLoad = false;
                 }
             }
         });
-    },
-    // updateEventsPrivate: function (firstVisibleDay, lastVisibleDay, firstMonthDay, hasFailedUpdate = false) {
-    //     $('#overlay').css('display', 'flex');
-    //     $.ajax({
-    //         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-    //         url: '/orders/admin/order/private_calendar/get',
-    //         method: 'POST',
-    //         data: {
-    //             order_id: TrampolineOrder.UpdateOrder.OrderIdToUpdate,
-    //             first_visible_day: firstVisibleDay,
-    //             last_visible_day: lastVisibleDay,
-    //             first_month_day: firstMonthDay
-    //         },
-    //     }).done((response) => {
-    //         $('#overlay').hide();
-    //         if (response.status) {
-    //             Occupied = response.Occupied;
-    //             this.Calendar.calendar.removeAllEvents();
-    //             this.addEvent(response.Occupied);
-    //             this.addEvent(response.Availability);
-    //             Trampolines = response.Trampolines;
-    //             if (hasFailedUpdate) {
-    //                 TrampolineOrder.FormSendOrder.Event.OccupiedFromCreate = response.Occupied;
-    //             }
-    //         }
-    //     });
-    // },
+    }
 };
 
 let TrampolineOrder = {
@@ -591,3 +543,8 @@ $(document).ready(function () {
     CalendarFunctions.Calendar.initialize();
     console.log('Trampolines ->', Trampolines);
 });
+
+
+
+
+

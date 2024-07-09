@@ -82,3 +82,10 @@
     width: 16px;
     height: 16px;
 }
+
+#sendToOrderButton:disabled {
+    background-color: #cccccc; /* Light gray background */
+    cursor: not-allowed; /* Change cursor to indicate disabled state */
+    opacity: 0.6; /* Slightly transparent */
+}
+

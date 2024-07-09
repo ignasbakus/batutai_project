@@ -146,6 +146,7 @@ class TrampolineOrder implements Order
             return $this;
         }
     }
+
     public function update(TrampolineOrderData $trampolineOrderData): static
     {
         if (!$trampolineOrderData->ValidationStatus) {
@@ -265,12 +266,14 @@ class TrampolineOrder implements Order
         try {
 
             $order = \App\Models\Order::find($orderID);
-
-//            Mail::to($order->client->email)->send(new OrderDeleted($order));
-
+            if (config('mail.send_email') === true){
+                Mail::to($order->client->email)->send(new OrderDeleted($order));
+            }
             $order->trampolines()->delete();
             $order->client()->delete();
             $order->address()->delete();
+            $order->paymentCreationLog()->delete();
+            $order->paymentExecutionLog()->delete();
             $this->status = $order->delete();
             $this->Messages[] = 'Užsakymas #' . $orderID . ' ištrintas sėkmingai !';
         } catch (\Exception $exception) {
@@ -286,6 +289,7 @@ class TrampolineOrder implements Order
     public static function canRegisterOrder(TrampolineOrderData $trampolineOrderData): array
     {
         foreach ($trampolineOrderData->Trampolines as $trampoline) {
+//            dd($trampoline);
             $trampolineId = $trampoline['id'];
             $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
             $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
@@ -373,13 +377,14 @@ class TrampolineOrder implements Order
             $order->update(['order_status' => 'Atšauktas kliento']);
         } else {
             $order->update(['order_status' => 'Atšauktas, nes neapmokėtas']);
+            Log::info('Paupdatinom');
         }
         foreach ($orderTrampolines as $orderTrampoline) {
             $orderTrampoline->update(['is_active' => 0]);
         }
         $this->status = true;
         $this->Messages[] = 'Užsakymas atšauktas sėkmingai !';
-        Log::info('Atšaukimo message ->', $this->Messages[0]);
+//        Log::info('Atšaukimo message ->', $this->Messages[0]);
         return $this;
     }
     public function updateOrderStatus($orderId): array

@@ -16,18 +16,17 @@ let Carousels = {
         ChosenTrampoline: 1,
         init: function () {
             $('#trampolinesCarousel').on('slide.bs.carousel', event => {
-                this.ChosenTrampoline = $(event.relatedTarget).data('trampolineid')
+                this.ChosenTrampoline = $(event.relatedTarget).data('trampolineid');
             })
             $('#selectTrampoline').on('click', () => {
-                Trampolines.addToSelected(this.ChosenTrampoline)
+                Trampolines.addToSelected(this.ChosenTrampoline);
             })
         }
     }
 }
 
 let Trampolines = {
-    init: function () {
-    },
+    init: function () {},
     chosen: [],
     Modals: {
         showTrampoline: {
@@ -35,10 +34,10 @@ let Trampolines = {
             Events: {
                 init: function () {
                     $('#showTrampolineModal .chooseTrampoline').on('click', (event) => {
-                        event.stopPropagation()
-                        console.log("batuto id po paspaudimo: ", Carousels.trampolinesCarousel.ChosenTrampoline)
-                        Trampolines.addToSelected(Carousels.trampolinesCarousel.ChosenTrampoline)
-                        Trampolines.Modals.showTrampoline.element.hide()
+                        event.stopPropagation();
+                        console.log("batuto id po paspaudimo: ", Carousels.trampolinesCarousel.ChosenTrampoline);
+                        Trampolines.addToSelected(Carousels.trampolinesCarousel.ChosenTrampoline);
+                        Trampolines.Modals.showTrampoline.element.hide();
                     })
                 }
             }
@@ -47,7 +46,7 @@ let Trampolines = {
     SendOrder: {
         Events: {
             init: function () {
-                $('#sendToOrder').on('click', (event) => {
+                $('#sendToOrderButton').on('click', (event) => {
                     window.location.href = '/orders/public?' + $.param({
                         trampoline_id: Trampolines.chosen
                     });
@@ -57,24 +56,33 @@ let Trampolines = {
     },
     addToSelected: function (TrampolineID) {
         if (this.chosen.find((element) => element === TrampolineID) !== TrampolineID) {
-            this.chosen.push(TrampolineID)
+            this.chosen.push(TrampolineID);
         }
-        console.log('selected = ' + TrampolineID + ' | chosen trampolines => ', this.chosen)
-        this.getTrampolinesView()
+        console.log('selected = ' + TrampolineID + ' | chosen trampolines => ', this.chosen);
+        this.updateOrderButtonState();
+        this.getTrampolinesView();
     },
     removeFromSelected: function (TrampolineID) {
-        let findInChosen = this.chosen.findIndex((element) => element === TrampolineID)
-        this.chosen.splice(findInChosen, 1)
-        this.getTrampolinesView()
+        let findInChosen = this.chosen.findIndex((element) => element === TrampolineID);
+        this.chosen.splice(findInChosen, 1);
+        this.updateOrderButtonState();
+        this.getTrampolinesView();
+    },
+    updateOrderButtonState: function () {
+        if (this.chosen.length > 0) {
+            $('#sendToOrderButton').removeAttr('disabled');
+        } else {
+            $('#sendToOrderButton').attr('disabled', 'disabled');
+        }
     },
     initEventsAfterHtmlUpdate: function () {
         $('.removeSelectedTrampoline').on('click', (event) => {
-            event.stopPropagation()
-            this.removeFromSelected($(event.currentTarget).data('trampolineid'))
-        })
+            event.stopPropagation();
+            this.removeFromSelected($(event.currentTarget).data('trampolineid'));
+        });
     },
     getTrampolinesView: function () {
-        $('#overlay').css('display', 'flex')
+        $('#overlay').css('display', 'flex');
         $.ajax({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -87,15 +95,14 @@ let Trampolines = {
         }).done((response) => {
             $('#overlay').hide();
             console.log("response : ", response);
-            console.log(Trampolines.chosen)
-            $('#SelectedTrampolines').html(response.view)
+            console.log(Trampolines.chosen);
+            $('#SelectedTrampolines').html(response.view);
             this.initEventsAfterHtmlUpdate();
         }).fail(function (jqXHR, textStatus) {
             alert("Request failed: " + textStatus);
         });
     }
 }
-
 
 $(document).ready(function () {
     console.log("/js/trampolines/public/trampolines_public.js -> ready!");

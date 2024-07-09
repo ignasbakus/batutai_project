@@ -94,6 +94,8 @@ let CalendarFunctions = {
                     let dropEndForDisplay = dropEndMinusOneHour.toISOString().split('T')[0]
                     let draggedEndForDisplay = draggedEndMinusOneHour.toISOString().split('T')[0]
 
+                    console.log('Occupied =>', Occupied)
+
                     Occupied.forEach(function (Occupation) {
                         let OccupationStart = new Date(Occupation.start);
                         let OccupationEnd = new Date(Occupation.end);
@@ -106,6 +108,7 @@ let CalendarFunctions = {
                     });
 
                     if (CouldBeDropped) {
+                        console.log('Trampolines => ', trampolines)
                         trampolines.forEach(function (Trampoline) {
                             draggedEvent.extendedProps.trampolines.forEach(function (AffectedTrampoline) {
                                 if (Trampoline.id === AffectedTrampoline.id) {

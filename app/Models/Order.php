@@ -38,9 +38,14 @@ class Order extends Model
         return $this->belongsTo(ClientAddress::class, 'delivery_address_id');
     }
 
-    public function payment(): HasMany
+    public function paymentCreationLog(): HasMany
     {
         return $this->hasMany(MontonioPaymentCreationLog::class);
+    }
+
+    public function paymentWebhooksLog(): HasMany
+    {
+        return $this->hasMany(MontonioPaymentWebhooksLog::class);
     }
 
     public array $FieldRelationsToColumns = [
