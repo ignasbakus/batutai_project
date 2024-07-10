@@ -25,10 +25,19 @@ class DataTablesProcessing
 
     private string $TableName;
 
-    public function getPaginatedData(Model $model, array $Relations, int $Length, int $Start, array $Ordering = [], $startDate = null, $endDate = null, $searchValue = null): static
-    {
+    public function getPaginatedData(
+        Model $model,
+        array $Relations,
+        int $Length,
+        int $Start,
+        array $Ordering = [],
+              $startDate = null,
+              $endDate = null,
+              $searchValue = null
+    ): static {
         $this->TableName = $model->getTable();
         $Query = $model->newQuery();
+
         if (count($Relations) > 0) {
             $Query->with($Relations);
         }
@@ -50,25 +59,41 @@ class DataTablesProcessing
             });
         }
 
-
         switch ($model->getTable()) {
-            case 'trampolines' :
-                $Query->leftJoin((new Parameter())->getTable(), (new Parameter())->getTable() . '.trampolines_id', '=', 'trampolines.id');
+            case 'trampolines':
+                $Query->leftJoin(
+                    (new Parameter())->getTable(),
+                    (new Parameter())->getTable() . '.trampolines_id',
+                    '=',
+                    'trampolines.id'
+                );
                 break;
-            case 'orders' :
-                $Query->leftJoin((new OrdersTrampoline())->getTable(), (new OrdersTrampoline())->getTable() . '.orders_id', '=', 'orders.id');
+            case 'orders':
+                $Query->leftJoin(
+                    (new OrdersTrampoline())->getTable(),
+                    (new OrdersTrampoline())->getTable() . '.orders_id',
+                    '=',
+                    'orders.id'
+                );
                 break;
         }
+
         try {
             foreach ($Ordering as $Order) {
                 $Query->orderBy($model->getField($Order['column']), $Order['dir']);
             }
         } catch (\Exception $exception) {
+            // Handle exception if needed
         }
+
+        // Using distinct to avoid duplicate entries
+        $Query->distinct();
         $Query->offset($Start)->limit($Length);
         $this->List = $Query->get();
+
         $this->recordsTotal = $model->newQuery()->count();
         $this->recordsFiltered = $Query->count();
+
         if ($this->List->isEmpty()) {
             $this->data = [];
         } else {
@@ -76,6 +101,7 @@ class DataTablesProcessing
         }
         return $this;
     }
+
 
     private function generateTableRows(): void
     {
@@ -134,9 +160,12 @@ class DataTablesProcessing
                     $TrampolineNames = '';
                     $RentalStart = '';
                     $RentalEnd = '';
+                    $DeliveryTime = '';
                     if ($CollectionItem->Trampolines->isNotEmpty()) {
                         $RentalStart = $CollectionItem->Trampolines->first()->rental_start;
                         $RentalEnd = Carbon::parse($CollectionItem->Trampolines->first()->rental_end)->subDay()->toDateString();
+                        $DeliveryTime = $CollectionItem->Trampolines->first()->delivery_time;
+//                        dd($DeliveryTime);
 
                         foreach ($CollectionItem->Trampolines as $Trampoline) {
                             $TrampolineNames .= 'Batutas ' . $Trampoline->trampoline->title . '<br>';
@@ -149,6 +178,7 @@ class DataTablesProcessing
                         $CollectionItem->order_date,
                         $TrampolineNames,
                         $RentalStart . '<br>' . $RentalEnd,
+                        $DeliveryTime,
                         $CollectionItem->client->name . ' <br> ' . $CollectionItem->client->surname,
                         $CollectionItem->client->email . '<br>' . $CollectionItem->client->phone,
 //                        $CollectionItem->client->phone,

@@ -31,56 +31,62 @@
                 <form id="orderForm" class="needs-validation" novalidate>
                     <div class="row">
                         <div class="form-group col-6">
-                            <label for="customerName">Vardas:</label>
+                            <label for="customerName">Vardas</label>
                             <input name="customerName" type="text" class="form-control" id="customerName"
                                    placeholder="Įveskite vardą" required>
                             <div class="invalid-feedback customerNameInValidFeedback"></div>
                         </div>
                         <div class="form-group col-6">
-                            <label for="customerSurname">Pavardė:</label>
+                            <label for="customerSurname">Pavardė</label>
                             <input name="customerSurname" type="text" class="form-control" id="customerSurname"
                                    placeholder="Įveskite pavardę" required>
                             <div class="invalid-feedback customerSurnameInValidFeedback"></div>
                         </div>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="customerPhoneNumber">Telefono Numeris:</label>
+                        <label for="customerPhoneNumber">Telefono Numeris</label>
                         <input name="customerPhoneNumber" type="tel" class="form-control" id="customerPhoneNumber"
                                placeholder="Įveskite telefono numerį">
                         <div class="invalid-feedback customerPhoneNumberInValidFeedback"></div>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="customerEmail">El. Paštas:</label>
+                        <label for="customerEmail">El. Paštas</label>
                         <input name="customerEmail" type="email" class="form-control" id="customerEmail"
                                placeholder="Įveskite el. paštą" required>
                         <div class="invalid-feedback customerEmailInValidFeedback"></div>
                     </div>
                     <div class="row mt-3">
                         <div class="form-group col-6">
-                            <label for="customerDeliveryCity">Pristatymo Miestas:</label>
+                            <label for="customerDeliveryCity">Pristatymo Miestas</label>
                             <input name="customerDeliveryCity" type="text" class="form-control"
                                    id="customerDeliveryCity"
                                    placeholder="Įveskite pristatymo miestą" required>
                             <div class="invalid-feedback customerDeliveryCityInValidFeedback"></div>
                         </div>
                         <div class="form-group col-6">
-                            <label for="customerDeliveryPostCode">Pašto Kodas:</label>
+                            <label for="customerDeliveryPostCode">Pašto Kodas</label>
                             <input name="customerDeliveryPostCode" type="text" class="form-control"
                                    id="customerDeliveryPostCode" placeholder="Įveskite pašto kodą" required>
                             <div class="invalid-feedback customerDeliveryPostCodeInValidFeedback"></div>
                         </div>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="customerDeliveryAddress">Pristatymo Adresas:</label>
+                        <label for="customerDeliveryAddress">Pristatymo Adresas</label>
                         <input name="customerDeliveryAddress" class="form-control" id="customerDeliveryAddress"
                                placeholder="Įveskite pristatymo adresą" required>
                         <div class="invalid-feedback customerDeliveryAddressNameInValidFeedback"></div>
-
+                    </div>
+                    <div class="row mt-3">
+                        <div class="form-group col">
+                            <label for="customerDeliveryTime">Pristatymo laikas</label>
+                            <input name="customerDeliveryTime" class="form-control" type="text" id="customerDeliveryTime" placeholder="Pasirinkite pristatymo laiką" required>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-4 infoBeforeSuccessfulOrder" style="display: block">
                             <button class="btn btn-primary mt-3 d-flex align-items-center justify-content-center
-                            viewOrderButton" id="viewOrderButton" data-toggle="modal" data-target="#viewOrderModal" disabled>
+                            viewOrderButton" id="viewOrderButton" data-toggle="modal" data-target="#viewOrderModal"
+                                    disabled>
                                 <span id="buttonText">Peržiūrėti užsakymą</span>
                             </button>
                         </div>
@@ -123,7 +129,8 @@
                 </div>
             </div>
         </div>--}}
-        <div class="modal fade" id="viewOrderModal" tabindex="-1" role="dialog" aria-labelledby="reservationModalLabel" aria-hidden="true">
+        <div class="modal fade" id="viewOrderModal" tabindex="-1" role="dialog" aria-labelledby="reservationModalLabel"
+             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
@@ -138,9 +145,11 @@
                         <div class="order-summary">
                             <h5 class="mb-3">Užsakomi batutai</h5>
                             @foreach($Trampolines as $trampoline)
-                                <div class="d-flex justify-content-between trampoline-item py-2" data-price="{{ $trampoline->Parameter->price }}">
+                                <div class="d-flex justify-content-between trampoline-item py-2"
+                                     data-price="{{ $trampoline->Parameter->price }}">
                                     <span class="font-weight-bold trampoline-name">Batutas {{$trampoline->title}}</span>
-                                    <span class="font-weight-bold trampoline-price">{{ number_format($trampoline->Parameter->price, 2) }}{{$currency}}</span>
+                                    <span
+                                        class="font-weight-bold trampoline-price">{{ number_format($trampoline->Parameter->price, 2) }}{{$currency}}</span>
                                 </div>
                             @endforeach
                             <hr>
@@ -174,5 +183,6 @@
         let AdvancePercentage = {{ Illuminate\Support\Js::from($AdvancePercentage)}};
     </script>
     <script src='/frameworks/fullcalendar6111/dist/index.global.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="/js/orders/public/order_public.js"></script>
 @endsection

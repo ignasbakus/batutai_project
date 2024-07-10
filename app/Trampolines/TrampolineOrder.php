@@ -111,6 +111,7 @@ class TrampolineOrder implements Order
                     'rental_start' => $RentalStart->format('Y-m-d'),
                     'rental_end' => $RentalEnd->format('Y-m-d'),
                     'rental_duration' => $RentalDuration,
+                    'delivery_time' => $trampolineOrderData->DeliveryTime,
                     'total_sum' => $RentalDuration * $Trampoline->Parameter->price,
                     'is_active' => 1
                 ]);
@@ -234,6 +235,7 @@ class TrampolineOrder implements Order
                         'trampolines_id' => $Trampoline->id,
                     ],
                     [
+                        'delivery_time' => $trampolineOrderData->DeliveryTime,
                         'rental_start' => Carbon::parse($trampoline['rental_start'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_start)->format('Y-m-d'),
                         'rental_end' => Carbon::parse($trampoline['rental_end'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_end)->format('Y-m-d'),
                         'rental_duration' => $RentalDuration,
@@ -273,7 +275,7 @@ class TrampolineOrder implements Order
             $order->client()->delete();
             $order->address()->delete();
             $order->paymentCreationLog()->delete();
-            $order->paymentExecutionLog()->delete();
+            $order->paymentWebhooksLog()->delete();
             $this->status = $order->delete();
             $this->Messages[] = 'Užsakymas #' . $orderID . ' ištrintas sėkmingai !';
         } catch (\Exception $exception) {

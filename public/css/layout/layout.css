@@ -13,3 +13,12 @@
     width: 100%;
     height: 3.5rem;
 }
+
+.navbar-lightblue {
+    background-color: #4E91FD; /* Blue color */
+}
+
+.navbar-lightblue .navbar-brand,
+.navbar-lightblue .nav-link {
+    color: white; /* White text color for contrast */
+}

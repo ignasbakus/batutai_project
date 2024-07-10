@@ -122,3 +122,7 @@ label[for="showConfirmation"] input[type="checkbox"] {
     width: auto;
     max-width: 100%;
 }
+
+/*.flatpickr-calendar {*/
+/*    z-index: 1050; !* Higher than modal's z-index *!*/
+/*}*/

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('rental_start');
             $table->date('rental_end');
             $table->decimal('rental_duration');
+            $table->string('delivery_time');
             $table->boolean('is_active'); /*Ar uzsakymas aktyvus*/
             $table->decimal('total_sum');
             $table->timestamps();

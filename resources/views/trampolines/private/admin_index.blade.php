@@ -274,5 +274,6 @@
     </div>
 @endsection
 @section('custom_js')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="/js/trampolines/private/trampolines_admin.js"></script>
 @endsection

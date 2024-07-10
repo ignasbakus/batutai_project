@@ -51,7 +51,6 @@ class OrderController extends Controller
             'recordsTotal' => $Orders->recordsTotal ?? 0,
             'recordsFiltered' => $Orders->recordsFiltered ?? 0,
         ]);
-
     }
 
     public function adminGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application

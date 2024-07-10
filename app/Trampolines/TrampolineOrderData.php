@@ -17,6 +17,7 @@ class TrampolineOrderData
     public string $CustomerEmail;
     public string $CustomerPhone;
     public string $City;
+    public string $DeliveryTime;
     public string $PostCode;
     public string $Address;
     public array $Trampolines;
@@ -36,7 +37,8 @@ class TrampolineOrderData
                 'customerPhoneNumber' => 'required',
                 'customerDeliveryCity' => 'required|min:4',
                 'customerDeliveryPostCode' => 'required|digits:5|numeric',
-                'customerDeliveryAddress' => 'required|min:5'
+                'customerDeliveryAddress' => 'required|min:5',
+                'customerDeliveryTime' => 'required'
             ], [
                 'customerName.required' => 'Vardas privalomas',
                 'customerName.min' => 'Vardas per trumpas',
@@ -49,7 +51,8 @@ class TrampolineOrderData
                 'customerDeliveryPostCode.digits' => 'Pašto kodas turi būti sudarytas iš 5 skaitmenų',
                 'customerDeliveryPostCode.numeric' => 'Naudojami gali būti tik skaičiai',
                 'customerDeliveryAddress.required' => 'Adresas privalomas',
-                'customerDeliveryAddress.min' => 'Adresas per trumpas'
+                'customerDeliveryAddress.min' => 'Adresas per trumpas',
+                'customerDeliveryTime.required' => 'Pristatymo laikas privalomas'
             ]);
             if($validator->fails()) {
                 Log::info('Didnt pass validator');
@@ -62,6 +65,7 @@ class TrampolineOrderData
                 $this->ValidationStatus = true;
                 //Order id
                 $this->orderID = $request->get('orderID', 0);
+                $this->DeliveryTime = $request->get('customerDeliveryTime', '');
                 //Order form -> client info
                 $this->ClientID = $request->get('clientID', 0);
                 $this->CustomerName = $request->get('customerName', '');

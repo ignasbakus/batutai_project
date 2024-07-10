@@ -5,6 +5,7 @@ let isEventDrop = false;
 let isCancelButtonClicked = false;
 let modalPopulated = false;
 let trampolineID;
+let defaultTime;
 let eventDay
 let trampolines;
 let firstMonthDay;
@@ -17,7 +18,8 @@ let isWeeklyFilterActive = false;
 /* JS classes */
 let Variables = {
     orderFormInput: [
-        'customerName', 'customerSurname', 'customerPhoneNumber', 'customerEmail', 'customerDeliveryCity', 'customerDeliveryPostCode', 'customerDeliveryAddress'
+        'customerName', 'customerSurname', 'customerPhoneNumber', 'customerEmail', 'customerDeliveryCity',
+        'customerDeliveryPostCode', 'customerDeliveryAddress', 'customerDeliveryTime'
     ],
     getOrderFormInputs: function (ModalID) {
         let values = {}
@@ -170,6 +172,17 @@ let CalendarFunctions = {
         });
     }
 }
+let flatPicker = {
+    initialize: function () {
+        $('#customerDeliveryTime').flatpickr({
+            enableTime: true, // Enable time picker
+            noCalendar: true, // Hide calendar
+            dateFormat: "H:i", // Format displayed time (24-hour)
+            time_24hr: true, // Use 24-hour time format
+            defaultDate: defaultTime
+        })
+    }
+}
 let Orders = {
     init: function () {
         this.Modals.deleteOrder.init()
@@ -238,7 +251,8 @@ let Orders = {
                     {title: "Užsakymo<br>Numeris", orderable: false},
                     {title: "Užsakymo data", orderable: false},
                     {title: "Užsakytas batutas", orderable: false},
-                    {title: "Užsakyta nuo-iki"},
+                    {title: "Užsakyta <br> nuo-iki"},
+                    {title: "Pristatymo <br> laikas", orderable: false},
                     {title: "Klientas", orderable: false},
                     {title: "Elektroninis paštas <br> ir Telefonas", orderable: false},
                     // {title: "Telefonas", orderable: false},
@@ -413,7 +427,12 @@ let Orders = {
                     set: function (Value) {
                         $('#updateOrderModal input[name=customerDeliveryAddress]').val(Value)
                     }
-                }
+                },
+                customerDeliveryTime: {
+                    set: function (Value) {
+                        $('#updateOrderModal input[name=customerDeliveryTime]').val(Value)
+                    }
+                },
             },
             fillDataForm: function (BackendResponse) {
                 this.dataForm.customerName.set(BackendResponse.client.name)
@@ -423,6 +442,7 @@ let Orders = {
                 this.dataForm.customerDeliveryCity.set(BackendResponse.address.address_town)
                 this.dataForm.customerDeliveryPostCode.set(BackendResponse.address.address_postcode)
                 this.dataForm.customerDeliveryAddress.set(BackendResponse.address.address_street)
+                this.dataForm.customerDeliveryTime.set(BackendResponse.trampolines[0].delivery_time)
             },
             prepareModal: function (OrderID) {
                 this.orderIdToUpdate = OrderID;
@@ -474,6 +494,8 @@ let Orders = {
                 }).done((response) => {
                     $('#overlay').hide();
                     if (response.status) {
+                        defaultTime = response.order.trampolines[0].delivery_time
+                        flatPicker.initialize();
                         this.OccupiedWhenCancelled = response.Occupied
                         this.EventWhenCancelled = response.Events
                         eventDay = response.Events[0].start
@@ -483,6 +505,7 @@ let Orders = {
                         trampolines = response.Trampolines
                         CalendarFunctions.addEvent(response.Occupied)
                         CalendarFunctions.addEvent(response.Events)
+                        console.log('defaultTime => ', defaultTime)
                         modalPopulated = true
                         trampolines = response.Trampolines
                     } else {
