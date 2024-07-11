@@ -331,6 +331,7 @@ class OrderController extends Controller
 
     public function orderUpdate(): JsonResponse
     {
+//        dd(\request()->get('trampolines[0][rental_start]'));
         $Order = (new TrampolineOrder())->update(new TrampolineOrderData(\request()));
 
         if (!isset($Order->Order)) {
