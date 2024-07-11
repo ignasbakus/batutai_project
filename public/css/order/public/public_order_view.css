@@ -238,11 +238,11 @@ hr.new1 {
 
 @media (max-width: 576px) {
     .fc-day-header {
-        font-size: 2px; /* Example: Increase day header font size */
+        font-size: 100px; /* Example: Increase day header font size */
     }
     .fc-daygrid-event {
-        font-size: 2px; /* Example: Decrease event font size */
-        padding: 2px 5px; /* Example: Adjust padding for event items */
+        font-size: 10px; /* Example: Decrease event font size */
+        padding: 2px 2px; /* Example: Adjust padding for event items */
     }
     .fc-time-grid-event {
         font-size: 2px; /* Example: Decrease event font size in time grid */
