@@ -100,7 +100,6 @@ let CalendarFunctions = {
                     }
                     isEventDrop = false;
                 },
-                dayMaxEvents: true,
                 events: [],
                 datesSet: function (info) {
                     let CalendarView = info.view;
