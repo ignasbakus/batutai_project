@@ -8,8 +8,6 @@ let PickerInitialized = false
 let PcCalendar = false
 let mobileCalendar = false
 let Calendar = null;
-let isCalendarOpen = false;
-let isAjaxRunning = false;
 let Picker = null;
 let isEventDrop = false;
 let isFirstLoad = true; // Add flag for initial load
@@ -175,7 +173,6 @@ let CalendarFunctions = {
         // console.log('firstVisibleDay:', firstVisibleDay)
         // console.log('lastVisibleDay:', lastVisibleDay)
         $('#overlay').css('display', 'flex');
-        isAjaxRunning = true;
         $.ajax({
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             url: '/orders/public/order/public_calendar/get',
@@ -225,22 +222,29 @@ let CalendarFunctions = {
                 if (mobileCalendar) {
                     /* We minus one day from range.end, because in full calendar we use the next days midnight,
                     * here it doesn't work like that */
+                    // lockDays = null
+                    const dateCells = document.querySelectorAll('.litepicker-day'); // Adjust selector as needed
+                    dateCells.forEach(cell => {
+                        cell.classList.remove('is-occupied'); // Remove class indicating occupied days
+                        cell.removeAttribute('data-event-id'); // Remove any event ID attribute
+                    });
                     lockDays = response.Occupied ? response.Occupied.map(range => {
                         const endDate = new Date(range.end);
                         endDate.setDate(endDate.getDate() - 1); // Subtract one day
-                        return [range.start, endDate.toISOString().split('T')[0]]; // Format back to 'YYYY-MM-DD'
+                        console.log('range start', range.start)
+                        let newRangeStart = [range.start, endDate.toISOString().split('T')[0]]; // Format back to 'YYYY-MM-DD'
+                        console.log('newRangeStart', newRangeStart)
+                        return newRangeStart
                     }) : [];
-                    console.log("Lock days: ", lockDays);
+                    console.log('Lock days: ', lockDays);
                     if (!PickerInitialized) {
                         litePicker.init();
                         PickerInitialized = true;
                     }
-                    console.log('Picker get date', Picker.getDate())
                     Picker.setOptions({ disallowLockDaysInRange: true });
                     Picker.gotoDate(firstMonthDay)
                 }
             }
-            isAjaxRunning = false;
         });
     }
 };
@@ -297,23 +301,6 @@ let litePicker = {
                 console.log('Next month button clicked');
                 CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
             });
-
-
-            $(document).on('click', function (event) {
-                litePicker.Events.handleDocumentClick(event)
-            })
-
-            // document.addEventListener('click', function () {
-            // })
-
-            // document.querySelector('#calendarInput').addEventListener('focus', function () {
-            //     litePicker.Events.openCalendar();
-            // });
-
-            document.querySelector('#litepicker').addEventListener('click', function () {
-                // litePicker.Events.openCalendar();
-                isCalendarOpen = true;
-            });
         },
         findFirstLastVisibleDay: function () {
             console.log('Litepicker rendered');
@@ -341,14 +328,6 @@ let litePicker = {
                     console.log('First visible day:', firstVisibleFormatted);
                     console.log('Last visible day:', lastVisibleFormatted);
                 }
-            }
-        },
-        handleDocumentClick: function (event) {
-            const calendarElement = document.querySelector('.litepicker'); // Adjust the selector as needed
-            if (isAjaxRunning) {
-                event.preventDefault();
-                event.stopPropagation();
-                return false;
             }
         },
     }

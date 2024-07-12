@@ -138,6 +138,7 @@ class OrderController extends Controller
     public function publicUpdateCalendar(): JsonResponse
     {
         $trampolineIds = \request()->get('trampoline_id', []);
+//        dd($trampolineIds);
         $firstVisibleDay = Carbon::parse(\request()->get('first_visible_day', null));
         $lastVisibleDay = Carbon::parse(\request()->get('last_visible_day', null));
         $firstMonthDay = Carbon::parse(\request()->get('first_month_day', null));
@@ -173,6 +174,39 @@ class OrderController extends Controller
             $trampoline->rental_start = Carbon::parse($Availability[0]->start)->format('Y-m-d');
             $trampoline->rental_end = Carbon::parse($Availability[0]->end)->format('Y-m-d');
         }
+
+        $fakeData = [
+            [
+                'id' => null,
+                'start' => '2024-07-12',
+                'end' => '2024-07-15',
+                'backgroundColor' => 'red',
+                'editable' => false,
+                'extendedProps' => [
+                    'type_custom' => 'occ'
+                ]
+            ],
+            [
+                'id' => null,
+                'start' => '2024-07-17',
+                'end' => '2024-07-19',
+                'backgroundColor' => 'red',
+                'editable' => false,
+                'extendedProps' => [
+                    'type_custom' => 'occ'
+                ]
+            ],
+            [
+                'id' => null,
+                'start' => '2024-08-13',
+                'end' => '2024-08-16',
+                'backgroundColor' => 'red',
+                'editable' => false,
+                'extendedProps' => [
+                    'type_custom' => 'occ'
+                ]
+            ]
+        ];
 
 //        dd($Occupied);
 
