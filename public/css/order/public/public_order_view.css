@@ -251,3 +251,21 @@ hr.new1 {
         white-space: normal; /* Wrap event title on smaller screens */
     }
 }
+
+#calendar, #orderDates {
+    display: none;
+}
+
+/* Show PC calendar for larger screens */
+@media (min-width: 768px) {
+    #calendar {
+        display: block;
+    }
+}
+
+/* Show mobile calendar for smaller screens */
+@media (max-width: 767px) {
+    #orderDates {
+        display: block;
+    }
+}

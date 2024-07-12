@@ -72,6 +72,13 @@
                                placeholder="Įveskite pristatymo adresą" required>
                         <div class="invalid-feedback customerDeliveryAddressNameInValidFeedback"></div>
                     </div>
+                    <div class="row mt-3" id="orderDates">
+                        <div class="form-group col">
+                            <label for="litepicker">Užsakymo datos</label>
+                            <input name="litepicker" class="form-control" type="text" id="litepicker"
+                                   placeholder="Pasirinkite datas" required>
+                        </div>
+                    </div>
                     <div class="row mt-3">
                         <div class="form-group col">
                             <label for="customerDeliveryTime">Pristatymo laikas</label>
@@ -92,7 +99,6 @@
             </div>
             <div class="col-lg-7 col-md-6 col-sm-12">
                 <div id="calendar"></div>
-                {{--                <input type="text" id="litepicker" placeholder="Select Date">--}}
             </div>
             <div class="alert alert-warning alert-dismissible fade show custom-alert col-12 mt-3" id="failedAlert"
                  role="alert"
