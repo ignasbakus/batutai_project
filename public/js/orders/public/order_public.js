@@ -3,7 +3,12 @@ let eventDay;
 let firstVisibleDayOnCalendar;
 let lastVisibleDayOnCalendar;
 let firstMonthDay;
+let lockDays;
+let PickerInitialized = false
+let PcCalendar = false
+let mobileCalendar = false
 let Calendar = null;
+let Picker = null;
 let isEventDrop = false;
 let isFirstLoad = true; // Add flag for initial load
 let isNavigating = false; // Add flag for navigation
@@ -17,15 +22,18 @@ today = today.toISOString().split('T')[0];
 /* JS classes */
 let showCalendar = {
     showCalendar: function () {
-        if($(window).width() >= 768){
+        if ($(window).width() >= 768) {
             $('#calendar').css('display', 'block');
             $('#orderDates').css('display', 'none');
-            CalendarFunctions.Calendar.initialize()
+            PcCalendar = true;
+            mobileCalendar = false;
         } else {
             $('#calendar').css('display', 'none');
             $('#orderDates').css('display', 'block');
-            litePicker.initialize();
+            mobileCalendar = true;
+            PcCalendar = false;
         }
+        CalendarFunctions.Calendar.initialize()
     }
 }
 let Variables = {
@@ -162,6 +170,8 @@ let CalendarFunctions = {
         });
     },
     updateEventsPublic: function (firstVisibleDay, lastVisibleDay, firstMonthDay) {
+        // console.log('firstVisibleDay:', firstVisibleDay)
+        // console.log('lastVisibleDay:', lastVisibleDay)
         $('#overlay').css('display', 'flex');
         $.ajax({
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -179,35 +189,52 @@ let CalendarFunctions = {
             let Availability = response.Availability;
             Trampolines = response.Trampolines;
             if (response.status) {
-                this.Calendar.calendar.removeAllEvents();
-                this.addEvent(Occupied);
-                this.addEvent(Availability);
+                if (PcCalendar) {
+                    this.Calendar.calendar.removeAllEvents();
+                    this.addEvent(Occupied);
+                    this.addEvent(Availability);
+                    if (isFirstLoad && Availability.length > 0) {
+                        let firstAvailableDate = new Date(Availability[0].start);
+                        let availableMonth = firstAvailableDate.getMonth();
+                        let currentMonth = new Date(firstMonthDay).getMonth();
+                        if (availableMonth > currentMonth) {
+                            // Set navigating flag to true
+                            isNavigating = true;
+                            skippedMonth = new Date(firstMonthDay).getMonth();
+                            // Navigate to next month
+                            this.Calendar.calendar.next();
 
-                // Handle navigation logic for first load and availability check
-                if (isFirstLoad && Availability.length > 0) {
-                    let firstAvailableDate = new Date(Availability[0].start);
-                    let availableMonth = firstAvailableDate.getMonth();
-                    let currentMonth = new Date(firstMonthDay).getMonth();
-                    if (availableMonth > currentMonth) {
-                        // Set navigating flag to true
-                        isNavigating = true;
-                        skippedMonth = new Date(firstMonthDay).getMonth();
-                        // Navigate to next month
-                        this.Calendar.calendar.next();
+                            // Recalculate the dates after navigation
+                            let newCalendarView = this.Calendar.calendar.view;
+                            let newFirstDayMonth = new Date(newCalendarView.currentStart);
+                            newFirstDayMonth.setUTCHours(newFirstDayMonth.getUTCHours() + 3);
+                            let firstMonthDayNew = newFirstDayMonth.toISOString().split('T')[0];
 
-                        // Recalculate the dates after navigation
-                        let newCalendarView = this.Calendar.calendar.view;
-                        let newFirstDayMonth = new Date(newCalendarView.currentStart);
-                        newFirstDayMonth.setUTCHours(newFirstDayMonth.getUTCHours() + 3);
-                        let firstMonthDayNew = newFirstDayMonth.toISOString().split('T')[0];
+                            // Update events for the new month
+                            this.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDayNew);
 
-                        // Update events for the new month
-                        this.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDayNew);
-
-                        // Reset navigating flag after update
-                        isNavigating = false;
+                            // Reset navigating flag after update
+                            isNavigating = false;
+                        }
+                        isFirstLoad = false;
                     }
-                    isFirstLoad = false;
+                }
+                if (mobileCalendar) {
+                    /* We minus one day from range.end, because in full calendar we use the next days midnight,
+                    * here it doesn't work like that */
+                    lockDays = response.Occupied ? response.Occupied.map(range => {
+                        const endDate = new Date(range.end);
+                        endDate.setDate(endDate.getDate() - 1); // Subtract one day
+                        return [range.start, endDate.toISOString().split('T')[0]]; // Format back to 'YYYY-MM-DD'
+                    }) : [];
+                    console.log("Lock days: ", lockDays);
+                    if (!PickerInitialized) {
+                        litePicker.init();
+                        PickerInitialized = true;
+                    }
+                    console.log('Picker get date', Picker.getDate())
+                    Picker.setOptions({ disallowLockDaysInRange: true });
+                    Picker.gotoDate(firstMonthDay)
                 }
             }
         });
@@ -228,13 +255,71 @@ let flatPicker = {
 }
 
 let litePicker = {
+    init: function () {
+        this.initialize()
+        this.Events.init()
+    },
     initialize: function () {
-        const picker = new Litepicker({
+        Picker = new Litepicker({
             element: document.getElementById('litepicker'),
             singleMode: false, // Set to true for single date selection
-            format: 'YYYY-MM-DD', // Customize the date format
-            // Add more options as needed
+            format: 'YYYY-MM-DD',
+            lockDays: lockDays,
+            disallowLockDaysInRange: true,
+            minDate: today,
+            lockDaysFilter: (date) => {
+                if (!lockDays.length) return false; // Return false if lockDays is empty
+
+                return lockDays.some(range => {
+                    if (Array.isArray(range)) {
+                        const start = new Date(range[0]);
+                        const end = new Date(range[1]);
+                        return date.getTime() >= start.getTime() && date.getTime() <= end.getTime();
+                    } else {
+                        return date.format('YYYY-MM-DD') === range;
+                    }
+                });
+            },
         })
+    },
+    Events: {
+        init: function () {
+            Picker.on('render', function () {
+                litePicker.Events.findFirstLastVisibleDay()
+            });
+            $(document).on('click', '.button-next-month', function () {
+                console.log('Next month button clicked');
+                CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+            });
+        },
+        findFirstLastVisibleDay: function () {
+            console.log('Litepicker rendered');
+            const calendarEl = document.querySelector('.litepicker');
+            console.log('Calendar element:', calendarEl);
+            if (calendarEl) {
+                const firstDay = calendarEl.querySelector('.day-item:not(.is-locked)');
+                const lastDay = calendarEl.querySelector('.day-item:not(.is-locked):last-child');
+
+                if (firstDay && lastDay) {
+                    const firstVisibleDay = new Date(parseInt(firstDay.getAttribute('data-time')));
+                    const lastVisibleDay = new Date(parseInt(lastDay.getAttribute('data-time')));
+
+                    // Add 3 hours for Vilnius timezone (GMT+3)
+                    firstVisibleDay.setHours(firstVisibleDay.getHours() + 3);
+                    lastVisibleDay.setHours(lastVisibleDay.getHours() + 3);
+
+                    // Format dates as YYYY-MM-DD
+                    const firstVisibleFormatted = firstVisibleDay.toISOString().split('T')[0];
+                    const lastVisibleFormatted = lastVisibleDay.toISOString().split('T')[0];
+                    firstVisibleDayOnCalendar = firstVisibleFormatted;
+                    lastVisibleDayOnCalendar = lastVisibleFormatted;
+                    firstMonthDay = firstVisibleFormatted
+
+                    console.log('First visible day:', firstVisibleFormatted);
+                    console.log('Last visible day:', lastVisibleFormatted);
+                }
+            }
+        }
     }
 }
 
@@ -312,7 +397,7 @@ let TrampolineOrder = {
         },
         checkFormValidity: function () {
             let isValid = true;
-            $('#orderForm input[required]').each(function () {
+            $('#orderForm input[required]:visible').each(function () {
                 if ($(this).val().trim() === '') {
                     isValid = false;
                     return false;

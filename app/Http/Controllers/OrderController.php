@@ -174,7 +174,7 @@ class OrderController extends Controller
             $trampoline->rental_end = Carbon::parse($Availability[0]->end)->format('Y-m-d');
         }
 
-//        dd($Trampolines);
+//        dd($Occupied);
 
         return response()->json([
             'status' => true,
