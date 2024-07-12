@@ -8,6 +8,8 @@ let PickerInitialized = false
 let PcCalendar = false
 let mobileCalendar = false
 let Calendar = null;
+let isCalendarOpen = false;
+let isAjaxRunning = false;
 let Picker = null;
 let isEventDrop = false;
 let isFirstLoad = true; // Add flag for initial load
@@ -173,6 +175,7 @@ let CalendarFunctions = {
         // console.log('firstVisibleDay:', firstVisibleDay)
         // console.log('lastVisibleDay:', lastVisibleDay)
         $('#overlay').css('display', 'flex');
+        isAjaxRunning = true;
         $.ajax({
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             url: '/orders/public/order/public_calendar/get',
@@ -237,6 +240,7 @@ let CalendarFunctions = {
                     Picker.gotoDate(firstMonthDay)
                 }
             }
+            isAjaxRunning = false;
         });
     }
 };
@@ -267,6 +271,8 @@ let litePicker = {
             lockDays: lockDays,
             disallowLockDaysInRange: true,
             minDate: today,
+            autoApply: false,
+            zIndex: 9998,
             lockDaysFilter: (date) => {
                 if (!lockDays.length) return false; // Return false if lockDays is empty
 
@@ -290,6 +296,23 @@ let litePicker = {
             $(document).on('click', '.button-next-month', function () {
                 console.log('Next month button clicked');
                 CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+            });
+
+
+            $(document).on('click', function (event) {
+                litePicker.Events.handleDocumentClick(event)
+            })
+
+            // document.addEventListener('click', function () {
+            // })
+
+            // document.querySelector('#calendarInput').addEventListener('focus', function () {
+            //     litePicker.Events.openCalendar();
+            // });
+
+            document.querySelector('#litepicker').addEventListener('click', function () {
+                // litePicker.Events.openCalendar();
+                isCalendarOpen = true;
             });
         },
         findFirstLastVisibleDay: function () {
@@ -319,7 +342,15 @@ let litePicker = {
                     console.log('Last visible day:', lastVisibleFormatted);
                 }
             }
-        }
+        },
+        handleDocumentClick: function (event) {
+            const calendarElement = document.querySelector('.litepicker'); // Adjust the selector as needed
+            if (isAjaxRunning) {
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            }
+        },
     }
 }
 

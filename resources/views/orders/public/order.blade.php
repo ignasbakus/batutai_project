@@ -20,7 +20,6 @@
             color: #999;
             /*border-radius: 0;*/
         }
-
     </style>
 @endsection
 
