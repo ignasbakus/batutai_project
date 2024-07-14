@@ -8,8 +8,8 @@ let PickerInitialized = false
 let PcCalendar = false
 let mobileCalendar = false
 let Calendar = null;
+let flatPicker = null;
 let Picker = null;
-let datePickerNew = null
 let isEventDrop = false;
 let isFirstLoad = true; // Add flag for initial load
 let isNavigating = false; // Add flag for navigation
@@ -248,10 +248,27 @@ let CalendarFunctions = {           // Calendar functions
                     //     datePicker.initialize()
                     //     PickerInitialized = true;
                     // }
-                    flatPickerCalendar.initialize()
+                    let disabledDates = CalendarFunctions.processOccupiedDates(response.Occupied);
+                    if (!PickerInitialized) {
+                        flatPickerCalendar.initialize(disabledDates)
+                        PickerInitialized = true;
+                    } else {
+                        flatPickerCalendar.updateDisabledDates(disabledDates);
+                    }
                 }
             }
         });
+    },
+    processOccupiedDates: function (occupiedDates) {
+        let processedDates = occupiedDates.map(occupied => ({
+            from: new Date(new Date(occupied.start).getTime() - 3 * 60 * 60 * 1000), // Subtract 3 hours
+            to: new Date(new Date(occupied.end).getTime() - 24 * 60 * 60 * 1000) // Subtract 1 day
+        }));
+
+        // Log the processed dates
+        console.log('Processed Dates:', processedDates);
+
+        return processedDates;
     }
 };
 
@@ -269,20 +286,121 @@ let flatPickerTime = {
 }
 
 let flatPickerCalendar = {
-    initialize: function () {
-        $('#flatPickerCalendar').flatpickr({
+    initialize: function (disabledDates) {
+        flatPicker = $('#flatPickerCalendar').flatpickr({
             mode: 'range', // Enables range selection
             dateFormat: 'Y/m/d', // Date format
             minDate: "today",
-            disable: [
-                {
-                    from: "2024-07-15",
-                    to: "2024-07-22"
-                },
-                "2024-07-29",
-            ],
+            // disableMobile: true, // Force Flatpickr to use its own picker on mobile devices
+            disable: disabledDates,
+            onChange: function (selectedDates, dateStr, instance) {
+                // Ensure range selection does not include disabled dates
+                if (selectedDates.length === 2) {
+                    let startDate = selectedDates[0];
+                    let endDate = selectedDates[1];
+                    let isValidRange = true;
+
+                    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                        if (flatPickerCalendar.isDateDisabled(d, disabledDates)) {
+                            isValidRange = false;
+                            break;
+                        }
+                    }
+
+                    if (!isValidRange) {
+                        instance.clear()
+                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
+                        console.log('firstMonthDay:', firstMonthDay)
+                        alert('The selected range includes disabled dates. Please select a valid range.');
+                    } else {
+                        console.log('Valid Date Range selected:', dateStr);
+                    }
+                }
+            },
+            onMonthChange: function (selectedDates, dateStr, instance) {
+                console.log("Month changed to: ", instance.currentMonth + 1); // Months are zero-indexed
+                flatPickerCalendar.logVisibleDays(); // Log the visible days when the month changes
+                CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
+            }
         })
+    },
+    isDateDisabled: function (date, disabledDates) {
+        for (let entry of disabledDates) {
+            if (entry instanceof Object && entry.from && entry.to) {
+                if (date >= entry.from && date <= entry.to) {
+                    return true;
+                }
+            } else if (entry instanceof Date) {
+                if (date.toDateString() === entry.toDateString()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
+    logVisibleDays: function () {
+        // Assuming flatPicker is your Flatpickr instance
+        // Get the days container element
+        const daysContainer = flatPicker.calendarContainer.querySelector('.flatpickr-days');
+
+        // Find all visible day elements
+        const allDayElements = daysContainer.querySelectorAll('.flatpickr-day');
+
+        // Initialize variables to hold first and last visible day elements
+        let firstVisibleDayElement = null;
+        let lastVisibleDayElement = null;
+
+        // Loop through all day elements to find first and last visible ones
+        allDayElements.forEach(dayElement => {
+            // Check if the element is visible (not previous or next month)
+            if (dayElement.classList.contains('prevMonthDay') && dayElement.classList.contains('nextMonthDay')) {
+                // If first visible day element is not set, set it
+                if (!firstVisibleDayElement) {
+                    firstVisibleDayElement = dayElement;
+                }
+                // Always update last visible day element until the loop finishes
+                lastVisibleDayElement = dayElement;
+            }
+        });
+
+        // If there are no previous month days, use the first day of the current month
+        if (!firstVisibleDayElement) {
+            firstVisibleDayElement = daysContainer.querySelector('.flatpickr-day:not(.nextMonthDay)');
+        }
+
+        // If there are no next month days, use the last day of the current month
+        if (!lastVisibleDayElement) {
+            const allDayElementsArray = Array.from(allDayElements);
+            lastVisibleDayElement = allDayElementsArray[allDayElementsArray.length - 1];
+        }
+
+        // Function to format date to yyyy-mm-dd HH:MM:ss
+        // Function to format date to yyyy-mm-dd HH:MM:ss and add one day to the last visible day only
+        const formatDate = (dateLabel, isLastVisibleDay) => {
+            const date = new Date(dateLabel);
+            // Add 3 hours to adjust for Lithuanian GMT+3
+            date.setHours(date.getHours() + 3);
+            if (isLastVisibleDay) {
+                date.setDate(date.getDate() + 1);
+            }
+            return date.toISOString().split('T')[0]; // Extract yyyy-mm-dd from ISO string
+        };
+
+        const firstDateLabel = firstVisibleDayElement.getAttribute('aria-label');
+        const lastDateLabel = lastVisibleDayElement.getAttribute('aria-label');
+
+        // Format dates
+        const formattedFirstDate = formatDate(firstDateLabel, false);
+        const formattedLastDate = formatDate(lastDateLabel, true);
+
+        firstVisibleDayOnCalendar = formattedFirstDate;
+        lastVisibleDayOnCalendar = formattedLastDate;
+        firstMonthDay = formattedFirstDate;
+    },
+    updateDisabledDates: function (newDisabledDates) {
+        flatPicker.set('disable', newDisabledDates);
     }
+
 }
 
 let litePicker = {
