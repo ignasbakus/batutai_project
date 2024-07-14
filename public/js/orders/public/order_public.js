@@ -286,34 +286,48 @@ let flatPickerTime = {
 }
 
 let flatPickerCalendar = {
+    disabledDaysArray: [],
     initialize: function (disabledDates) {
+        flatPickerCalendar.disabledDaysArray = disabledDates;
         flatPicker = $('#flatPickerCalendar').flatpickr({
             mode: 'range', // Enables range selection
             dateFormat: 'Y/m/d', // Date format
             minDate: "today",
             // disableMobile: true, // Force Flatpickr to use its own picker on mobile devices
-            disable: disabledDates,
+            disable: flatPickerCalendar.disabledDaysArray,
             onChange: function (selectedDates, dateStr, instance) {
                 // Ensure range selection does not include disabled dates
+                console.log('disabled days: ', flatPickerCalendar.disabledDaysArray)
+                console.log('patekom i on change')
                 if (selectedDates.length === 2) {
+                    console.log('Selected dates:', selectedDates);
+
                     let startDate = selectedDates[0];
                     let endDate = selectedDates[1];
                     let isValidRange = true;
 
+                    console.log('Start date:', startDate);
+                    console.log('End date:', endDate);
+
                     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                        if (flatPickerCalendar.isDateDisabled(d, disabledDates)) {
+                        console.log('Checking date in range:', d);
+
+                        if (flatPickerCalendar.isDateDisabled(d, flatPickerCalendar.disabledDaysArray)) {
+                            console.log('Found a disabled date in range:', d);
                             isValidRange = false;
                             break;
                         }
                     }
 
                     if (!isValidRange) {
-                        instance.clear()
-                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
-                        console.log('firstMonthDay:', firstMonthDay)
+                        console.log('Invalid date range. Clearing selection and updating events.');
+                        instance.clear();
+                        CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+                        console.log('Updated events after clearing selection.');
+                        console.log('First month day:', firstMonthDay);
                         alert('The selected range includes disabled dates. Please select a valid range.');
                     } else {
-                        console.log('Valid Date Range selected:', dateStr);
+                        console.log('Valid date range selected:', selectedDates);
                     }
                 }
             },
@@ -321,6 +335,7 @@ let flatPickerCalendar = {
                 console.log("Month changed to: ", instance.currentMonth + 1); // Months are zero-indexed
                 flatPickerCalendar.logVisibleDays(); // Log the visible days when the month changes
                 CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
+
             }
         })
     },
@@ -398,9 +413,9 @@ let flatPickerCalendar = {
         firstMonthDay = formattedFirstDate;
     },
     updateDisabledDates: function (newDisabledDates) {
+        flatPickerCalendar.disabledDaysArray = newDisabledDates;
         flatPicker.set('disable', newDisabledDates);
     }
-
 }
 
 let litePicker = {
