@@ -71,6 +71,7 @@ class OrderController extends Controller
             'AdvancePercentage' => config('trampolines.advance_percentage'),
         ]);
     }
+
     public function publicGetIndexViaEmail($order_number): \Illuminate\Contracts\Foundation\Application|Factory|View|Application
     {
         $order = Order::where('order_number', $order_number)->first();
@@ -108,6 +109,7 @@ class OrderController extends Controller
             ]
         ]);
     }
+
     public function orderWaitingConfirmation($order_number): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
 //        $order = Order::where('order_number', $order_number)->firstOrFail();
@@ -115,7 +117,8 @@ class OrderController extends Controller
             'order_number' => $order_number
         ]);
     }
-    public function checkPaymentStatus ($order_number): JsonResponse
+
+    public function checkPaymentStatus($order_number): JsonResponse
     {
         $order = Order::where('order_number', $order_number)->firstOrFail();
         if ($order->order_status === 'Apmokėtas') {
@@ -135,6 +138,7 @@ class OrderController extends Controller
 
         return response()->json(['status' => false]);
     }
+
     public function publicUpdateCalendar(): JsonResponse
     {
         $trampolineIds = \request()->get('trampoline_id', []);
@@ -320,7 +324,7 @@ class OrderController extends Controller
             ];
         }
 
-        if ($firstVisibleDay < Carbon::now()){
+        if ($firstVisibleDay < Carbon::now()) {
             $Occupied = (new BaseTrampoline())->getOccupation(
                 $Trampolines,
                 OccupationTimeFrames::MONTH,
@@ -444,6 +448,7 @@ class OrderController extends Controller
     {
         return response()->json((new TrampolineOrder())->delete(\request()->input('orderID')));
     }
+
     public function orderCancel(): JsonResponse
     {
         $cancelledOrder = (new TrampolineOrder())->cancelOrder(\request()->input('order_id'));
@@ -487,7 +492,6 @@ class OrderController extends Controller
             $trampolineIds = $order->trampolines()->pluck('trampolines_id')->toArray();
             $targetFromDate = Carbon::parse(request()->get('target_start_date', null));
             $targetTillDate = Carbon::parse(request()->get('target_end_date', null));
-
 
 
             $Trampolines = (new Trampoline())->newQuery()->whereIn('id', $trampolineIds)->get();
@@ -553,6 +557,7 @@ class OrderController extends Controller
             ], 400);
         }
     }
+
     public function checkForUnpaidOrders(): JsonResponse
     {
         $unpaidOrders = (new TrampolineOrder())->deleteUnpaidOrders();
@@ -562,13 +567,23 @@ class OrderController extends Controller
 //            'unpaidOrders' => $unpaidOrders
 //        ]);
     }
+
     public function generatePaymentUrl($orderId): string
     {
         (new MontonioPaymentsService())->createOrder($orderId);
         return (new MontonioPaymentsService())->retrievePaymentLink($orderId);
     }
-    public function test(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
+    public function deliveryPricesIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
-        return \view('test.test');
+        return view('orders.public.delivery_prices');
     }
+    public function contactsIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
+    {
+        return view('orders.public.contacts');
+    }
+
+//    public function test(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
+//    {
+//        return \view('test.test');
+//    }
 }

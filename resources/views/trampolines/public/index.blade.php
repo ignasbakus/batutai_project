@@ -16,7 +16,8 @@
                 <div id="trampolinesCarousel" class="carousel slide" data-bs-theme="dark">
                     <div class="carousel-inner">
                         @foreach($Trampolines as $Trampoline)
-                            <div class="carousel-item {{ $Trampoline->active ? 'active' : '' }}" data-trampolineid='{{$Trampoline->id}}'>
+                            <div class="carousel-item {{ $Trampoline->active ? 'active' : '' }}" data-bs-toggle="tooltip"
+                                 data-trampolineid='{{$Trampoline->id}}' title="Paspauskite, kad pamatytumėte daugiau nuotraukų">
                                 <a data-bs-target="#showTrampolineModal" data-bs-toggle="modal" href="#">
                                     <img src="{{$Trampoline->image_url}}" class="d-block w-100" alt="...">
                                 </a>
@@ -44,7 +45,7 @@
                 <div class="row mt-3">
                     <div class="col-12 col-md-8"></div>
                     <div class="col-12 col-md-4 text-end">
-                        <button class="btn btn-primary mt-3 w-100 sendToOrderButton mb-5" id="sendToOrderButton" disabled>
+                        <button class="btn btn-primary mt-3 w-100 sendToOrderButton mb-5" id="sendToOrderButton" style="display: none;">
                             <span id="buttonText">Užsakyti</span>
                         </button>
                     </div>

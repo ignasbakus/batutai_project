@@ -28,14 +28,17 @@
                     aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a class="navbar-brand" href="#">op-op</a>
+            <a class="navbar-brand" href="{{route('trampolinesPublic')}}">op-op</a>
             <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="#">Batutai</a>
+                        <a class="nav-link" href="{{ route('trampolinesPublic') }}">Batutai</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Kontaktai</a>
+                        <a class="nav-link" href="{{ route('contactsIndex') }}">Kontaktai</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('deliveryPricesIndex') }}">Pristatymo kainos</a>
                     </li>
                 </ul>
             </div>

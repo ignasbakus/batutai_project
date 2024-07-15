@@ -3,14 +3,12 @@ let eventDay;
 let firstVisibleDayOnCalendar;
 let lastVisibleDayOnCalendar;
 let firstMonthDay;
-let lockDays;
 let PickerInitialized = false
 let PcCalendar = false
 let mobileCalendar = false
 let isFirstMonthCaptured = false
 let Calendar = null;
 let flatPicker = null;
-let Picker = null;
 let isEventDrop = false;
 let isFirstLoad = true; // Add flag for initial load
 let isNavigating = false; // Add flag for navigation
@@ -278,6 +276,7 @@ let flatPickerTime = {
         $('#customerDeliveryTime').flatpickr({
             enableTime: true, // Enable time picker
             noCalendar: true, // Hide calendar
+            disableMobile: "true",
             dateFormat: "H:i", // Format displayed time (24-hour)
             time_24hr: true, // Use 24-hour time format
             minTime: "8:00",

@@ -11,9 +11,9 @@ Route::controller(WebhookController::class)->group(function () {
 //    Route::post('/webhook/montonio/pending', 'paymentPending');
 });
 
-Route::controller(ClientsController::class)->group(function () {
-    Route::get('/clients', 'index')->name('clients');
-});
+//Route::controller(ClientsController::class)->group(function () {
+//    Route::get('/clients', 'index')->name('clients');
+//});
 
 Route::controller(OrderController::class)->prefix('orders')->group(function () {
     /*For admin usage (authenticated user)*/
@@ -36,6 +36,8 @@ Route::controller(OrderController::class)->prefix('orders')->group(function () {
     /*For customer usage (no authentication)*/
     Route::prefix('public')->group(function () {
         Route::get('/', 'publicGetIndex'); //http://locahost:8000/orders/public
+        Route::get('delivery_prices', 'deliveryPricesIndex')->name('deliveryPricesIndex');
+        Route::get('contacts', 'contactsIndex')->name('contactsIndex');
         /* Route for new orders/customers */
         Route::prefix('order')->group(function () {
             Route::get('test', 'test');
