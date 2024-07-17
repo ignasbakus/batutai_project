@@ -66,7 +66,6 @@ let flatPickerFunctions = {
         initialRentalStart: 0,
         initialRentalEnd: 0,
         initialize: function () {
-            console.log('inicializuojam flatpickeri')
             flatPicker = $('#flatPickerCalendar').flatpickr({
                 mode: 'range', // Enables range selection
                 dateFormat: 'Y/m/d', // Date format
@@ -245,7 +244,7 @@ let flatPickerFunctions = {
                 time_24hr: true, // Use 24-hour time format
                 minTime: "8:00",
                 maxTime: "22:00",
-                defaultDate: flatPickerFunctions.flatPickerTime.defaultTime
+                // defaultDate: flatPickerFunctions.flatPickerTime.defaultTime
             })
         }
     }

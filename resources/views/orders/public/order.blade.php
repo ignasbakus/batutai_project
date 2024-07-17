@@ -72,7 +72,7 @@
                     <div class="row mt-3">
                         <div class="form-group col">
                             <label for="customerDeliveryTime">Pristatymo laikas</label>
-                            <input name="customerDeliveryTime" class="form-control" type="tel"
+                            <input name="customerDeliveryTime" class="form-control" type="time"
                                    id="customerDeliveryTime" placeholder="Pasirinkite pristatymo laiką" required>
                         </div>
                     </div>
