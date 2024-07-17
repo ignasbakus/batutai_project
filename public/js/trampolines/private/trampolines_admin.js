@@ -157,6 +157,7 @@ let Trampolines = {
                         if (response.status) {
                             $('#successAlertMessage').text('Batutas sukurtas sėkmingai!')
                             $('#successAlert').show().css('display', 'flex')
+                            Trampolines.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                             $('#createTrampolineModal form input[type=text], #createTrampolineModal form input[type=number], #createTrampolineModal form textarea').val('');
                             $('#createTrampolineModal form input').removeClass('is-invalid');
                             Trampolines.Modals.addTrampoline.element.hide();
@@ -265,6 +266,7 @@ let Trampolines = {
                     }
                     $('#failedAlertMessage').text(errorMessage);
                     $('#failedAlert').show().css('display', 'flex');
+                    Trampolines.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                 })
             },
             Events: {
@@ -296,6 +298,7 @@ let Trampolines = {
                         if (response.status) {
                             $('#successAlertMessage').text('Batutas atnaujintas sėkmingai!')
                             $('#successAlert').show().css('display', 'flex')
+                            Trampolines.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                             $('#updateTrampolineModal form input[type=text], #updateTrampolineModal form input[type=number], #updateTrampolineModal form textarea').val('');
                             $('#updateTrampolineModal form input').removeClass('is-invalid');
                             Trampolines.Modals.updateTrampoline.element.hide()
@@ -312,6 +315,8 @@ let Trampolines = {
                         }
                         $('#failedAlertMessage').text(errorMessage);
                         $('#failedAlert').show().css('display', 'flex');
+                        Trampolines.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
+
                     })
                 }
             }
@@ -348,6 +353,7 @@ let Trampolines = {
                     }
                     $('#failedAlertMessage').text(errorMessage);
                     $('#failedAlert').show().css('display', 'flex');
+                    Trampolines.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
                 })
             },
             Events: {
@@ -372,6 +378,7 @@ let Trampolines = {
                         if (response.status) {
                             $('#successAlertMessage').text('Batutas ištrintas sėkmingai!')
                             $('#successAlert').show().css('display', 'flex')
+                            Trampolines.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                             Trampolines.Modals.deleteTrampoline.element.hide()
                         }
                         Trampolines.Table.Table.draw()
@@ -386,6 +393,7 @@ let Trampolines = {
                         }
                         $('#failedAlertMessage').text(errorMessage);
                         $('#failedAlert').show().css('display', 'flex');
+                        Trampolines.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
                     })
                 }
             }
@@ -399,6 +407,15 @@ let Trampolines = {
             }
         }
     },
+    Events: {
+        dismissAlertsAfterTimeout: function (alertId, timeout){
+            setTimeout(function() {
+                $(alertId).fadeOut('slow', function() {
+                    $(this).alert('close');
+                });
+            }, timeout);
+        }
+    }
 }
 $(document).ready(function () {
     console.log("/js/trampolines/private/trampolines_admin.js -> ready!");

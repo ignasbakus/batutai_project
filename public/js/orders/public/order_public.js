@@ -511,6 +511,7 @@ let TrampolineOrder = {
                         if (response.failed_input.error) {
                             $('#failedAlertMessage').text(response.failed_input.error[0]);
                             $('#failedAlert').show().css('display', 'flex');
+                            TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
                             CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                         }
                     }
@@ -604,6 +605,15 @@ let TrampolineOrder = {
                 $('#reservation-dates').text(`${startDate.toISOString().split('T')[0]} ${reservationDays > 1 ? `- ${endDate.toISOString().split('T')[0]}` : ''}`);
                 $('#reservation-label').text(`Rezervuotos dienos${reservationDays > 1 ? 's' : 'a'}:`);
             }
+        }
+    },
+    Events: {
+        dismissAlertsAfterTimeout: function (alertId, timeout){
+            setTimeout(function() {
+                $(alertId).fadeOut('slow', function() {
+                    $(this).alert('close');
+                });
+            }, timeout);
         }
     }
 }

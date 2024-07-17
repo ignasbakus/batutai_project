@@ -140,8 +140,8 @@
                             <hr>
                             <div>
                                 <span class="text-danger py-2">
-                                    * Prie galutinės sumos dar nėra priskaičiuota <br> pristatymo kaina. Dėl jos prašome kreiptis telefonu +37048512600 <br>
-                                    arba el. paštu op-op.lt@gmail.com
+                                    * Prie galutinės sumos dar nėra priskaičiuota pristatymo kaina. Pastikrinti apytikslę <br>
+                                    kainą į jūsų miestą <a href="{{route('deliveryPricesIndex')}}" target="_blank">galite čia</a>
                                 </span>
                             </div>
                         </div>

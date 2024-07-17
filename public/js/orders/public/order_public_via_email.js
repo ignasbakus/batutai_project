@@ -516,6 +516,7 @@ let TrampolineOrder = {
                 }
                 $('#failedAlertMessage').text(errorMessage);
                 $('#failedAlert').show().css('display', 'flex');
+                TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
             });
         },
         getDataForModal: function () {
@@ -570,6 +571,7 @@ let TrampolineOrder = {
                 }
                 $('#failedAlertMessage').text(errorMessage);
                 $('#failedAlert').show().css('display', 'flex');
+                TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
             });
         },
         Event: {
@@ -605,8 +607,9 @@ let TrampolineOrder = {
                     $('#overlay').hide();
                     if (response.status) {
                         eventDay = response.Event[0].start;
-                        $('#dateChangeAlertMessage').text('Rezervacijos dienos sėkmingai atnaujintos!');
+                        $('#dateChangeAlertMessage').text('Rezervacija sėkmingai atnaujinta!');
                         $('#successfulDateChangeAlert').show().css('display', 'flex');
+                        TrampolineOrder.Events.dismissAlertsAfterTimeout('#successfulDateChangeAlert', 5000);
                         $('#confirmationContainer').css('display', 'none');
                         $('#thankYouDiv').html(response.view);
                         if (PcCalendar) {
@@ -631,6 +634,7 @@ let TrampolineOrder = {
 
                         $('#failedAlertMessage').text(response.failed_input.error[0]);
                         $('#failedAlert').show().css('display', 'flex');
+                        TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
                         if (PcCalendar) {
                             CalendarFunctions.Calendar.calendar.removeAllEvents();
                             CalendarFunctions.Calendar.goToInitialDates();
@@ -656,6 +660,7 @@ let TrampolineOrder = {
                     if (response.status) {
                         $('#dateChangeAlertMessage').text('Pristatymo laikas sėkmingai atnaujintas!');
                         $('#successfulDateChangeAlert').show().css('display', 'flex');
+                        TrampolineOrder.Events.dismissAlertsAfterTimeout('#successfulDateChangeAlert', 5000);
                         $('#confirmationContainer').css('display', 'none');
                         $('#thankYouDiv').html(response.view);
                         flatPickerFunctions.flatPickerTime.defaultTime = response.deliveryTime
@@ -665,6 +670,7 @@ let TrampolineOrder = {
                     if (!response.status) {
                         $('#failedAlertMessage').text(response.failed_input.error[0]);
                         $('#failedAlert').show().css('display', 'flex');
+                        TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
                         TrampolineOrder.ChangeOrderDatesModal.element.hide();
                     }
                 });
@@ -703,9 +709,9 @@ let TrampolineOrder = {
                         $('#content-wrap').replaceWith($(response.view).find('#content-wrap'));
                     }
                     if (!response.status) {
-                        console.log('patekom')
                         $('#failedAlertMessage').text(response.failed_inputs.error[0])
                         $('#failedAlert').show().css('display', 'flex');
+                        TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
                     }
                 })
             }
@@ -752,6 +758,15 @@ let TrampolineOrder = {
             return processedDates;
         },
     },
+    Events: {
+        dismissAlertsAfterTimeout: function (alertId, timeout){
+            setTimeout(function() {
+                $(alertId).fadeOut('slow', function() {
+                    $(this).alert('close');
+                });
+            }, timeout);
+        }
+    }
 }
 
 $(document).ready(function () {

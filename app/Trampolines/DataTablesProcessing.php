@@ -28,13 +28,14 @@ class DataTablesProcessing
     public function getPaginatedData(
         Model $model,
         array $Relations,
-        int $Length,
-        int $Start,
+        int   $Length,
+        int   $Start,
         array $Ordering = [],
               $startDate = null,
               $endDate = null,
               $searchValue = null
-    ): static {
+    ): static
+    {
         $this->TableName = $model->getTable();
         $Query = $model->newQuery();
 
@@ -46,13 +47,13 @@ class DataTablesProcessing
         if ($startDate && $endDate) {
             $startDate = Carbon::parse($startDate)->startOfDay();
             $endDate = Carbon::parse($endDate)->endOfDay();
-            $Query->whereHas('Trampolines', function($query) use ($startDate, $endDate) {
+            $Query->whereHas('Trampolines', function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('rental_start', [$startDate, $endDate]);
             });
         }
 
         if ($searchValue) {
-            $Query->whereHas('Client', function($query) use ($searchValue) {
+            $Query->whereHas('Client', function ($query) use ($searchValue) {
                 $query->whereRaw("CONCAT(name, ' ', surname) LIKE ?", ["%{$searchValue}%"])
                     ->orWhere('email', 'like', '%' . $searchValue . '%')
                     ->orWhere('phone', 'like', '%' . $searchValue . '%');
@@ -90,6 +91,7 @@ class DataTablesProcessing
         $Query->distinct();
         $Query->offset($Start)->limit($Length);
         $this->List = $Query->get();
+//        $Query->addSelect('orders_trampolines.rental_start');
 
         $this->recordsTotal = $model->newQuery()->count();
         $this->recordsFiltered = $Query->count();

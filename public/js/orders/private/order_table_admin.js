@@ -297,6 +297,7 @@ let Orders = {
                         if (response.status) {
                             $('#successAlertMessage').text('Užsakymai ištrinti')
                             $('#successAlert').show().css('display', 'flex')
+                            Orders.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                         }
                         Orders.Table.Table.draw()
                     })
@@ -361,6 +362,7 @@ let Orders = {
                         if (response.status) {
                             $('#successAlertMessage').text('Užsakymas atšauktas')
                             $('#successAlert').show().css('display', 'flex')
+                            Orders.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                             Orders.Modals.deleteOrder.element.hide()
                         }
                         Orders.Table.Table.draw()
@@ -375,6 +377,7 @@ let Orders = {
                         }
                         $('#failedAlertMessage').text(errorMessage);
                         $('#failedAlert').show().css('display', 'flex');
+                        Orders.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
                     })
                 }
             }
@@ -477,6 +480,7 @@ let Orders = {
                     }
                     $('#failedAlertMessage').text(errorMessage);
                     $('#failedAlert').show().css('display', 'flex');
+                    Orders.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
                 })
             },
             getDataForModal: function () {
@@ -522,6 +526,7 @@ let Orders = {
                     }
                     $('#failedAlertMessage').text(errorMessage);
                     $('#failedAlert').show().css('display', 'flex');
+                    Orders.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
                 })
             },
             Events: {
@@ -580,6 +585,7 @@ let Orders = {
                                 if (response.failed_input.error) {
                                     $('#failedAlertMessage').text(response.failed_input.error[0]);
                                     $('#failedAlert').show().css('display', 'flex');
+                                    Orders.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
                                     CalendarFunctions.Calendar.calendar.removeAllEvents()
                                     Orders.Modals.updateOrder.Events.DisplayConfirmationElement('none')
                                     Orders.Modals.updateOrder.getDataForModal()
@@ -589,6 +595,7 @@ let Orders = {
                         if (response.status) {
                             $('#successAlertMessage').text('Užsakymas atnaujintas sėkmingai!')
                             $('#successAlert').show().css('display', 'flex')
+                            Orders.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                             eventDay = response.Event[0].start
                             $('#updateOrderModal form input').removeClass('is-invalid');
                             this.DisplayConfirmationElement('none')
@@ -623,6 +630,15 @@ let Orders = {
                     }
                 }
             }
+        }
+    },
+    Events: {
+        dismissAlertsAfterTimeout: function (alertId, timeout){
+            setTimeout(function() {
+                $(alertId).fadeOut('slow', function() {
+                    $(this).alert('close');
+                });
+            }, timeout);
         }
     }
 }
