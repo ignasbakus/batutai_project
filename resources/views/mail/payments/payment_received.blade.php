@@ -85,14 +85,14 @@
                 <td>{{ number_format($order->total_sum, 2) }}{{config('trampolines.currency')}}</td>
             </tr>
             <tr>
-                <th>Galutinė mokama suma vietoje</th>
+                <th>Galutinė mokama suma vietoje*</th>
                 <td>{{ number_format($order->total_sum, 2) - number_format($order->advance_sum, 2) }}{{config('trampolines.currency')}}</td>
             </tr>
         </table>
-        <h6>
-            Prie galutinės užsakymo sumos prisidės pristatymo kaina. Apytiksles kainas į didžiuosius Lietuvos miestus <a href="{{route('deliveryPricesIndex')}}">rasite čia</a>. <br>
+        <h4>
+            * Prie galutinės užsakymo sumos prisidės pristatymo kaina. Apytiksles kainas į didžiuosius Lietuvos miestus <a href="{{route('deliveryPricesIndex')}}">rasite čia</a>. <br>
             Jeigu savo miesto nerandate, prašome susisiekti su mumis el. paštu: op-op.lt arba telefonu: +370 600 00000
-        </h6>
+        </h4>
     </div>
 
     <div class="customer-info">

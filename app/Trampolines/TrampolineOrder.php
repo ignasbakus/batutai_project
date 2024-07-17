@@ -4,6 +4,7 @@ namespace App\Trampolines;
 
 use App\Interfaces\Order;
 use App\Mail\OrderDeleted;
+use App\Mail\OrderNotPaid;
 use App\Mail\OrderPaid;
 use App\Mail\OrderPlaced;
 use App\Models\Client;
@@ -371,38 +372,45 @@ class TrampolineOrder implements Order
         }
         return $this;
     }
-    public function cancelOrder($orderID, $isFromWebhook = false): static{
-        Log::info('Patekom i cancel order is montonioPaymentServices');
+    public function cancelOrder($orderID, $isFromWebhook = false): static
+    {
         $order = \App\Models\Order::find($orderID);
         $orderTrampolines = OrdersTrampoline::where('orders_id', $orderID)->get();
-        $orderRentalStart = Carbon::parse($orderTrampolines->first()->rental_start)->format('Y-m-d');
-        $now = Carbon::now();
+
         if (!$order) {
-            Log::info('neradom orderio');
+            Log::info('Order not found');
             $this->status = false;
             $this->failedInputs->add('error', 'Order not found.');
             return $this;
         }
-        if ($now->diffInDays($orderRentalStart, false) < 3) {
-            $this->status = false;
-            $this->failedInputs->add('error', 'Užsakymo atšaukti negalima, nes liko mažiau nei 3 dienos iki pirmosios rezervacijos dienos');
-            return $this;
+
+        if (!$isFromWebhook) {
+            $orderRentalStart = Carbon::parse($orderTrampolines->first()->rental_start)->format('Y-m-d');
+            $now = Carbon::now();
+            if ($now->diffInDays($orderRentalStart, false) < 3) {
+                $this->status = false;
+                $this->failedInputs->add('error', 'Užsakymo atšaukti negalima, nes liko mažiau nei 3 dienos iki pirmosios rezervacijos dienos');
+                return $this;
+            }
         }
 
         if (!$isFromWebhook) {
             $order->update(['order_status' => 'Atšauktas kliento']);
         } else {
             $order->update(['order_status' => 'Atšauktas, nes neapmokėtas']);
-            Log::info('Paupdatinom');
+            Mail::to($order->client->email)->send(new OrderNotPaid($order));
         }
+
         foreach ($orderTrampolines as $orderTrampoline) {
             $orderTrampoline->update(['is_active' => 0]);
         }
+
         $this->status = true;
         $this->Messages[] = 'Užsakymas atšauktas sėkmingai !';
-//        Log::info('Atšaukimo message ->', $this->Messages[0]);
+
         return $this;
     }
+
     public function updateOrderStatus($orderId): array
     {
         $order = \App\Models\Order::find($orderId);

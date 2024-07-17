@@ -7,6 +7,6 @@
 </head>
 <body>
 <h1>Jūsų užsakymas buvo atšauktas</h1>
-<p>Apgailestaujame, bet norime jus informuoti, kad jūsų užsakymas numeris: {{ $order->order_number }} buvo atšauktas.</p>
+<p>Apgailestaujame, bet norime jus informuoti, kad jūsų užsakymas numeris: {{ $order->order_number }} buvo atšauktas, nes negavome jūsų apmokėjimo.</p>
 </body>
 </html>
