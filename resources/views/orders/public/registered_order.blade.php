@@ -72,7 +72,7 @@
                         </div>
                         <div>
                             <label for="customerDeliveryTime">Pristatymo laikas</label>
-                            <input name="customerDeliveryTime" class="form-control" type="tel"
+                            <input name="customerDeliveryTime" class="form-control" type="number"
                                    id="customerDeliveryTime" placeholder="Pasirinkite pristatymo laiką">
                         </div>
                     </div>

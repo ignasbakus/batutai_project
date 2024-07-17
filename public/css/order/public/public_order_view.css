@@ -230,6 +230,20 @@ hr.new1 {
     color: #555;
 }
 
+.order-summary hr {
+    border-color: #333; /* Darker color */
+}
+
+.order-summary .text-danger {
+    font-size: 12px; /* Adjust the font size as needed */
+}
+
+.is-locked {
+    background-color: #f8d7da; /* Red color */
+    color: #999;
+    /*border-radius: 0;*/
+}
+
 #viewOrderButton:disabled {
     background-color: #cccccc; /* Light gray background */
     cursor: not-allowed; /* Change cursor to indicate disabled state */

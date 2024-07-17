@@ -118,6 +118,7 @@ let flatPickerFunctions = {
                         if (!isValidRange) {
                             console.log('Invalid date range. Clearing selection and updating events.');
                             instance.clear();
+                            instance.setDate([flatPickerFunctions.flatPickerCalendar.initialRentalStart, flatPickerFunctions.flatPickerCalendar.initialRentalEnd]);
                             console.log('current month', instance.currentMonth)
                             instance.changeMonth(flatPickerFunctions.flatPickerCalendar.monthChangeTo, true);
                             console.log('Updated events after clearing selection.');
@@ -129,8 +130,8 @@ let flatPickerFunctions = {
                                 Trampoline.rental_start = formattedStartDate;
                                 Trampoline.rental_end = formattedEndDate;
                             })
-                            TrampolineOrder.ChangeOrderDatesModalMobile.flatPickerRangeStart = formattedStartDate;
-                            TrampolineOrder.ChangeOrderDatesModalMobile.flatPickerRangeEnd = formattedEndDate;
+                            TrampolineOrder.ChangeOrderDatesModal.flatPickerRangeStart = formattedStartDate;
+                            TrampolineOrder.ChangeOrderDatesModal.flatPickerRangeEnd = formattedEndDate;
                         }
                     }
                 },
@@ -308,9 +309,9 @@ let Variables = {
         this.clientTime = time;
         $('#orderForm input[name="customerDeliveryTime"]').val(time.delivery_time);
     },
-    // getDeliveryTime: function () {
-    //     return this.clientTime.delivery_time;
-    // },
+    getDeliveryTime: function () {
+        return this.clientTime.delivery_time;
+    },
     populateOrderFormValues: function () {
         return {
             customerName: this.client.name,
@@ -460,7 +461,7 @@ let CalendarFunctions = {
                     Trampolines = response.Trampolines;
                 }
                 if (mobileCalendar) {
-                    let disabledDates = TrampolineOrder.ChangeOrderDatesModalMobile.processOccupiedDates(response.Occupied);
+                    let disabledDates = TrampolineOrder.ChangeOrderDatesModal.processOccupiedDates(response.Occupied);
                     flatPickerFunctions.flatPickerCalendar.updateDisabledDates(disabledDates);
                 }
             }
@@ -474,7 +475,7 @@ let TrampolineOrder = {
         showCalendar.showCalendar();
         this.UpdateOrder.init();
         this.CancelOrderModal.init()
-        this.ChangeOrderDatesModalMobile.init()
+        this.ChangeOrderDatesModal.init()
         Variables.setClientDetails(Client);
         Variables.setClientAddressDetails(ClientAddress);
         Variables.setDeliveryTimeDetails(DeliveryTime);
@@ -546,7 +547,7 @@ let TrampolineOrder = {
                         let endDate = new Date(response.Events[0].end);
                         endDate.setDate(endDate.getDate() - 1);
                         endDate = endDate.toISOString().split('T')[0];
-                        flatPickerFunctions.flatPickerCalendar.disabledDaysArray = TrampolineOrder.ChangeOrderDatesModalMobile.processOccupiedDates(response.Occupied);
+                        flatPickerFunctions.flatPickerCalendar.disabledDaysArray = TrampolineOrder.ChangeOrderDatesModal.processOccupiedDates(response.Occupied);
                         flatPickerFunctions.flatPickerCalendar.initialRentalStart = response.Events[0].start;
                         flatPickerFunctions.flatPickerCalendar.initialRentalEnd = endDate;
                         flatPickerFunctions.flatPickerCalendar.initialize()
@@ -608,11 +609,23 @@ let TrampolineOrder = {
                         $('#successfulDateChangeAlert').show().css('display', 'flex');
                         $('#confirmationContainer').css('display', 'none');
                         $('#thankYouDiv').html(response.view);
-                        CalendarFunctions.Calendar.calendar.removeAllEvents();
-                        CalendarFunctions.addEvent(response.Occupied);
-                        CalendarFunctions.addEvent(response.Event);
-                        TrampolineOrder.UpdateOrder.OccupiedWhenCancelled = response.Occupied;
-                        TrampolineOrder.UpdateOrder.EventWhenCancelled = response.Event;
+                        if (PcCalendar) {
+                            CalendarFunctions.Calendar.calendar.removeAllEvents();
+                            CalendarFunctions.addEvent(response.Occupied);
+                            CalendarFunctions.addEvent(response.Event);
+                            TrampolineOrder.UpdateOrder.OccupiedWhenCancelled = response.Occupied;
+                            TrampolineOrder.UpdateOrder.EventWhenCancelled = response.Event;
+                        }
+                        if (mobileCalendar) {
+                            let endDate = new Date(response.Event[0].end);
+                            endDate.setDate(endDate.getDate() - 1);
+                            endDate = endDate.toISOString().split('T')[0];
+                            flatPickerFunctions.flatPickerCalendar.disabledDaysArray = TrampolineOrder.ChangeOrderDatesModal.processOccupiedDates(response.Occupied);
+                            flatPickerFunctions.flatPickerCalendar.initialRentalStart = response.Event[0].start;
+                            flatPickerFunctions.flatPickerCalendar.initialRentalEnd = endDate;
+                            flatPickerFunctions.flatPickerTime.defaultTime = response.deliveryTime
+                            TrampolineOrder.ChangeOrderDatesModal.element.hide();
+                        }
                     }
                     if (!response.status) {
 
@@ -624,51 +637,38 @@ let TrampolineOrder = {
                             $('#confirmationContainer').css('display', 'none');
                         }
                         if (mobileCalendar) {
-                            TrampolineOrder.ChangeOrderDatesModalMobile.element.hide();
+                            TrampolineOrder.ChangeOrderDatesModal.element.hide();
                         }
                     }
                 });
             },
-            // updateOrderDeliveryTime: function () {
-            //     $('#overlay').css('display', 'flex');
-            //     let form_data = Variables.getDeliveryTimeForPc();
-            //     form_data.orderID = Order_id;
-            //     form_data
-            //     // form_data.delivery_time = Variables.getDeliveryTime(); // Add delivery_time
-            //     $.ajax({
-            //         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-            //         method: 'PUT',
-            //         url: '/orders/public/order/updateDeliveryTime',
-            //         data: form_data,
-            //     }).done((response) => {
-            //         $('#overlay').hide();
-            //         if (response.status) {
-            //             eventDay = response.Event[0].start;
-            //             $('#dateChangeAlertMessage').text('Rezervacijos dienos sėkmingai atnaujintos!');
-            //             $('#successfulDateChangeAlert').show().css('display', 'flex');
-            //             $('#confirmationContainer').css('display', 'none');
-            //             $('#thankYouDiv').html(response.view);
-            //             CalendarFunctions.Calendar.calendar.removeAllEvents();
-            //             CalendarFunctions.addEvent(response.Occupied);
-            //             CalendarFunctions.addEvent(response.Event);
-            //             TrampolineOrder.UpdateOrder.OccupiedWhenCancelled = response.Occupied;
-            //             TrampolineOrder.UpdateOrder.EventWhenCancelled = response.Event;
-            //         }
-            //         if (!response.status) {
-            //
-            //             $('#failedAlertMessage').text(response.failed_input.error[0]);
-            //             $('#failedAlert').show().css('display', 'flex');
-            //             if (PcCalendar) {
-            //                 CalendarFunctions.Calendar.calendar.removeAllEvents();
-            //                 CalendarFunctions.Calendar.goToInitialDates();
-            //                 $('#confirmationContainer').css('display', 'none');
-            //             }
-            //             if (mobileCalendar) {
-            //                 TrampolineOrder.ChangeOrderDatesModalMobile.element.hide();
-            //             }
-            //         }
-            //     });
-            // },
+            updateOrderDeliveryTime: function () {
+                $('#overlay').css('display', 'flex');
+                let form_data = Variables.getDeliveryTimeForPc();
+                form_data.orderID = Order_id;
+                $.ajax({
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    method: 'PUT',
+                    url: '/orders/public/order/updateDeliveryTime',
+                    data: form_data,
+                }).done((response) => {
+                    $('#overlay').hide();
+                    if (response.status) {
+                        $('#dateChangeAlertMessage').text('Pristatymo laikas sėkmingai atnaujintas!');
+                        $('#successfulDateChangeAlert').show().css('display', 'flex');
+                        $('#confirmationContainer').css('display', 'none');
+                        $('#thankYouDiv').html(response.view);
+                        flatPickerFunctions.flatPickerTime.defaultTime = response.deliveryTime
+                        TrampolineOrder.ChangeOrderDatesModal.element.hide()
+
+                    }
+                    if (!response.status) {
+                        $('#failedAlertMessage').text(response.failed_input.error[0]);
+                        $('#failedAlert').show().css('display', 'flex');
+                        TrampolineOrder.ChangeOrderDatesModal.element.hide();
+                    }
+                });
+            },
             DisplayConfirmationElement: function () {
                 $('#confirmationContainer').css('display', 'block');
             },
@@ -711,7 +711,7 @@ let TrampolineOrder = {
             }
         }
     },
-    ChangeOrderDatesModalMobile: {
+    ChangeOrderDatesModal: {
         init: function () {
             this.Event.init();
         },

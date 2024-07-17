@@ -7,22 +7,6 @@
 
 @section('custom_css')
     <link href="/css/order/public/public_order_view.css" rel="stylesheet" crossorigin="anonymous">
-    <style>
-        /* Additional custom styles for responsiveness */
-        .order-summary hr {
-            border-color: #333; /* Darker color */
-        }
-
-        .order-summary .text-danger {
-            font-size: 12px; /* Adjust the font size as needed */
-        }
-
-        .is-locked {
-            background-color: #f8d7da; /* Red color */
-            color: #999;
-            /*border-radius: 0;*/
-        }
-    </style>
 @endsection
 
 @section('content')

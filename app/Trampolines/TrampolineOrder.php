@@ -10,6 +10,7 @@ use App\Models\ClientAddress;
 use App\Models\OrdersTrampoline;
 use App\Models\Trampoline;
 use Carbon\Carbon;
+use http\Env\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -410,5 +411,25 @@ class TrampolineOrder implements Order
             'status' => true,
             'message' => 'Order status updated to Apmokėta successfully.'
         ];
+    }
+    public function updateDeliveryTime($Request): array
+    {
+        $orderID = $Request->input('orderID');
+        $customerDeliveryTime = $Request->input('customerDeliveryTime');
+
+        $affectedRows = OrdersTrampoline::where('orders_id', $orderID)->update(['delivery_time' => $customerDeliveryTime]);
+        if($affectedRows > 0){
+            return [
+                'status' => true,
+                'message' => 'Delivery time updated successfully.',
+                'deliveryTime' => $customerDeliveryTime
+            ];
+        } else {
+            return [
+                'status' => false,
+                'failedInputs' => 'Failed to update delivery time.'
+            ];
+        }
+
     }
 }

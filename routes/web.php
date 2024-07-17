@@ -48,7 +48,7 @@ Route::controller(OrderController::class)->prefix('orders')->group(function () {
             Route::post('generate_url', 'generatePaymentUrl');
             Route::post('private_calendar/get', 'privateUpdateCalendar');
             Route::post('public_calendar/get', 'publicUpdateCalendar');
-//            Route::post('updateDeliveryTime', 'updateDeliveryTime');
+            Route::put('updateDeliveryTime', 'updateDeliveryTime');
             //http://locahost:8000/orders/public/order [CRUD] without UUID
             Route::get('/', 'orderGet');
             Route::post('/', 'orderInsert');

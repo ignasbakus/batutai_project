@@ -436,15 +436,30 @@ class OrderController extends Controller
             'status' => $Order->status,
             'Occupied' => $Occupied,
             'OrderID' => $Order->Order->id,
+            'deliveryTime' => $Order->OrderTrampolines[0]->delivery_time,
             'view' => \view('orders.public.order_info', [
                 'Order' => (new Order())->newQuery()->with('trampolines')->with('client')
                     ->with('address')->find($Order->Order->id),
             ])->render()
         ]);
     }
-//    public function updateDeliveryTime(){
-//
-//    }
+    public function updateDeliveryTime(): JsonResponse
+    {
+        $deliveryTime = (new TrampolineOrder())->updateDeliveryTime(\request());
+//        dd($deliveryTime);
+        if ($deliveryTime['status']) {
+            return response()->json([
+                'status' => true,
+                'deliveryTime' => $deliveryTime['deliveryTime'],
+                'message' => 'Delivery time updated successfully',
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'failed_inputs' => $deliveryTime['failedInputs'] ?? []
+            ]);
+        }
+    }
     public function orderDelete(): JsonResponse
     {
         return response()->json((new TrampolineOrder())->delete(\request()->input('orderID')));
