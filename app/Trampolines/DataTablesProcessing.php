@@ -42,25 +42,41 @@ class DataTablesProcessing
         if (count($Relations) > 0) {
             $Query->with($Relations);
         }
-        $Query->select([$model->getTable() . '.*']);
+
+        // Conditionally select fields based on the model's table
+        $fieldsToSelect = [$model->getTable() . '.*'];
+        if ($this->TableName === 'orders') {
+            $fieldsToSelect[] = 'orders_trampolines.rental_start';
+        } elseif ($this->TableName === 'trampolines') {
+            $fieldsToSelect[] = 'parameters.height';
+            $fieldsToSelect[] = 'parameters.width';
+            $fieldsToSelect[] = 'parameters.length';
+            $fieldsToSelect[] = 'parameters.price';
+        }
+        $Query->select($fieldsToSelect);
 
         if ($startDate && $endDate) {
             $startDate = Carbon::parse($startDate)->startOfDay();
             $endDate = Carbon::parse($endDate)->endOfDay();
-            $Query->whereHas('Trampolines', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('rental_start', [$startDate, $endDate]);
-            });
+            if ($this->TableName === 'orders') {
+                $Query->whereHas('trampolines', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('rental_start', [$startDate, $endDate]);
+                });
+            }
         }
 
         if ($searchValue) {
-            $Query->whereHas('Client', function ($query) use ($searchValue) {
-                $query->whereRaw("CONCAT(name, ' ', surname) LIKE ?", ["%{$searchValue}%"])
-                    ->orWhere('email', 'like', '%' . $searchValue . '%')
-                    ->orWhere('phone', 'like', '%' . $searchValue . '%');
-            });
+            if ($this->TableName === 'orders') {
+                $Query->whereHas('client', function ($query) use ($searchValue) {
+                    $query->whereRaw("CONCAT(name, ' ', surname) LIKE ?", ["%{$searchValue}%"])
+                        ->orWhere('email', 'like', '%' . $searchValue . '%')
+                        ->orWhere('phone', 'like', '%' . $searchValue . '%');
+                });
+            }
         }
 
-        switch ($model->getTable()) {
+        // Handle joins based on the model's table
+        switch ($this->TableName) {
             case 'trampolines':
                 $Query->leftJoin(
                     (new Parameter())->getTable(),
@@ -79,9 +95,13 @@ class DataTablesProcessing
                 break;
         }
 
+        // Handle ordering
         try {
             foreach ($Ordering as $Order) {
-                $Query->orderBy($model->getField($Order['column']), $Order['dir']);
+                $field = $model->getField($Order['column']);
+                if ($field) {
+                    $Query->orderBy($field, $Order['dir']);
+                }
             }
         } catch (\Exception $exception) {
             // Handle exception if needed
@@ -90,8 +110,9 @@ class DataTablesProcessing
         // Using distinct to avoid duplicate entries
         $Query->distinct();
         $Query->offset($Start)->limit($Length);
+//        dd($Query->offset($Start)->limit($Length));
+
         $this->List = $Query->get();
-//        $Query->addSelect('orders_trampolines.rental_start');
 
         $this->recordsTotal = $model->newQuery()->count();
         $this->recordsFiltered = $Query->count();

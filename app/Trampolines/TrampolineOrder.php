@@ -386,15 +386,15 @@ class TrampolineOrder implements Order
             return $this;
         }
 
-        if (!$isFromWebhook) {
-            $orderRentalStart = Carbon::parse($orderTrampolines->first()->rental_start)->format('Y-m-d');
-            $now = Carbon::now();
-            if ($now->diffInDays($orderRentalStart, false) < 3) {
-                $this->status = false;
-                $this->failedInputs->add('error', 'Užsakymo atšaukti negalima, nes liko mažiau nei 3 dienos iki pirmosios rezervacijos dienos');
-                return $this;
-            }
-        }
+//        if (!$isFromWebhook) {
+//            $orderRentalStart = Carbon::parse($orderTrampolines->first()->rental_start)->format('Y-m-d');
+//            $now = Carbon::now();
+//            if ($now->diffInDays($orderRentalStart, false) < 3) {
+//                $this->status = false;
+//                $this->failedInputs->add('error', 'Užsakymo atšaukti negalima, nes liko mažiau nei 3 dienos iki pirmosios rezervacijos dienos');
+//                return $this;
+//            }
+//        }
 
         if (!$isFromWebhook) {
             $order->update(['order_status' => 'Atšauktas kliento']);

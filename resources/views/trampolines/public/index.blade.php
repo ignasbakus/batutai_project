@@ -41,7 +41,9 @@
                 <div class="text-center mt-3">
                     <h3>Jusu pasirinkti batutai</h3>
                 </div>
-                <ul id="SelectedTrampolines" class="list-group"></ul>
+                <ul id="SelectedTrampolines" class="list-group">
+{{--                        <li class="list-group-item no-trampolines-message" style="display: block">No trampolines selected</li>--}}
+                </ul>
                 <div class="row mt-3">
                     <div class="col-12 col-md-8"></div>
                     <div class="col-12 col-md-4 text-end">

@@ -38,6 +38,7 @@ let Carousels = {
 
 let Trampolines = {
     init: function () {
+        this.updateNoTrampolinesMessage()
     },
     chosen: [],
     Modals: {
@@ -47,10 +48,9 @@ let Trampolines = {
                 init: function () {
                     $('#showTrampolineModal .chooseTrampoline').on('click', (event) => {
                         event.stopPropagation();
-                        console.log("batuto id po paspaudimo: ", Carousels.trampolinesCarousel.ChosenTrampoline);
                         Trampolines.addToSelected(Carousels.trampolinesCarousel.ChosenTrampoline);
                         Trampolines.Modals.showTrampoline.element.hide();
-                    })
+                    });
                 }
             }
         }
@@ -67,16 +67,17 @@ let Trampolines = {
         }
     },
     addToSelected: function (TrampolineID) {
-        if (this.chosen.find((element) => element === TrampolineID) !== TrampolineID) {
+        if (!this.chosen.includes(TrampolineID)) {
             this.chosen.push(TrampolineID);
         }
-        console.log('selected = ' + TrampolineID + ' | chosen trampolines => ', this.chosen);
         this.updateOrderButtonState();
         this.getTrampolinesView();
     },
     removeFromSelected: function (TrampolineID) {
-        let findInChosen = this.chosen.findIndex((element) => element === TrampolineID);
-        this.chosen.splice(findInChosen, 1);
+        let index = this.chosen.indexOf(TrampolineID);
+        if (index !== -1) {
+            this.chosen.splice(index, 1);
+        }
         this.updateOrderButtonState();
         this.getTrampolinesView();
     },
@@ -85,6 +86,13 @@ let Trampolines = {
             $('#sendToOrderButton').show();
         } else {
             $('#sendToOrderButton').hide();
+        }
+    },
+    updateNoTrampolinesMessage: function () {
+        if (this.chosen.length === 0) {
+            $('#SelectedTrampolines').html('<li class="list-group-item mt-3 no-trampolines-message">Nepasirinkote jokių batutų</li>');
+        } else {
+            $('#SelectedTrampolines .no-trampolines-message').remove();
         }
     },
     initEventsAfterHtmlUpdate: function () {
@@ -106,15 +114,14 @@ let Trampolines = {
             }
         }).done((response) => {
             $('#overlay').hide();
-            console.log("response : ", response);
-            console.log(Trampolines.chosen);
             $('#SelectedTrampolines').html(response.view);
             this.initEventsAfterHtmlUpdate();
+            this.updateNoTrampolinesMessage(); // Update message after rendering
         }).fail(function (jqXHR, textStatus) {
             alert("Request failed: " + textStatus);
         });
     }
-}
+};
 
 $(document).ready(function () {
     console.log("/js/trampolines/public/trampolines_public.js -> ready!");

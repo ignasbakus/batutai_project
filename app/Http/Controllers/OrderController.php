@@ -76,12 +76,14 @@ class OrderController extends Controller
     public function publicGetIndexViaEmail($order_number): \Illuminate\Contracts\Foundation\Application|Factory|View|Application
     {
         $order = Order::where('order_number', $order_number)->first();
-        $orderId = $order->id;
-        $orderTrampolines = OrdersTrampoline::where('orders_id', $orderId)->where('is_active', 1)->first();
 //        dd($orderTrampolines);
 
-
-        if (!$order || !$orderTrampolines || $order->order_status !== 'Apmokėtas') {
+        if (!$order) {
+            return view('orders.public.order_not_found');
+        }
+        $orderId = $order->id;
+        $orderTrampolines = OrdersTrampoline::where('orders_id', $orderId)->where('is_active', 1)->first();
+        if (!$orderTrampolines || $order->order_status !== 'Apmokėtas') {
             return view('orders.public.order_not_found');
         }
         $deliveryTime = $orderTrampolines->first();
@@ -354,6 +356,7 @@ class OrderController extends Controller
             $paymentLink = self::generatePaymentUrl($Order->Order->id);
             $clientEmail = (new Client())->newQuery()->where('id', $Order->Order->client_id)->first()->email;
             if (config('mail.send_email') === true){
+                Log::info('Sending email to: ' . $clientEmail);
                 Mail::to($clientEmail)->send(new OrderPlaced($Order->Order, $paymentLink));
             }
         } else {

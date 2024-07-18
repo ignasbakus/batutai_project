@@ -46,8 +46,7 @@
                     </div>
                     <div class="modal-body">
                         <h5>Ar tikrai norite atšaukti užsakymą?</h5>
-                        <p style="color: red">Jei iki pirmosios rezervacijos dienos yra likusios mažiau nei 3 dienos,
-                            užsakymo atšaukti neleis</p>
+                        <p style="color: red">Jeigu nuspręsite užsakymą atšaukti, pinigai už avansą negražinami</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Išeiti</button>
