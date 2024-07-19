@@ -74,7 +74,7 @@ class TrampolinesController extends Controller
 
     public function adminGetDatatable(): JsonResponse
     {
-//        dd(\request()->get('filterActive'));
+//        dd(\request()->get('filterInactive'));
         $Trampolines = (new DataTablesProcessing())->getPaginatedData(
             new Trampoline(),
             ['Parameter'],

@@ -1,3 +1,6 @@
+let filterActive = false
+let filterInactive = false
+
 let Variables = {
     trampolineFormInput: [
         'trampolineName', 'trampolineColor', "trampolineHeight", 'trampolineLength', 'trampolineWidth', "trampolineDescription", 'trampolineActivity', 'trampolinePrice'
@@ -15,8 +18,6 @@ let Variables = {
     }
 }
 let Trampolines = {
-    filterActive: false,
-    filterInactive: false,
     init: function () {
         this.Modals.addTrampoline.Events.init()
         this.Modals.updateTrampoline.Events.init()
@@ -31,8 +32,12 @@ let Trampolines = {
         Table: false,
         AXAJData: function (d) {
             d._token = $('meta[name="csrf-token"]').attr('content');
-            d.filterActive = Trampolines.filterActive;
-            d.filterInactive = Trampolines.filterInactive;
+            if (filterActive){
+                d.filterActive = filterActive;
+            }
+            if(filterInactive){
+                d.filterInactive = filterInactive;
+            }
             return d;
         },
         init: function () {
@@ -52,6 +57,7 @@ let Trampolines = {
                     type: 'POST',
                     dataType: 'json',
                     data: function (d) {
+                        console.log('Sending data:', d);
                         d = Trampolines.Table.AXAJData(d);
                     },
                     dataFilter: function (response) {
@@ -59,7 +65,7 @@ let Trampolines = {
                     },
                     dataSrc: function (json) {
                         Trampolines.Table.TrampolinesList = json.list;
-                        return json.DATA || [];
+                        return json.DATA;
                     }
                 },
                 columnDefs: [
@@ -414,11 +420,12 @@ let Trampolines = {
     Events: {
         init: function (){
           $('#activeTrampolines').on('change', function () {
-              Trampolines.filterActive = $(this).is(':checked');
+              filterActive = $(this).is(':checked');
+              console.log($(this).is(':checked'));
               Trampolines.Table.Table.draw();
           });
             $('#inactiveTrampolines').on('change', function () {
-                Trampolines.filterInactive = $(this).is(':checked');
+                filterInactive = $(this).is(':checked');
                 Trampolines.Table.Table.draw();
             });
         },

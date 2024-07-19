@@ -4,9 +4,9 @@
 @endphp
 <div class="px-4 py-5">
     <h5 class="text-uppercase">{{$Order->client->name}} {{$Order->client->surname}}</h5>
-    <h4 class="mt-5 theme-color mb-5">Ačiū už jūsų rezervaciją!</h4>
+    <h4 class="mt-5 mb-3 theme-color">Ačiū už jūsų rezervaciją!</h4>
     @if($Order->trampolines->isNotEmpty())
-        <div class="d-flex justify-content-between mb-5">
+        <div class="d-flex justify-content-between">
             @if($Order->trampolines->first()->rental_duration <= 1)
                 <span class="font-weight-bold">Rezervuota diena</span>
             @else
@@ -22,12 +22,13 @@
                 @endif
             </span>
         </div>
+        <div class="d-flex justify-content-between mt-3 mb-5">
+            <span class="font-weight-bold">Pristatymo laikas</span>
+            <span class="font-weight-bold"> {{ $Order->trampolines->first()->delivery_time }}</span>
+        </div>
     @endif
     <span></span>
-    <h5 class="theme-color">Mokėjimo suvestinė</h5>
-    <div class="mb-3">
-        <hr class="new1">
-    </div>
+    <h5 class="theme-color mb-3">Mokėjimo suvestinė</h5>
     @foreach($Order->trampolines as $orderTrampolines)
         <div class="d-flex justify-content-between">
             <span class="font-weight-bold">Batutas {{$orderTrampolines->trampoline->title}}</span>

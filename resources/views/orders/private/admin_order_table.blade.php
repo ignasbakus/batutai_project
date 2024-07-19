@@ -1,9 +1,10 @@
 @extends('layouts.admin_panel_layout')
 @section('custom_css')
     <link href="/css/order/admin/admin_order_calendar.css" rel="stylesheet" crossorigin="anonymous">
+    <style>
+    </style>
 @endsection
 @section('content')
-    <div class="container flex-grow-1">
         <div class="row mb-5">
             <div class="col-12 col-md-4 custom-col">
                 <div class="button-container">
@@ -20,13 +21,14 @@
                 </div>
             </div>
         </div>
-        <div class="row mb-5">
-            <div class="col-12">
-                <table id="orderTable" class="display" style="width:100%">
-                    <tbody></tbody>
-                </table>
-            </div>
+    <div class="row mb-5">
+        <div class="col-12">
+            <table id="orderTable" class="display" style="width:100%">
+                <tbody></tbody>
+            </table>
         </div>
+    </div>
+    <div class="container flex-grow-1">
         <div class="modal fade" id="removeOrderModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">

@@ -3,35 +3,35 @@
     <link href="/css/trampolines/admin/admin_index.css" rel="stylesheet" crossorigin="anonymous">
 @endsection
 @section('content')
-    <div class="container flex-grow-1">
-        <div class="row mb-5">
-            <div class="col-4">
-                <div class="button-container">
-                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createTrampolineModal">
-                        Pridėti
-                        naują batutą
-                    </button>
-                    <button id="refreshTable" class="btn btn-secondary">
-                        Atnaujinti lentelė
-                    </button>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="activeTrampolines">
-                        <label class="form-check-label" for="flexSwitchCheckDefault">Aktyvus batutai</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="inactiveTrampolines">
-                        <label class="form-check-label" for="flexSwitchCheckDefault">Neaktyvvus batutai</label>
-                    </div>
+    <div class="row mb-5">
+        <div class="col-4">
+            <div class="button-container">
+                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createTrampolineModal">
+                    Pridėti
+                    naują batutą
+                </button>
+                <button id="refreshTable" class="btn btn-secondary">
+                    Atnaujinti lentelė
+                </button>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="activeTrampolines">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Aktyvus batutai</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="inactiveTrampolines">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Neaktyvvus batutai</label>
                 </div>
             </div>
         </div>
-        <div class="row mb-5">
-            <div class="col-12">
-                <table id="trampolineTable" class="display" style="width:100%">
-                    <tbody></tbody>
-                </table>
-            </div>
+    </div>
+    <div class="row mb-5">
+        <div class="col-12">
+            <table id="trampolineTable" class="display" style="width:100%">
+                <tbody></tbody>
+            </table>
         </div>
+    </div>
+    <div class="container flex-grow-1">
         <div class="modal fade" id="createTrampolineModal" data-bs-backdrop="static" tabindex="-1"
              aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

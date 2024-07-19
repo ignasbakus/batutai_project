@@ -3,28 +3,27 @@
 namespace App\Trampolines;
 
 use App\Interfaces\Order;
-use App\Mail\OrderDeleted;
-use App\Mail\OrderNotPaid;
-use App\Mail\OrderPaid;
-use App\Mail\OrderPlaced;
+use App\Mail\admin\adminOrderCancelled;
+use App\Mail\admin\adminOrderUpdated;
+use App\Mail\admin\AdminPaidOrder;
+use App\Mail\user\OrderDeleted;
+use App\Mail\user\OrderNotPaid;
+use App\Mail\user\OrderPaid;
+use App\Mail\user\OrderPlaced;
+use App\Mail\user\orderUpdated;
 use App\Models\Client;
 use App\Models\ClientAddress;
 use App\Models\OrdersTrampoline;
-use App\Models\Trampoline;
-use App\MontonioPayments\MontonioPaymentsService;
 use Carbon\Carbon;
-use http\Env\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
-use Illuminate\Database\QueryException;
-use function PHPUnit\Framework\assertArrayIsEqualToArrayOnlyConsideringListOfKeys;
 
 class TrampolineOrder implements Order
 {
@@ -168,6 +167,7 @@ class TrampolineOrder implements Order
         }
 
         $order = \App\Models\Order::find($trampolineOrderData->orderID);
+//        dd($order);
         if (!$order || $order->order_status === 'Atšauktas') {
             $this->status = false;
             $this->failedInputs->add('error', 'Nepavyko atnaujinti. Užsakymas nerastas/atšauktas.');
@@ -209,11 +209,7 @@ class TrampolineOrder implements Order
             }
         }
 
-        $Order = \App\Models\Order::updateOrCreate(
-            [
-                'id' => $trampolineOrderData->orderID
-            ]
-        );
+        $Order = \App\Models\Order::find($trampolineOrderData->orderID);
 
         $this->Order = $Order;
 
@@ -278,6 +274,10 @@ class TrampolineOrder implements Order
 //        dd($this);
         $this->status = true;
         $this->Messages[] = 'Užsakymas atnaujintas sėkmingai !';
+        if (config('mail.send_email') === true){
+            Mail::to($Order->client->email)->send(new orderUpdated($this->Order));
+            Mail::to(config('mail.admin_email'))->send(new adminOrderUpdated($this->Order));
+        }
         return $this;
     }
     public function delete($orderID): static
@@ -285,7 +285,9 @@ class TrampolineOrder implements Order
         try {
 
             $order = \App\Models\Order::find($orderID);
+
             if (config('mail.send_email') === true){
+                if ($order->trampolines->first()->is_active)
                 Mail::to($order->client->email)->send(new OrderDeleted($order));
             }
             $order->trampolines()->delete();
@@ -398,9 +400,15 @@ class TrampolineOrder implements Order
 
         if (!$isFromWebhook) {
             $order->update(['order_status' => 'Atšauktas kliento']);
+            if (config('mail.send_email') === true){
+                Mail::to($order->client->email)->send(new OrderDeleted($order));
+                Mail::to(config('mail.admin_email'))->send(new adminOrderCancelled($this->Order));
+            }
         } else {
             $order->update(['order_status' => 'Atšauktas, nes neapmokėtas']);
-            Mail::to($order->client->email)->send(new OrderNotPaid($order));
+            if (config('mail.send_email') === true){
+                Mail::to($order->client->email)->send(new OrderNotPaid($order));
+            }
         }
 
         foreach ($orderTrampolines as $orderTrampoline) {
@@ -409,7 +417,6 @@ class TrampolineOrder implements Order
 
         $this->status = true;
         $this->Messages[] = 'Užsakymas atšauktas sėkmingai !';
-
         return $this;
     }
 
@@ -427,6 +434,7 @@ class TrampolineOrder implements Order
         $order->update(['order_status' => 'Apmokėtas']);
         if (config('mail.send_email') === true){
             Mail::to($order->client->email)->send(new OrderPaid($order));
+            Mail::to(config('mail.admin_email'))->send(new AdminPaidOrder($order));
         }
         return [
             'status' => true,
@@ -436,9 +444,15 @@ class TrampolineOrder implements Order
     public function updateDeliveryTime($Request): array
     {
         $orderID = $Request->input('orderID');
+        $order = \App\Models\Order::find($orderID);
         $customerDeliveryTime = $Request->input('customerDeliveryTime');
 
+
         $affectedRows = OrdersTrampoline::where('orders_id', $orderID)->update(['delivery_time' => $customerDeliveryTime]);
+        if($affectedRows > 0 && config('mail.send_email') === true){
+            Mail::to($order->client->email)->send(new orderUpdated($order));
+            Mail::to(config('mail.admin_email'))->send(new adminOrderUpdated($order));
+        }
         if($affectedRows > 0){
             return [
                 'status' => true,

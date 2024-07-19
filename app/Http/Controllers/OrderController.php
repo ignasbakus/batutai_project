@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\OrderPlaced;
+use App\Mail\user\OrderPlaced;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrdersTrampoline;
 use App\Models\Trampoline;
 use App\MontonioPayments\MontonioPaymentsService;
-use App\StripePayments\StripePaymentsService;
 use App\Trampolines\BaseTrampoline;
 use App\Trampolines\DataTablesProcessing;
 use App\Trampolines\OccupationTimeFrames;
@@ -19,7 +18,6 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -29,6 +27,8 @@ class OrderController extends Controller
 
     public function adminGetDatatable(): JsonResponse
     {
+//        dd(\request()->get('length'));
+//        dd(\request()->get('start'));
         $Orders = (new DataTablesProcessing())->getPaginatedData(
             new Order(),
             [
@@ -44,6 +44,19 @@ class OrderController extends Controller
             \request()->get('searchValue', '')
         );
 
+//        dd($Orders->recordsTotal);
+//        dd($Orders->List);
+//        dd(\request()->get('draw'));
+//        dd(response()->json(
+//            [
+//                'status' => true,
+//                'DATA' => $Orders->data ?? [],
+//                'draw' => \request()->get('draw'),
+//                'list' => $Orders->List ?? [],
+//                'recordsTotal' => $Orders->recordsTotal ?? 0,
+//                'recordsFiltered' => $Orders->recordsFiltered ?? 0,
+//            ]
+//        ));
         return response()->json([
             'status' => true,
             'DATA' => $Orders->data ?? [],

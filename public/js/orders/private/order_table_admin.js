@@ -215,6 +215,7 @@ let Orders = {
             this.Table = new DataTable('#orderTable', {
                 pagingType: "full_numbers",
                 pageLength: 5,
+                // paging: true,
                 lengthMenu: [[5, 10, 15, 20, 30], [5, 10, 15, 20, 30]],
                 processing: true,
                 filter: true,
@@ -228,6 +229,7 @@ let Orders = {
                     type: 'POST',
                     dataType: 'json',
                     data: function (d) {
+                        console.log('Sending data:', d);
                         d = Orders.Table.AXAJData(d);
                     },
                     dataFilter: function (response) {
@@ -261,7 +263,7 @@ let Orders = {
                     {title: "Bendra<br>suma", orderable: false},
                     {title: "Avanso<br>suma", orderable: false},
                     {title: "Užsakymo<br>būsena", orderable: false},
-                    {title: "Valdymas", orderable: false}
+                    {title: "Valdymas", orderable: false, width: "15%"}
                 ],
                 bAutoWidth: false,
                 fixedColumns: true,

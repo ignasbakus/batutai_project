@@ -1,8 +1,11 @@
 <?php
 
 return [
-
+    /* Checks if mails should be sent or no */
     'send_email' => env('SEND_EMAILS', false),
+
+    /* Declares to which address should the admin emails be sent */
+    'admin_email' => env('ADMIN_EMAIL',),
 
     /*
     |--------------------------------------------------------------------------

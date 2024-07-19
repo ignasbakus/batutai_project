@@ -1,28 +1,28 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\user;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderPaid extends Mailable
+class OrderPlaced extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public Order $order;
+    public string $paymentLink;
     /**
      * Create a new message instance.
      */
-    public function __construct(
-        public Order $order
-    )
+    public function __construct(Order $order, string $paymentLink)
     {
-        //
+        $this->order = $order;
+        $this->paymentLink = $paymentLink;
     }
 
     /**
@@ -35,7 +35,7 @@ class OrderPaid extends Mailable
             replyTo: [
                 new Address('uzsakymai@op-op.lt', 'OPOP LT administratorius'),
             ],
-            subject: 'Užsakymas apmokėtas',
+            subject: 'Užsakymas pateiktas',
         );
     }
 
@@ -45,7 +45,12 @@ class OrderPaid extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.payments.payment_received',
+            view: 'mail.user.orders.order-placed',
+            with: [
+                'order' => $this->order,
+                'paymentLink' => $this->paymentLink,
+            ],
+            //text: 'mail.orders.order-placed'
         );
     }
 

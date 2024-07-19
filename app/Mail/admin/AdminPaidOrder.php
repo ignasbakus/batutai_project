@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\admin;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderNotPaid extends Mailable
+class AdminPaidOrder extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -32,10 +31,7 @@ class OrderNotPaid extends Mailable
     {
         return new Envelope(
             from: new Address('uzsakymai@op-op.lt', 'OP-OP batutai'),
-            replyTo: [
-                new Address('uzsakymai@op-op.lt', 'OPOP LT administratorius'),
-            ],
-            subject: 'Užsakymas nebuvo apmokėtas',
+            subject: 'Gautas naujas užsakymas',
         );
     }
 
@@ -45,7 +41,7 @@ class OrderNotPaid extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.payments.payment_failed',
+            view: 'mail.admin.orders.paid_order_received',
         );
     }
 

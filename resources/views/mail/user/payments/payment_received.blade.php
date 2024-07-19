@@ -60,7 +60,7 @@
         <h1>Jūsų užsakymas yra apmokėtas!</h1>
     </div>
     <div>
-        <h2>Savo užsakymą galite peržiūrėti čia: <a
+        <h2>Savo užsakymą redaguoti ir peržiūrėti galite čia: <a
                 href="{{ url('/orders/public/order/view/' . $order->order_number) }}">Spauskite čia</a></h2>
         <br>
         <h4>Svarbu! Atšaukus užakymą, avansas negražinamas</h4>

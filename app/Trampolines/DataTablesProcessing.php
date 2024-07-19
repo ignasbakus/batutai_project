@@ -34,8 +34,8 @@ class DataTablesProcessing
               $startDate = null,
               $endDate = null,
               $searchValue = null,
-              $filterActive = false,
-              $filterInactive = false
+              $filterActive = null,
+              $filterInactive = null
     ): static
     {
         $this->TableName = $model->getTable();
@@ -79,28 +79,12 @@ class DataTablesProcessing
                 });
             }
         }
-//        dd($Query->whereHas('parameter', function ($query) {
-//            $query->where('activity', 1);
-//        }));
-        //
-//        dd($filterActive);
-
-
-        if($filterActive === true){
-            dd('patekom jog filteractive true');
-        }
-
-        if($filterActive === false){
-            dd('patekom jog filteractive false');
-        }
 
         if ($filterActive && !$filterInactive) {
-//            dd('patekom');
             $Query->whereHas('parameter', function ($query) {
                 $query->where('activity', 1);
             });
         } elseif (!$filterActive && $filterInactive) {
-//            dd('patekom');
             $Query->whereHas('parameter', function ($query) {
                 $query->where('activity', 0);
             });
@@ -147,7 +131,7 @@ class DataTablesProcessing
         $this->List = $Query->get();
 
         $this->recordsTotal = $model->newQuery()->count();
-        $this->recordsFiltered = $Query->count();
+        $this->recordsFiltered = $this->recordsTotal;
 
         if ($this->List->isEmpty()) {
             $this->data = [];
@@ -265,6 +249,7 @@ class DataTablesProcessing
                 '
                     ];
                     $this->data[] = $ROW;
+//                    dd($ROW);
                     break;
             }
         }
