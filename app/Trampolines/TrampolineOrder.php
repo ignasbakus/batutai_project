@@ -46,19 +46,20 @@ class TrampolineOrder implements Order
 
     public function create(TrampolineOrderData $trampolineOrderData): static
     {
-//        dd($trampolineOrderData);
-        $checkResult = self::canRegisterOrder(null, $trampolineOrderData);
-//        dd($isTrampolineActive);
-        if (!$checkResult['status']) {
-            $this->status = false;
-            $this->failedInputs->add('error', $checkResult['message']);
-            return $this;
-        }
 
+//        dd($isTrampolineActive);
         if (!$trampolineOrderData->ValidationStatus) {
 //            dd('patekom');
             $this->failedInputs = $trampolineOrderData->failedInputs;
             $this->status = false;
+            return $this;
+        }
+
+        $checkResult = self::canRegisterOrder(null, $trampolineOrderData);
+
+        if (!$checkResult['status']) {
+            $this->status = false;
+            $this->failedInputs->add('error', $checkResult['message']);
             return $this;
         }
 
@@ -325,10 +326,12 @@ class TrampolineOrder implements Order
             }
         }
         if ($order) {
-            $trampolineId = $order->trampolines->first()->trampolines_id;
-            $rentalStart = Carbon::parse($order->trampolines()->first()->rental_start)->format('Y-m-d');
-            $rentalEnd = Carbon::parse($order->trampolines()->first()->rental_end)->format('Y-m-d');
-            $orderId = $order->id;
+            foreach ($order->trampolines as $trampoline) {
+                $trampolineId = $trampoline->trampolines_id;
+                $rentalStart = Carbon::parse($trampoline->rental_start)->format('Y-m-d');
+                $rentalEnd = Carbon::parse($trampoline->rental_end)->format('Y-m-d');
+                $orderId = $order->id;
+            }
         }
 
         $overlappingRentals = DB::table('orders_trampolines')

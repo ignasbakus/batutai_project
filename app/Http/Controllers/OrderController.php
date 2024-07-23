@@ -301,7 +301,7 @@ class OrderController extends Controller
         $lastVisibleDay = Carbon::parse(\request()->get('lastVisibleDay', null));
         $NewOrderEventBackgroundColor = 'green';
         $NewOrderEventTitle = 'Jūsų užsakymas';
-//        dd(\request()->all());
+
         $Order = (new TrampolineOrder())->create((new TrampolineOrderData(\request())));
 //        dd($Order);
 //        dd($Order);
