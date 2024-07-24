@@ -49,9 +49,9 @@
         @yield('content')
     </div>
 
-    <footer id="footer" class="navbar navbar-lightblue">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Fixed bottom</a>
+    <footer id="footer" class="text-center">
+        <div class="container-fluid mt-3">
+            <p>&copy; <span id="year"></span> Op-Op.lt. Visos teisės saugomos.</p>
         </div>
     </footer>
 
@@ -59,6 +59,7 @@
     <script src="/frameworks/jquery-ui-1.13.2/jquery-ui.min.js" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/@popperjs/core@2" crossorigin="anonymous"></script>
     <script src="/frameworks/bootstrap-5.3.3/js/bootstrap.bundle.js" crossorigin="anonymous"></script>
+    <script src="/js/layouts/public.layout.js"></script>
     @yield('custom_js')
 </div>
 </body>

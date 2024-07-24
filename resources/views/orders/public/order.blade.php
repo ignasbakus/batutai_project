@@ -140,8 +140,8 @@
                             <hr>
                             <div>
                                 <span class="text-danger py-2">
-                                    * Prie galutinės sumos dar nėra priskaičiuota pristatymo kaina. Pastikrinti apytikslę <br>
-                                    kainą į jūsų miestą <a href="{{route('deliveryPricesIndex')}}" target="_blank">galite čia</a>
+                                    * Prie galutinės sumos dar nėra priskaičiuota pristatymo kaina. Dėl daugiau informacijos
+                                    skambinkite numeriu +3706200000 arba rašykite el. paštu op-op.lt
                                 </span>
                             </div>
                         </div>

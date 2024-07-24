@@ -16,6 +16,7 @@ use App\Models\ClientAddress;
 use App\Models\OrdersTrampoline;
 use App\MontonioPayments\MontonioPaymentsService;
 use Carbon\Carbon;
+use http\Env\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -289,23 +290,45 @@ class TrampolineOrder implements Order
         return $this;
     }
 
-    public function delete($orderID): static
+    public function delete($request): static
     {
         try {
-
-            $order = \App\Models\Order::find($orderID);
+//            dd($request->orderID);
+            $order = \App\Models\Order::find($request->orderID);
 
             if (config('mail.send_email') === true) {
-                if ($order->trampolines->first()->is_active)
-                    Mail::to($order->client->email)->send(new OrderDeleted($order));
+                if (isset($request->informClient)) {
+                    switch ($request->cancellationExcuse) {
+                        case 'normalCancellation':
+                            Mail::to($order->client->email)->send(new OrderDeleted($order));
+                            break;
+                        case 'technicalFailure':
+                            Mail::to($order->client->email)->send(new OrderDeleted($order, 'Užsakymas buvo atšauktas
+                            dėl kilusių techninių nesklandumų. Greitu metu su jumis susisieksime, jog galėtume gražinti avansą.'));
+                            break;
+                        case 'badWeather':
+                            Mail::to($order->client->email)->send(new OrderDeleted($order, 'Užsakymas buvo atšauktas
+                            dėl blogų oro sąlygų. Greitu metu su jumis susisieksime, jog galėtume gražinti avansą.'));
+                            break;
+                        case 'trampolineReserved':
+                            Mail::to($order->client->email)->send(new OrderDeleted($order, 'Užsakymas buvo atšauktas, nes
+                            batutas, kurį užsisakėte buvo užimtas. Greitu metu su jumis susisieksime, jog galėtume gražinti avansą.'));
+                            break;
+                        case 'paymentMissing':
+                            Mail::to($order->client->email)->send(new OrderDeleted($order, 'Užsakymas buvo atšauktas, nes
+                            negavome jūsų avanso apmokėjimo.'));
+                            break;
+                    }
+                }
             }
+
             $order->trampolines()->delete();
 //            $order->client()->delete();
 //            $order->address()->delete();
             $order->paymentCreationLog()->delete();
             $order->paymentWebhooksLog()->delete();
             $this->status = $order->delete();
-            $this->Messages[] = 'Užsakymas #' . $orderID . ' ištrintas sėkmingai !';
+            $this->Messages[] = 'Užsakymas #' . $request->orderID . ' ištrintas sėkmingai !';
         } catch (\Exception $exception) {
             $this->Errors[] = 'Trinant užsakymą įvyko klaida : ' . $exception->getMessage();
             $this->status = false;
@@ -425,7 +448,7 @@ class TrampolineOrder implements Order
             $order->update(['order_status' => 'Atšauktas kliento']);
             if (config('mail.send_email') === true) {
                 Mail::to($order->client->email)->send(new OrderDeleted($order));
-                Mail::to(config('mail.admin_email'))->send(new adminOrderCancelled($this->Order));
+                Mail::to(config('mail.admin_email'))->send(new adminOrderCancelled($order));
             }
         } else {
             $order->update(['order_status' => 'Atšauktas, nes neapmokėtas']);
@@ -569,10 +592,16 @@ class TrampolineOrder implements Order
     {
         $order = \App\Models\Order::find($orderID);
         $orderActive = $order->trampolines()->where('is_active', 1)->exists();
+        $orderRentalStart = Carbon::parse($order->trampolines()->pluck('rental_start')->first())->format('Y-m-d');
         if (!$orderActive) {
             return [
                 'status' => false,
                 'message' => 'Užsakymas neaktyvus, redaguoti negalima.'
+            ];
+        } else if ($orderRentalStart < Carbon::now()->format('Y-m-d')) {
+            return [
+                'status' => false,
+                'message' => 'Užsakymo redaguoti negalima, nes praėjo rezervacijos pradžios data.'
             ];
         }
         $rentalStart = $order->trampolines()->pluck('rental_start')->first();
@@ -604,6 +633,9 @@ class TrampolineOrder implements Order
                 break;
             case 'OrderNotPaid':
                 Mail::to($email)->send(new OrderNotPaid($order));
+                break;
+            case 'OrderCancelled':
+                Mail::to($email)->send(new OrderDeleted($order));
                 break;
         }
         return [

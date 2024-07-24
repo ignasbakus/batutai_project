@@ -8,5 +8,12 @@
 <body>
 <h1>Jūsų užsakymas buvo atšauktas</h1>
 <p>Apgailestaujame, bet norime jus informuoti, kad jūsų užsakymas numeris: {{ $order->order_number }} buvo atšauktas.</p>
+<br>
+
+<?php if (!empty($additionalInfo)) : ?>
+<h3>Priežastis:</h3>
+<p><?php echo htmlspecialchars($additionalInfo); ?></p>
+<?php endif; ?>
+
 </body>
 </html>

@@ -6,12 +6,12 @@
 
 @section('content')
     <div class="container">
-        <div class="row">
-            <div class="col text-center mb-3">
-                <h1>Mūsų batutai</h1>
-            </div>
-        </div>
-        <div class="row">
+{{--        <div class="row">--}}
+{{--            <div class="col text-center mb-3">--}}
+{{--                <h1>Mūsų batutai</h1>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+        <div class="row mt-5">
             <div class="col-12 col-lg-5 mb-3">
                 <div id="trampolinesCarousel" class="carousel slide" data-bs-theme="dark">
                     <div class="carousel-inner">
@@ -41,10 +41,10 @@
                     Pasirinkti batutą
                 </button>
             </div>
-            <div class="col-12 col-lg-7">
-                <div class="text-center mt-3">
-                    <h3>Pasirinkti batutai</h3>
-                </div>
+            <div class="col-12 col-lg-7 mt-5" >
+{{--                <div class="text-center mt-3">--}}
+{{--                    <h3>Pasirinkti batutai</h3>--}}
+{{--                </div>--}}
                 <ul id="SelectedTrampolines" class="list-group">
                     {{--                        <li class="list-group-item no-trampolines-message" style="display: block">No trampolines selected</li>--}}
                 </ul>

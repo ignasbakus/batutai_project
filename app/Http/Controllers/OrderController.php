@@ -85,14 +85,13 @@ class OrderController extends Controller
     public function publicGetIndexViaEmail($order_number): \Illuminate\Contracts\Foundation\Application|Factory|View|Application
     {
         $order = Order::where('order_number', $order_number)->first();
-//        dd($orderTrampolines);
-
         if (!$order) {
             return view('orders.public.order_not_found');
         }
         $orderId = $order->id;
         $orderTrampolines = OrdersTrampoline::where('orders_id', $orderId)->where('is_active', 1)->first();
-        if (!$orderTrampolines || $order->order_status !== 'Apmokėtas') {
+        $rentalStart = Carbon::parse($order->trampolines()->pluck('rental_start')->first())->format('Y-m-d');
+        if (!$orderTrampolines || $order->order_status !== 'Apmokėtas' || $rentalStart < Carbon::now()->format('Y-m-d')) {
             return view('orders.public.order_not_found');
         }
         $deliveryTime = $orderTrampolines->first();
@@ -474,7 +473,7 @@ class OrderController extends Controller
     }
     public function orderDelete(): JsonResponse
     {
-        return response()->json((new TrampolineOrder())->delete(\request()->input('orderID')));
+        return response()->json((new TrampolineOrder())->delete(\request()));
     }
     public function orderCancel(): JsonResponse
     {
@@ -612,9 +611,9 @@ class OrderController extends Controller
         return (new TrampolineOrder())->sendAdditionalEmail(\request());
     }
 
-//    public function contactsIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
-//    {
-//        return view('orders.public.contacts');
-//    }
+    public function contactsIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
+    {
+        return view('orders.public.contacts');
+    }
 
 }

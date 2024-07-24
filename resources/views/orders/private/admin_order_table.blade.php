@@ -5,22 +5,22 @@
     </style>
 @endsection
 @section('content')
-        <div class="row mb-5">
-            <div class="col-12 col-md-4 custom-col">
-                <div class="button-container">
-                    <button id="refreshTable" class="btn btn-secondary">
-                        Atnaujinti lentelė
-                    </button>
-                    <button id="deleteUnpaidOrders" class="btn btn-secondary">
-                        Ištrinti neapmokėtus užsakymus
-                    </button>
-                    <div class="form-check form-switch mt-2">
-                        <input class="form-check-input" type="checkbox" id="showWeeklyOrders">
-                        <label class="form-check-label" for="showWeeklyOrders">Rodyti 7 dienų užsakymus</label>
-                    </div>
+    <div class="row mb-5">
+        <div class="col-12 col-md-4 custom-col">
+            <div class="button-container">
+                <button id="refreshTable" class="btn btn-secondary">
+                    Atnaujinti lentelė
+                </button>
+                <button id="deleteUnpaidOrders" class="btn btn-secondary">
+                    Ištrinti neapmokėtus užsakymus
+                </button>
+                <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" id="showWeeklyOrders">
+                    <label class="form-check-label" for="showWeeklyOrders">Rodyti 7 dienų užsakymus</label>
                 </div>
             </div>
         </div>
+    </div>
     <div class="row mb-5">
         <div class="col-12">
             <table id="orderTable" class="display" style="width:100%">
@@ -46,10 +46,21 @@
                             <div class="col">
                                 <div class="form-check mt-3">
                                     <input class="form-check-input informClient" name="informClient" type="checkbox"
-                                           value="" id="flexCheckChecked" checked>
-                                    <label class="form-check-label" for="informClient">
+                                           value="checked" id="flexCheckChecked">
+                                    <label class="form-check-label" for="flexCheckChecked">
                                         Informuoti klientą
                                     </label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mt-3 cancellationDropdown"  style="display:none;">
+                                    <select name="cancellationExcuse" class="form-select">
+                                        <option value="normalCancellation">Be priežasties</option>
+                                        <option value="technicalFailure">Techninis gedimas</option>
+                                        <option value="badWeather">Blogos oro sąlygos</option>
+                                        <option value="trampolineReserved">Batutas jau rezervuotas</option>
+                                        <option value="paymentMissing">Negautas mokėjimas</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -62,7 +73,7 @@
             </div>
         </div>
         <div class="modal fade" id="updateOrderModal" data-bs-backdrop="static" tabindex="-1"
-                   aria-labelledby="updateOrderModal" aria-hidden="true">
+             aria-labelledby="updateOrderModal" aria-hidden="true">
             <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -178,7 +189,7 @@
             <div class="modal-dialog modal-dialog-centered modal-sm">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">El. laiško  pakartotinis siuntimas</h1>
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">El. laiško pakartotinis siuntimas</h1>
                         <button type="button" class="btn-close modalClose" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                     </div>
@@ -186,22 +197,25 @@
                         <div class="row">
                             <div class="col">
                                 <label for="recipientEmail" class="form-label">Gavėjo el. paštas</label>
-                                <input type="email" id="recipientEmail" name="customerEmail" class="form-control" value="">
+                                <input type="email" id="recipientEmail" name="customerEmail" class="form-control"
+                                       value="">
                             </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col">
-                                <label for="randomValues" class="form-label">El. laiško tipas</label>
+                                <label for="emailType" class="form-label">El. laiško tipas</label>
                                 <select name="emailType" class="form-select">
                                     <option value="OrderPaid">Gautas apmokėjimas</option>
                                     <option value="OrderPlaced">Gautas užsakymas</option>
                                     <option value="OrderNotPaid">Užsakymas neapmokėtas</option>
+                                    <option value="OrderCancelled">Užsakymas atšauktas</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary modalClose" data-bs-dismiss="modal">Uždaryti</button>
+                        <button type="button" class="btn btn-secondary modalClose" data-bs-dismiss="modal">Uždaryti
+                        </button>
                         <button type="submit" class="btn btn-primary sendEmail">Siųsti</button>
                     </div>
                 </div>

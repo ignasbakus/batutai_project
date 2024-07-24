@@ -83,6 +83,3 @@ Route::controller(TrampolinesController::class)->group(function () {
         });
     });
 });
-
-
-

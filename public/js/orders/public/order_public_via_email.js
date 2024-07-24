@@ -66,6 +66,20 @@ let flatPickerFunctions = {
         initialMonth: 0,
         initialRentalStart: 0,
         initialRentalEnd: 0,
+        monthNames: {
+            "January": "Sausis",
+            "February": "Vasaris",
+            "March": "Kovas",
+            "April": "Balandis",
+            "May": "Gegužė",
+            "June": "Birželis",
+            "July": "Liepa",
+            "August": "Rugpjūtis",
+            "September": "Rugsėjis",
+            "October": "Spalis",
+            "November": "Lapkritis",
+            "December": "Gruodis"
+        },
         initialize: function () {
             flatPicker = $('#flatPickerCalendar').flatpickr({
                 mode: 'range', // Enables range selection
@@ -76,6 +90,7 @@ let flatPickerFunctions = {
                 disable: flatPickerFunctions.flatPickerCalendar.disabledDaysArray,
                 defaultDate: [flatPickerFunctions.flatPickerCalendar.initialRentalStart, flatPickerFunctions.flatPickerCalendar.initialRentalEnd],
                 onChange: function (selectedDates, dateStr, instance) {
+                    flatPickerFunctions.flatPickerCalendar.overrideMonthNames();
                     if (selectedDates.length === 2) {
                         let startDate = selectedDates[0];
                         let endDate = selectedDates[1];
@@ -99,13 +114,15 @@ let flatPickerFunctions = {
                             }
                         }
                         if (!isValidRange) {
-                            // TrampolineOrder.ChangeOrderDatesModal.element.hide();
                             flatPickerFunctions.flatPickerCalendar.Modal.element.show();
                             $('#disabledDatesModal').on('hidden.bs.modal', function () {
                                 instance.clear();
                                 instance.setDate([flatPickerFunctions.flatPickerCalendar.initialRentalStart, flatPickerFunctions.flatPickerCalendar.initialRentalEnd]);
                                 instance.changeMonth(flatPickerFunctions.flatPickerCalendar.monthChangeTo, true);
                             })
+                            setTimeout(() => {
+                                flatPickerFunctions.flatPickerCalendar.overrideMonthNames();
+                            }, 100);
                         } else {
                             console.log('Valid date range selected:', selectedDates);
                             Trampolines.forEach(function (Trampoline) {
@@ -114,6 +131,9 @@ let flatPickerFunctions = {
                             })
                             TrampolineOrder.ChangeOrderDatesModal.flatPickerRangeStart = formattedStartDate;
                             TrampolineOrder.ChangeOrderDatesModal.flatPickerRangeEnd = formattedEndDate;
+                            setTimeout(() => {
+                                flatPickerFunctions.flatPickerCalendar.overrideMonthNames();
+                            }, 100);
                         }
                     }
                 },
@@ -124,6 +144,13 @@ let flatPickerFunctions = {
                     console.log('month change to: from initial + ', flatPickerFunctions.flatPickerCalendar.monthChangeTo)
                     flatPickerFunctions.flatPickerCalendar.logVisibleDays(); // Log the visible days when the month changes
                     CalendarFunctions.updateEvents(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay)
+                    setTimeout(() => {
+                        if (flatPicker.calendarContainer) {
+                            flatPickerFunctions.flatPickerCalendar.overrideMonthNames();
+                        } else {
+                            console.error('Calendar container not found after timeout');
+                        }
+                    }, 100);
                 },
                 onOpen: function (selectedDates, dateStr, instance) {
                     if (!isFirstMonthCaptured) {
@@ -133,8 +160,29 @@ let flatPickerFunctions = {
                     }
                 },
                 // appendTo: document.body, // Ensures the calendar is appended to the body, which is useful for z-index control
+                onReady: function (selectedDates, dateStr, instance) {
+                    // Use a timeout to ensure the calendar container is available
+                    setTimeout(() => {
+                        if (flatPicker.calendarContainer) {
+                            flatPickerFunctions.flatPickerCalendar.overrideMonthNames();
+                            flatPickerFunctions.flatPickerCalendar.updateInputText(); // Ensure correct text on ready
+                        } else {
+                            console.error('Calendar container not found on ready');
+                        }
+                    }, 100);
+                },
+                onValueUpdate: function (selectedDates, dateStr, instance) {
+                    flatPickerFunctions.flatPickerCalendar.updateInputText()
+                },
                 zIndex: 9900 // Set the desired z-index value here
             })
+        },
+        updateInputText: function() {
+            const inputField = document.querySelector('#dateCalendarForMobile input[name=flatPickerCalendar]');
+            if (inputField) {
+                console.log('Input field:', inputField);
+                inputField.value = inputField.value.replace(/to/g, '-');
+            }
         },
         isDateDisabled: function (date, disabledDates) {
             for (let entry of disabledDates) {
@@ -214,6 +262,22 @@ let flatPickerFunctions = {
         updateDisabledDates: function (newDisabledDates) {
             flatPickerFunctions.flatPickerCalendar.disabledDaysArray = newDisabledDates;
             flatPicker.set('disable', newDisabledDates);
+        },
+        overrideMonthNames: function () {
+            const calendarContainer = flatPicker.calendarContainer;
+            if (!calendarContainer) {
+                console.error('Calendar container not found');
+                return;
+            }
+
+            const monthElements = calendarContainer.querySelectorAll('.flatpickr-monthDropdown-month');
+            monthElements.forEach((el) => {
+                const englishMonthName = el.textContent.trim();
+                const lithuanianMonthName = flatPickerFunctions.flatPickerCalendar.monthNames[englishMonthName];
+                if (lithuanianMonthName) {
+                    el.textContent = lithuanianMonthName;
+                }
+            });
         },
         Modal: {
             init: function () {
@@ -460,6 +524,7 @@ let CalendarFunctions = {
                 if (mobileCalendar) {
                     let disabledDates = TrampolineOrder.ChangeOrderDatesModal.processOccupiedDates(response.Occupied);
                     flatPickerFunctions.flatPickerCalendar.updateDisabledDates(disabledDates);
+                    flatPickerFunctions.flatPickerCalendar.overrideMonthNames(); // Reapply month names after update
                 }
             }
         });

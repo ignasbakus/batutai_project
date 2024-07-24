@@ -18,10 +18,11 @@ class OrderDeleted extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public Order $order
+        public Order $order,
+        public $additionalInfo = null
     )
     {
-        //
+//        dd($additionalInfo);
     }
 
     /**

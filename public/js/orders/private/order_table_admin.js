@@ -19,18 +19,27 @@ let isWeeklyFilterActive = false;
 let Variables = {
     orderFormInput: [
         'customerName', 'customerSurname', 'customerPhoneNumber', 'customerEmail', 'customerDeliveryCity',
-        'customerDeliveryPostCode', 'customerDeliveryAddress', 'customerDeliveryTime', 'emailType'
+        'customerDeliveryPostCode', 'customerDeliveryAddress', 'customerDeliveryTime', 'emailType', 'cancellationExcuse',
+        'informClient'
     ],
     getOrderFormInputs: function (ModalID) {
         let values = {}
         this.orderFormInput.forEach(function (inputName) {
-            if (inputName === 'emailType') {
-                values[inputName] = $('#' + ModalID + ' select[name=' + inputName + ']').val(); // Correctly get the selected value from the dropdown
-            } else {
-                values[inputName] = $('#' + ModalID + ' input[name=' + inputName + ']').val(); // Get the value from the input fields
+            // Simplified version of the code
+            if (inputName === 'informClient' && $('#' + ModalID + ' input[name=informClient]').is(':checked')) {
+                console.log('patekom i checked = true', inputName);
+                values[inputName] = $('#' + ModalID + ' input[name=' + inputName + ']').val();
+            } else if (inputName === 'cancellationExcuse' && $('#' + ModalID + ' input[name=informClient]').is(':checked')) {
+                console.log('patekom i cancelexcuse if', inputName);
+                values[inputName] = $('#' + ModalID + ' select[name=' + inputName + ']').val();
+            } else if (inputName === 'emailType') {
+                values[inputName] = $('#' + ModalID + ' select[name=' + inputName + ']').val();
+            } else if (inputName !== 'informClient') {
+                values[inputName] = $('#' + ModalID + ' input[name=' + inputName + ']').val();
             }
         })
         values.trampolines = trampolines;
+        console.log('values', values)
         return values;
     }
 }
@@ -282,7 +291,7 @@ let Orders = {
         initEventsAfterReload: function () {
             $('#orderTable .orderDelete').on('click', (event) => {
                 event.stopPropagation()
-                this.Events.removeOrder($(event.currentTarget).data('orderid'))
+                this.Events.removeOrder($(event.currentTarget).data('orderid'), $(event.currentTarget).data('ordernumber'))
             })
             $('#orderTable .orderUpdate').on('click', (event) => {
                 event.stopPropagation()
@@ -336,8 +345,8 @@ let Orders = {
                 });
 
             },
-            removeOrder: function (OrderID) {
-                Orders.Modals.deleteOrder.prepareModal(OrderID)
+            removeOrder: function (OrderID, OrderNumber) {
+                Orders.Modals.deleteOrder.prepareModal(OrderID, OrderNumber)
             },
             updateOrder: function (OrderID) {
                 Orders.Modals.updateOrder.prepareModal(OrderID)
@@ -383,9 +392,9 @@ let Orders = {
         deleteOrder: {
             orderIdToDelete: 0,
             element: new bootstrap.Modal('#removeOrderModal'),
-            prepareModal: function (OrderID) {
+            prepareModal: function (OrderID, OrderNumber) {
                 this.orderIdToDelete = OrderID
-                $('#removeOrderModal .modal-body .editable').html('Ar tikrai norite ištrinti užsakymą Nr: "' + OrderID + '"?')
+                $('#removeOrderModal .modal-body .editable').html('Ar tikrai norite ištrinti užsakymą Nr: "' + OrderNumber + '"?')
                 this.element.show()
 
             },
@@ -398,16 +407,25 @@ let Orders = {
                         event.stopPropagation()
                         this.removeOrder(Orders.Modals.deleteOrder.orderIdToDelete)
                     })
+                    $('#removeOrderModal .informClient').on('change', (event) => {
+                        event.stopPropagation()
+                        if ($(event.currentTarget).is(':checked')) {
+                            $('#removeOrderModal .cancellationDropdown').css('display', 'block')
+                        } else {
+                            $('#removeOrderModal .cancellationDropdown').css('display', 'none')
+                        }
+                    })
                 },
                 removeOrder: function (OrderID) {
                     $('#overlay').css('display', 'flex')
+                    let form_data = Variables.getOrderFormInputs('removeOrderModal')
+                    form_data.orderID = OrderID
+                    console.log('form_data => ', form_data)
                     $.ajax({
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         method: "DELETE",
                         url: "/orders/admin/order",
-                        data: {
-                            orderID: OrderID
-                        }
+                        data: form_data,
                     }).done((response) => {
                         $('#overlay').hide();
                         if (response.status) {
@@ -415,11 +433,21 @@ let Orders = {
                             $('#successAlert').show().css('display', 'flex')
                             Orders.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                             Orders.Modals.deleteOrder.element.hide()
+                            $('#removeOrderModal .informClient').prop('checked', false).trigger('change')
+                        }
+                        if (!response.status) {
+                            $('#failedAlertMessage').text(response.message);
+                            $('#failedAlert').show().css('display', 'flex');
+                            Orders.Events.dismissAlertsAfterTimeout('#failedAlert', 5000)
+                            Orders.Modals.deleteOrder.element.hide()
+                            $('#removeOrderModal .informClient').prop('checked', false).trigger('change')
                         }
                         Orders.Table.Table.draw()
                     }).fail((jqXHR) => {
                         $('#overlay').hide();
                         Orders.Modals.deleteOrder.element.hide()
+                        $('#removeOrderModal .informClient').prop('checked', false).trigger('change')
+                        // $('#removeOrderModal .cancellationDropdown').find('select').val('')
                         let errorMessage = 'An error occurred';
                         if (jqXHR.responseJSON) {
                             errorMessage = 'Nepavyko atšaukti užsakymo: ' + jqXHR.responseJSON.message;
@@ -692,16 +720,16 @@ let Orders = {
         sendEmailModal: {
             EmailOrderId: 0,
             dataForm: {
-              customerEmail: {
-                  set: function (Value) {
-                      $('#sendEmailModal input[name=customerEmail]').val(Value)
-                  }
-              }
+                customerEmail: {
+                    set: function (Value) {
+                        $('#sendEmailModal input[name=customerEmail]').val(Value)
+                    }
+                }
             },
-            fillDataForm: function (BackendResponse){
+            fillDataForm: function (BackendResponse) {
                 this.dataForm.customerEmail.set(BackendResponse.client.email)
             },
-            getDataForModal: function (){
+            getDataForModal: function () {
                 $('#overlay').css('display', 'flex')
                 $.ajax({
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -756,7 +784,7 @@ let Orders = {
                         this.sendEmail()
                     })
                 },
-                sendEmail: function (){
+                sendEmail: function () {
                     $('#overlay').css('display', 'flex')
                     let form_data = Variables.getOrderFormInputs('sendEmailModal')
                     form_data.orderID = Orders.Modals.sendEmailModal.EmailOrderId
