@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Trampoline extends Model
@@ -18,6 +19,11 @@ class Trampoline extends Model
     public function Parameter(): HasOne
     {
         return $this->hasOne(Parameter::class, 'trampolines_id');
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(TrampolineImage::class, 'trampoline_id');
     }
 
     public array $FieldRelationsToColumns = [
