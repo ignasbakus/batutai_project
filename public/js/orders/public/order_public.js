@@ -188,6 +188,7 @@ let CalendarFunctions = {
             Trampolines = response.Trampolines;
             if (response.status) {
                 if (PcCalendar) {
+                    flatPickerTime.initialize(response.minTime, response.maxTime);
                     this.Calendar.calendar.removeAllEvents();
                     this.addEvent(Occupied);
                     this.addEvent(Availability);
@@ -215,6 +216,7 @@ let CalendarFunctions = {
                 if (mobileCalendar) {
                     let disabledDates = CalendarFunctions.processOccupiedDates(response.Occupied);
                     if (!PickerInitialized) {
+                        flatPickerTime.initialize(response.minTime, response.maxTime);
                         flatPickerCalendar.initialize(disabledDates);
                         PickerInitialized = true;
                     } else {
@@ -238,15 +240,15 @@ let CalendarFunctions = {
 };
 //@todo Add time picker and calendar picker into one class
 let flatPickerTime = {
-    initialize: function () {
+    initialize: function (minTime, maxTime) {
         $('#customerDeliveryTime').flatpickr({
             enableTime: true, // Enable time picker
             noCalendar: true, // Hide calendar
             disableMobile: "true",
             dateFormat: "H:i", // Format displayed time (24-hour)
             time_24hr: true, // Use 24-hour time format
-            minTime: "8:00",
-            maxTime: "22:00",
+            minTime: minTime,
+            maxTime: maxTime,
         })
     }
 }
@@ -668,7 +670,6 @@ $(document).ready(function () {
     console.log("/js/trampolines/public/order_public.js -> ready!");
     showCalendar.showCalendar()
     TrampolineOrder.init();
-    flatPickerTime.initialize();
     console.log('Trampolines ->', Trampolines);
     // new tempusDominus.TempusDominus(document.getElementById('datetimepicker'), {
     //     allowInputToggle: false,

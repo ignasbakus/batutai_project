@@ -183,11 +183,11 @@ class TrampolineOrder implements Order
 
 
         $datesChanged = false;
-
+        $days = (int) config('trampolines.amount_of_days');
         $rentalStartDb = Carbon::parse($order->trampolines()->first()->rental_start)->format('Y-m-d');
-        if (Carbon::now()->startOfDay()->addDays(3) > $rentalStartDb) {
+        if (Carbon::now()->startOfDay()->addDays($days) > $rentalStartDb) {
             $this->status = false;
-            $this->failedInputs->add('error', 'Užsakymo atnaujinti negalima, nes liko mažiau nei 3 dienos iki pirmosios rezervacijos dienos');
+            $this->failedInputs->add('error', 'Užsakymo atnaujinti negalima, nes liko mažiau nei ' . $days .  ' dienos iki pirmosios rezervacijos dienos');
             return $this;
         }
         foreach ($trampolineOrderData->Trampolines as $trampoline) {

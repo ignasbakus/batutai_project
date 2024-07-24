@@ -11,8 +11,8 @@
                     <div class="col-md-6">
                         <h4>Susisiekite su mumis</h4>
                         <p><strong>Adresas:</strong> Gedimino pr. 1, Vilnius, Lietuva</p>
-                        <p><strong>Telefonas:</strong> +370 600 12345</p>
-                        <p><strong>El. paštas:</strong> info@imone.lt</p>
+                        <p><strong>Telefonas:</strong> {{config('contactInfo.phone')}}</p>
+                        <p><strong>El. paštas:</strong> {{config('contactInfo.email')}}</p>
                     </div>
                     <div class="col-md-6">
                         <h4>Darbo laikas</h4>

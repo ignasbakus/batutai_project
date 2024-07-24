@@ -12,4 +12,8 @@ return [
 
     /* Custom param, which declares the advance percentage to 0.3 */
     'advance_percentage' => env('TRAMPOLINES_ADVANCE_PERCENTAGE', 0.3),
+
+    /* Custom param, which declares when the user won't be able to edit an order. For example, if 3, if the rental start
+    is less than 3 days from now, user wont be allowed to edit. */
+    'amount_of_days' => env('ALLOWED_DAYS_TO_UPDATE', 3),
 ];

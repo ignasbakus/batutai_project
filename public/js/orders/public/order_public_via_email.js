@@ -295,15 +295,15 @@ let flatPickerFunctions = {
     },
     flatPickerTime: {
         defaultTime: 0,
-        initialize: function () {
+        initialize: function (minTime, maxTime) {
             $('#customerDeliveryTime').flatpickr({
                 enableTime: true, // Enable time picker
                 noCalendar: true, // Hide calendar
                 disableMobile: "true",
                 dateFormat: "H:i", // Format displayed time (24-hour)
                 time_24hr: true, // Use 24-hour time format
-                minTime: "8:00",
-                maxTime: "22:00",
+                minTime: minTime,
+                maxTime: maxTime,
                 defaultDate: flatPickerFunctions.flatPickerTime.defaultTime,
                 appendTo: document.getElementById('updateOrderModal'),
             })
@@ -605,7 +605,7 @@ let TrampolineOrder = {
                     CalendarFunctions.addEvent(response.Events);
                     modalPopulated = true;
                     flatPickerFunctions.flatPickerTime.defaultTime = response.order.trampolines[0].delivery_time;
-                    flatPickerFunctions.flatPickerTime.initialize()
+                    flatPickerFunctions.flatPickerTime.initialize(response.minTime, response.maxTime);
                     if (mobileCalendar) {
                         let endDate = new Date(response.Events[0].end);
                         endDate.setDate(endDate.getDate() - 1);

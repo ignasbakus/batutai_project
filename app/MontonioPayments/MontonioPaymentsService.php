@@ -91,7 +91,7 @@ class MontonioPaymentsService
             'currency' => 'EUR',
             'grandTotal' => (float)$grandTotal,
             'locale' => 'lt',
-            'expiresIn' => 5,
+            'expiresIn' => config('montonio.payment_duration'),
             'billingAddress' => [
                 'firstName' => $client->name,
                 'lastName' => $client->surname,
@@ -106,8 +106,6 @@ class MontonioPaymentsService
                 ]
             ]
         ];
-
-//        dd($payload);
 
         $payload['payment'] = [
             "method" => "paymentInitiation",

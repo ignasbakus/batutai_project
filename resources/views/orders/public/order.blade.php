@@ -141,7 +141,7 @@
                             <div>
                                 <span class="text-danger py-2">
                                     * Prie galutinės sumos dar nėra priskaičiuota pristatymo kaina. Dėl daugiau informacijos
-                                    skambinkite numeriu +3706200000 arba rašykite el. paštu op-op.lt
+                                    skambinkite numeriu {{config('contactInfo.phone')}} arba rašykite el. paštu {{config('contactInfo.email')}}
                                 </span>
                             </div>
                         </div>

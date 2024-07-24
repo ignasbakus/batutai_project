@@ -149,7 +149,6 @@ class OrderController extends Controller
     public function publicUpdateCalendar(): JsonResponse
     {
         $trampolineIds = \request()->get('trampoline_id', []);
-//        dd($trampolineIds);
         $firstVisibleDay = Carbon::parse(\request()->get('first_visible_day', null));
         $lastVisibleDay = Carbon::parse(\request()->get('last_visible_day', null));
         $firstMonthDay = Carbon::parse(\request()->get('first_month_day', null));
@@ -225,7 +224,9 @@ class OrderController extends Controller
             'status' => true,
             'Availability' => $Availability,
             'Occupied' => $Occupied,
-            'Trampolines' => $Trampolines
+            'Trampolines' => $Trampolines,
+            'minTime' => config('flatpickr.min_time'),
+            'maxTime' => config('flatpickr.max_time'),
         ]);
     }
     public function privateUpdateCalendar(): JsonResponse
@@ -505,7 +506,7 @@ class OrderController extends Controller
                 'status' => $order['status'],
                 'Dates' => (object)[
                     'CalendarInitial' => Carbon::parse($order['rentalStart'])->format('Y-m-d')
-                ]
+                ],
             ]);
         }
     }
@@ -578,6 +579,8 @@ class OrderController extends Controller
                 'TrampolinesID' => $trampolineIds,
                 'Trampolines' => $Trampolines,
                 'order' => $order,
+                'minTime' => config('flatpickr.min_time'),
+                'maxTime' => config('flatpickr.max_time'),
             ]);
         } catch (\Exception $e) {
             return response()->json([

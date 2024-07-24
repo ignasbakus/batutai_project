@@ -157,7 +157,7 @@
         </table>
     </div>
     <div class="footeris">
-        <p>Jeigu turite klausimų, susisiekite su mumis el. paštu uzsakymai@op-op.lt arba telefonu +370 600 00000</p>
+        <p>Jeigu turite klausimų, susisiekite su mumis el. paštu {{config('contactInfo.email')}} arba telefonu {{config('contactInfo.phone')}}</p>
         <p>Ačiū, kad rinkotės mus!</p>
     </div>
 </div>
