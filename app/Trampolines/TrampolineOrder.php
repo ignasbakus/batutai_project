@@ -438,16 +438,6 @@ class TrampolineOrder implements Order
             return $this;
         }
 
-//        if (!$isFromWebhook) {
-//            $orderRentalStart = Carbon::parse($orderTrampolines->first()->rental_start)->format('Y-m-d');
-//            $now = Carbon::now();
-//            if ($now->diffInDays($orderRentalStart, false) < 3) {
-//                $this->status = false;
-//                $this->failedInputs->add('error', 'Užsakymo atšaukti negalima, nes liko mažiau nei 3 dienos iki pirmosios rezervacijos dienos');
-//                return $this;
-//            }
-//        }
-
         if (!$isFromWebhook) {
             $order->update(['order_status' => 'Atšauktas kliento']);
             if (config('mail.send_email') === true) {
@@ -506,15 +496,6 @@ class TrampolineOrder implements Order
     public function updateOrderActivity($orderId, $status): array
     {
         $order = \App\Models\Order::find($orderId);
-        if ($status === 'PAID') {
-            $isPossible = self::canRegisterOrder($order);
-            if (!$isPossible['status']) {
-                return [
-                    'status' => false,
-                    'message' => $isPossible['message']
-                ];
-            }
-        }
         if (!$order) {
             return [
                 'status' => false,

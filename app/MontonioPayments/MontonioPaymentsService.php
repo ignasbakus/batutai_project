@@ -215,14 +215,7 @@ class MontonioPaymentsService
             case 'PAID':
                 if ((new TrampolineOrder())->getOrderStatus($orderId)['orderStatus'] != 'Apmokėtas' &&
                     (new TrampolineOrder())->getOrderStatus($orderId)['orderStatus'] != 'Atšauktas kliento'){
-                        $activity = ((new TrampolineOrder())->updateOrderActivity($orderId, $paymentStatus));
-                        if (!$activity['status']){
-                            return response()->json([
-                                'status' => false,
-                                'message' => 'Užsakymo būsena negali būti pakeista į apmokėta, nes datos jau užimtos kito kliento.
-                                Pakeiskite datas!',
-                            ]);
-                        }
+                        ((new TrampolineOrder())->updateOrderActivity($orderId, $paymentStatus));
                         (new TrampolineOrder())->updateOrderStatus($orderId, $paymentStatus);
                         return response()->json([
                             'status' => 'changed',
