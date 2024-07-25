@@ -167,7 +167,7 @@ class TrampolineOrder implements Order
 
     public function update(TrampolineOrderData $trampolineOrderData): static
     {
-        dd($trampolineOrderData);
+//        dd($trampolineOrderData);
         if (!$trampolineOrderData->ValidationStatus) {
             $this->failedInputs = $trampolineOrderData->failedInputs;
             $this->status = false;
@@ -290,7 +290,7 @@ class TrampolineOrder implements Order
             Mail::to($updatedOrder ->client->email)->send(new orderUpdated($updatedOrder ));
             Mail::to(config('mail.admin_email'))->send(new adminOrderUpdated($updatedOrder));
         }
-        return $this;
+        dd($this);
     }
 
     public function delete($request): static
