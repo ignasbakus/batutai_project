@@ -218,13 +218,11 @@ class TrampolineOrder implements Order
             }
         }
 
-        $Order = \App\Models\Order::find($trampolineOrderData->orderID);
-
-        $this->Order = $Order;
+        $this->Order = \App\Models\Order::find($trampolineOrderData->orderID);
 
         Client::updateOrCreate(
             [
-                'id' => $Order->client_id
+                'id' => $this->Order->client_id
             ],
             [
                 'name' => $trampolineOrderData->CustomerName,
@@ -235,7 +233,7 @@ class TrampolineOrder implements Order
         );
         ClientAddress::updateOrCreate(
             [
-                'clients_id' => $Order->delivery_address_id,
+                'clients_id' => $this->Order->delivery_address_id,
             ],
             [
                 'address_street' => $trampolineOrderData->Address,
@@ -248,12 +246,12 @@ class TrampolineOrder implements Order
         try {
             foreach ($trampolineOrderData->Trampolines as $trampoline) {
                 $RentalStart = Carbon::parse($trampoline['rental_start'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_start);
-                $RentalDuration = $RentalStart->diffInDays(Carbon::parse($trampoline['rental_end'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_end));
+                $RentalEnd = Carbon::parse($trampoline['rental_end'] ?? OrdersTrampoline::where('orders_id', $trampolineOrderData->orderID)->first()->rental_end);
+                $RentalDuration = $RentalStart->diffInDays($RentalEnd);
                 $Trampoline = \App\Models\Trampoline::with('Parameter')->find($trampoline['id']);
-//                dd($Trampoline);
                 $this->OrderTrampolines[] = OrdersTrampoline::updateOrCreate(
                     [
-                        'orders_id' => $Order->id,
+                        'orders_id' => $this->Order->id,
                         'trampolines_id' => $Trampoline->id,
                     ],
                     [
@@ -271,21 +269,25 @@ class TrampolineOrder implements Order
             $this->Errors[] = 'Atnaujinant užsakymą įvyko klaida : ' . $exception->getMessage();
             $this->status = false;
         }
-        $Order->updateOrCreate(
-            [
-                'id' => $Order->id,
-            ],
-            [
-                'total_sum' => $OrderTotalSum,
-                'rental_duration' => $OrderRentalDuration
-            ]
-        );
-//        dd($this);
+        try {
+            $this->Order->update(
+                [
+                    'total_sum' => $OrderTotalSum,
+                    'rental_duration' => $OrderRentalDuration
+                ]
+            );
+        } catch (\Exception $exception){
+            $this->Errors[] = 'Atnaujinant užsakymą įvyko klaida : ' . $exception->getMessage();
+            $this->status = false;
+        }
+
+        Log::info('Order ->' . $this->Order);
         $this->status = true;
         $this->Messages[] = 'Užsakymas atnaujintas sėkmingai !';
         if (config('mail.send_email') === true) {
-            Mail::to($Order->client->email)->send(new orderUpdated($this->Order));
-            Mail::to(config('mail.admin_email'))->send(new adminOrderUpdated($this->Order));
+            $updatedOrder = \App\Models\Order::find($this->Order->id); // Ensure we have the latest order info
+            Mail::to($updatedOrder ->client->email)->send(new orderUpdated($updatedOrder ));
+            Mail::to(config('mail.admin_email'))->send(new adminOrderUpdated($updatedOrder));
         }
         return $this;
     }
