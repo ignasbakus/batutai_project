@@ -12,7 +12,7 @@
 {{--            </div>--}}
 {{--        </div>--}}
         <div class="row mt-5">
-            <div class="col-12 col-lg-5 mt-5 mb-3">
+            <div class="col-12 col-lg-6 mt-5 mb-3">
                 <div id="trampolinesCarousel" class="carousel slide" data-bs-theme="dark">
                     <div class="carousel-inner">
                         @foreach($Trampolines as $Trampoline)
@@ -41,7 +41,7 @@
                     Pasirinkti batutą
                 </button>
             </div>
-            <div class="col-12 col-lg-7 mt-5" >
+            <div class="col-12 col-lg-6 mt-5" >
 {{--                <div class="text-center mt-3">--}}
 {{--                    <h3>Pasirinkti batutai</h3>--}}
 {{--                </div>--}}
