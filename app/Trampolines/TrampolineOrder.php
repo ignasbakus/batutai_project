@@ -242,6 +242,7 @@ class TrampolineOrder implements Order
                 'address_postcode' => $trampolineOrderData->PostCode
             ]
         );
+        dd($this->Order->address);
         $OrderTotalSum = 0;
         $OrderRentalDuration = 0;
         try {
@@ -290,7 +291,7 @@ class TrampolineOrder implements Order
             Mail::to($updatedOrder ->client->email)->send(new orderUpdated($updatedOrder ));
             Mail::to(config('mail.admin_email'))->send(new adminOrderUpdated($updatedOrder));
         }
-        dd($this->Order->address);
+        return $this;
     }
 
     public function delete($request): static
