@@ -1,5 +1,6 @@
 @php
     $currency = config('trampolines.currency');
+//    dd($currency);
     $advancePercentage = config('trampolines.advance_percentage');
 @endphp
 
@@ -181,6 +182,7 @@
         let Dates = {{ Illuminate\Support\Js::from($Dates) }};
         let Availability = {{ Illuminate\Support\Js::from($Availability) }};
         let AdvancePercentage = {{ Illuminate\Support\Js::from($AdvancePercentage)}};
+        let Currency = {{ Illuminate\Support\Js::from($currency) }};
     </script>
     <script src='/frameworks/fullcalendar6111/dist/index.global.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

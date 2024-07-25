@@ -80,6 +80,7 @@ class OrderController extends Controller
                 'CalendarInitial' => Carbon::now()->format('Y-m-d')
             ],
             'AdvancePercentage' => config('trampolines.advance_percentage'),
+            'Currency' => config('trampolines.currency'),
         ]);
     }
     public function publicGetIndexViaEmail($order_number): \Illuminate\Contracts\Foundation\Application|Factory|View|Application

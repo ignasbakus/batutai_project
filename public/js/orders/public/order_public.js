@@ -640,18 +640,22 @@ let TrampolineOrder = {
                     trampolineNameElement.data('original-name', originalName);
                     trampolineNameElement.text(`${originalName} ${reservationDays > 1 ? `(${reservationDays} d.)` : ''}`);
                     const totalPrice = price * reservationDays;
-                    $(this).find('.trampoline-price').text(totalPrice.toFixed(2));
+
+                    // Preserve the Euro sign and format the total price
+                    $(this).find('.trampoline-price').text(`${totalPrice.toFixed(2)}${Currency}`); // Ensure currency variable is defined and contains '€'
+
                     totalSum += totalPrice;
                 });
 
                 // Calculate and update advance and final payments
                 const advancePayment = Math.round((totalSum * AdvancePercentage) / 10) * 10;
                 const finalPayment = totalSum - advancePayment;
-                $('#advance-payment').text(advancePayment.toFixed(2));
-                $('#final-payment').text(finalPayment.toFixed(2));
+                $('#advance-payment').text(`${advancePayment.toFixed(2)}${Currency}`);
+                $('#final-payment').text(`${finalPayment.toFixed(2)}${Currency}`);
                 $('#reservation-dates').text(`${startDate.toISOString().split('T')[0]} ${reservationDays > 1 ? `- ${endDate.toISOString().split('T')[0]}` : ''}`);
                 $('#reservation-label').text(`Rezervuotos dienos${reservationDays > 1 ? 's' : 'a'}:`);
             }
+
         }
     },
     Events: {
