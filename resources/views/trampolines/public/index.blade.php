@@ -12,7 +12,7 @@
 {{--            </div>--}}
 {{--        </div>--}}
         <div class="row mt-5">
-            <div class="col-12 col-lg-5 mb-3">
+            <div class="col-12 col-lg-5 mt-5 mb-3">
                 <div id="trampolinesCarousel" class="carousel slide" data-bs-theme="dark">
                     <div class="carousel-inner">
                         @foreach($Trampolines as $Trampoline)
@@ -20,8 +20,8 @@
                                  data-bs-toggle="tooltip"
                                  data-trampolineid='{{$Trampoline->id}}'
                                  title="Paspauskite, kad pamatytumėte daugiau nuotraukų">
-                                <a data-bs-target="#showTrampolineModal" data-bs-toggle="modal" href="#">
-                                    <img src="{{$Trampoline->image_url}}" class="d-block w-100" alt="...">
+                                <a class="openModal" data-bs-target="#showTrampolineModal" data-bs-toggle="modal" href="#">
+                                    <img src="{{$Trampoline->image_url}}" class="d-block w-100 modal-image" alt="...">
                                 </a>
                             </div>
                         @endforeach
@@ -66,20 +66,7 @@
                     <div class="modal-body">
                         <div id="carouselExample" class="carousel slide">
                             <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img
-                                        src="https://bouncycastlenetwork-res.cloudinary.com/image/upload/f_auto,q_auto,c_limit,w_1100/12e885a2ce90725ddac404eff42cef7e"
-                                        class="d-block w-100 modal-image" alt="...">
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="https://m.media-amazon.com/images/I/71voD+9xCRL._AC_UF894,1000_QL80_.jpg"
-                                         class="d-block w-100 modal-image" alt="...">
-                                </div>
-                                <div class="carousel-item">
-                                    <img
-                                        src="https://bouncycastlenetwork-res.cloudinary.com/316d6265d4ec22b8f761b96d7b521d22.jpg"
-                                        class="d-block w-100 modal-image" alt="...">
-                                </div>
+
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample"
                                     data-bs-slide="prev">

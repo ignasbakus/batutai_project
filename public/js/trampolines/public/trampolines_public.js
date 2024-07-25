@@ -2,6 +2,7 @@ let Actions = {
     InitActions: function () {
         ToolTip.init();
         Carousels.trampolinesCarousel.init();
+        Carousels.imageModal.init();
         Carousels.trampolinesCarousel.ChosenTrampoline = firstTrampolineId
         Trampolines.init();
         Trampolines.SendOrder.Events.init();
@@ -34,6 +35,43 @@ let Carousels = {
                 Trampolines.addToSelected(this.ChosenTrampoline);
             })
         },
+    },
+    imageModal: {
+        init: function (){
+            this.Events.init();
+        },
+        element: $('#modalCarouselInner'),
+        Events: {
+            init: function () {
+                $('#trampolinesCarousel .openModal').on('click', function(event) {
+                    console.log('trmpolines from db', trampolinesFromDb)
+                    event.preventDefault(); // Prevent the default link behavior
+
+                    const trampolineId = $(this).closest('.carousel-item').data('trampolineid');
+                    console.log('trampolineId:', trampolineId);
+
+                    const trampoline = trampolinesFromDb.find(t => t.id === trampolineId);
+                    console.log('trampoline: ', trampoline)
+
+                    if (trampoline) {
+                        // Update the modal carousel with images
+                        const $modalInner = $('#carouselExample .carousel-inner');
+                        $modalInner.empty(); // Clear existing items
+
+                        // Populate carousel items
+                        trampoline.image_urls.forEach((url, index) => {
+                            const $item = $('<div class="carousel-item"></div>');
+                            if (index === 0) $item.addClass('active'); // Set the first item as active
+
+                            const $img = $(`<img src="${url}" class="d-block w-100 modal-image" alt="Trampoline Image">`);
+                            $item.append($img);
+                            $modalInner.append($item);
+                        });
+                    }
+                })
+
+            }
+        }
     }
 }
 
@@ -61,8 +99,11 @@ let Trampolines = {
                     const button = $(event.relatedTarget).closest('.carousel-item'); // Closest carousel item
                     const trampolineId = button.data('trampolineid'); // Extract info from data-* attributes
                     let trampoline = trampolinesFromDb.find(t => t.id === trampolineId);
+                    console.log('trampoline:', trampoline)
                     let modalDescription = Trampolines.Modals.showTrampoline.element._element.querySelector('.modal-description h6');
+                    console.log('trampoline description:', trampoline.description)
                     modalDescription.textContent = trampoline.description;
+                    console.log('modalDescription:', modalDescription)
                 }
             }
         }

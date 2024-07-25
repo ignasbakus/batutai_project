@@ -16,11 +16,11 @@ class TrampolineImageSeeder extends Seeder
         $trampolineImages = [
             [
                 'trampoline_id' => 1,
-                'image' => 'images/MickeyMouseNuotraukos/20230509_115125.jpg',
+                'image' => 'images/MickeyMouseNuotraukos/firstMickeyMouse.jpg',
             ],
             [
                 'trampoline_id' => 1,
-                'image' => 'images/MickeyMouseNuotraukos/20230509_115149.jpg',
+                'image' => 'images/MickeyMouseNuotraukos/20230509_115125.jpg',
             ],
             [
                 'trampoline_id' => 1,
@@ -28,7 +28,7 @@ class TrampolineImageSeeder extends Seeder
             ],
             [
                 'trampoline_id' => 2,
-                'image' => 'images/PimpackiukaiNuotraukos/20230508_125218.jpg',
+                'image' => 'images/PimpackiukaiNuotraukos/firstPimpackiukai.jpg',
             ],
             [
                 'trampoline_id' => 2,
@@ -40,7 +40,7 @@ class TrampolineImageSeeder extends Seeder
             ],
             [
                 'trampoline_id' => 3,
-                'image' => 'images/KempiniukasNuotraukos/20230814_145438.jpg',
+                'image' => 'images/KempiniukasNuotraukos/firstKempiniukas.jpg',
             ],
             [
                 'trampoline_id' => 3,
@@ -56,11 +56,11 @@ class TrampolineImageSeeder extends Seeder
             ],
             [
                 'trampoline_id' => 5,
-                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/20230814_124145.jpg',
+                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/firstCiuozykla.jpg',
             ],
             [
                 'trampoline_id' => 5,
-                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/20230814_124212.jpg',
+                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/20230814_124145.jpg',
             ],
             [
                 'trampoline_id' => 5,
@@ -68,11 +68,11 @@ class TrampolineImageSeeder extends Seeder
             ],
             [
                 'trampoline_id' => 6,
-                'image' => 'images/DisneyPilisNuotraukos/20240303_160719.jpg',
+                'image' => 'images/DisneyPilisNuotraukos/firstDisney.jpg',
             ],
             [
                 'trampoline_id' => 6,
-                'image' => 'images/DisneyPilisNuotraukos/20240303_160743.jpg',
+                'image' => 'images/DisneyPilisNuotraukos/20240303_160719.jpg',
             ],
             [
                 'trampoline_id' => 6,
@@ -88,7 +88,7 @@ class TrampolineImageSeeder extends Seeder
             ],
             [
                 'trampoline_id' => 7,
-                'image' => 'images/BanglentininkasNuotraukos/20240303_163653.jpg',
+                'image' => 'images/BanglentininkasNuotraukos/firstBanglentininkas.jpg',
             ],
             [
                 'trampoline_id' => 7,
@@ -96,7 +96,7 @@ class TrampolineImageSeeder extends Seeder
             ],
             [
                 'trampoline_id' => 7,
-                'image' => 'images/BanglentininkasNuotraukos/20240303_163804.jpg',
+                'image' => 'images/BanglentininkasNuotraukos/20240303_163653.jpg',
             ],
             [
                 'trampoline_id' => 8,

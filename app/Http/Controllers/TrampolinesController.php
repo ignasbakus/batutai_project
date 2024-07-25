@@ -28,30 +28,50 @@ class TrampolinesController extends Controller
 
     public function publicIndex(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
-        $TrampolinesPhotos = [
-            0 => 'https://media.diy.com/is/image/KingfisherDigital/costway-inflatable-bounce-house-kids-bouncy-castle-outdoor-indoor-playhouse~6085651291834_01c_MP?$MOB_PREV$&$width=768&$height=768',
-            1 => 'https://littlekidsjumpingcastles.com.au/cdn/shop/products/9003rsmall_81333141-e43c-48ac-96ef-a8d3f75b0764.jpg?v=1679959240',
-            2 => 'https://image.smythstoys.com/zoom/126338_1.jpg',
-            //4 => '',
-            //5 => '',
-            //6 => '',
-        ];
-        $Trampolines = (new Trampoline)->with('Parameter')
+//        $TrampolinesPhotos = [
+//            0 => 'https://media.diy.com/is/image/KingfisherDigital/costway-inflatable-bounce-house-kids-bouncy-castle-outdoor-indoor-playhouse~6085651291834_01c_MP?$MOB_PREV$&$width=768&$height=768',
+//            1 => 'https://littlekidsjumpingcastles.com.au/cdn/shop/products/9003rsmall_81333141-e43c-48ac-96ef-a8d3f75b0764.jpg?v=1679959240',
+//            2 => 'https://image.smythstoys.com/zoom/126338_1.jpg',
+//            //4 => '',
+//            //5 => '',
+//            //6 => '',
+//        ];
+        $Trampolines = (new Trampoline)->with('images')
             ->whereHas('Parameter', function($query) {
                 $query->where('activity', 1);
             })
             ->orderBy('id', 'asc')
             ->get();
-        foreach ($Trampolines as $Index => $trampoline) {
-            if ($Index == 0) {
+
+//        dd($Trampolines);
+
+        foreach ($Trampolines as $index => $trampoline) {
+            if ($index == 0) {
                 $trampoline->active = 1;
             }
-            try {
-                $trampoline->image_url = $TrampolinesPhotos[$Index];
-            } catch (\Exception $exception) {
-                $trampoline->image_url = '/images/no_photo.PNG';
+
+            // Set the first image for carousel
+            if ($trampoline->images->isNotEmpty()) {
+                $trampoline->image_url = $trampoline->images->first()->image;
+            } else {
+                $trampoline->image_url = '/images/no_photo.PNG'; // Fallback image
             }
+
+            // Store all image URLs for modal
+            $trampoline->image_urls = $trampoline->images->pluck('image');
         }
+//        dd($Trampolines);
+
+//        foreach ($Trampolines as $Index => $trampoline) {
+//            if ($Index == 0) {
+//                $trampoline->active = 1;
+//            }
+//            try {
+//                $trampoline->image_url = $TrampolinesPhotos[$Index];
+//            } catch (\Exception $exception) {
+//                $trampoline->image_url = '/images/no_photo.PNG';
+//            }
+//        }
         return view('trampolines.public.index', [
             'Trampolines' => $Trampolines,
             'firstTrampolineId' => $Trampolines->isEmpty() ? null : $Trampolines->first()->id
