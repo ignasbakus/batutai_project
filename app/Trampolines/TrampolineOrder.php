@@ -232,30 +232,16 @@ class TrampolineOrder implements Order
                 'phone' => $trampolineOrderData->CustomerPhone
             ]
         );
-        try {
-            Log::info('Attempting to update or create client address.', [
-                'clients_id' => $this->Order->delivery_address_id,
-                'data' => [
-                    'address_street' => $trampolineOrderData->Address,
-                    'address_town' => $trampolineOrderData->City,
-                    'address_postcode' => $trampolineOrderData->PostCode
-                ]
-            ]);
-
-            $clientAddress = ClientAddress::updateOrCreate(
-                ['clients_id' => $this->Order->delivery_address_id],
-                [
-                    'address_street' => $trampolineOrderData->Address,
-                    'address_town' => $trampolineOrderData->City,
-                    'address_postcode' => $trampolineOrderData->PostCode
-                ]
-            );
-
-            Log::info('Client address updated or created successfully.', ['client_address' => $clientAddress]);
-
-        } catch (\Exception $e) {
-            Log::error('Error updating or creating client address: ' . $e->getMessage());
-        }
+        ClientAddress::updateOrCreate(
+            [
+                'id' => $this->Order->delivery_address_id,
+            ],
+            [
+                'address_street' => $trampolineOrderData->Address,
+                'address_town' => $trampolineOrderData->City,
+                'address_postcode' => $trampolineOrderData->PostCode
+            ]
+        );
 //        dd($this->Order->address);
         $OrderTotalSum = 0;
         $OrderRentalDuration = 0;
