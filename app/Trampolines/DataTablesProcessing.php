@@ -72,13 +72,23 @@ class DataTablesProcessing
 
         if ($searchValue) {
             if ($this->TableName === 'orders') {
-                $Query->whereHas('client', function ($query) use ($searchValue) {
-                    $query->whereRaw("CONCAT(name, ' ', surname) LIKE ?", ["%{$searchValue}%"])
-                        ->orWhere('email', 'like', '%' . $searchValue . '%')
-                        ->orWhere('phone', 'like', '%' . $searchValue . '%');
+                $Query->where(function ($query) use ($searchValue) {
+                    // Search within the 'client' relationship
+                    $query->whereHas('client', function ($query) use ($searchValue) {
+                        $query->whereRaw("CONCAT(name, ' ', surname) LIKE ?", ["%{$searchValue}%"])
+                            ->orWhere('email', 'like', '%' . $searchValue . '%')
+                            ->orWhere('phone', 'like', '%' . $searchValue . '%');
+                    })
+                        // Search within the 'address' relationship (client_addresses)
+                        ->orWhereHas('address', function ($query) use ($searchValue) {
+                            $query->where('address_town', 'like', '%' . $searchValue . '%');
+                        })
+                        // Search within the 'orders' table
+                        ->orWhere('order_number', 'like', '%' . $searchValue . '%');
                 });
             }
         }
+
 
         if ($filterActive && !$filterInactive) {
             $Query->whereHas('parameter', function ($query) {
