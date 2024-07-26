@@ -1,5 +1,5 @@
 
-
+/*//for pc*/
 @media (min-width: 768px) {
     .modal-image {
         height: 500px; /* Adjust the height as needed */
@@ -11,7 +11,7 @@
 
 @media (max-width: 767px) {
     .modal-image {
-        height: 350px; /* Adjust the height as needed */
+        height: 300px; /* Adjust the height as needed */
     }
     .mt-lg-5 {
         margin-top: 0;
@@ -96,5 +96,10 @@
     font-weight: bold; /* Bold font weight */
     margin-bottom: 20px; /* Space at the bottom */
     color: #343a40; /* Dark text color */
+}
+
+.modal-custom {
+    max-width: 100%; /* Adjust as needed */
+    width: 700px;   /* Custom width */
 }
 

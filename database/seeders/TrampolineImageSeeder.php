@@ -16,127 +16,139 @@ class TrampolineImageSeeder extends Seeder
         $trampolineImages = [
             [
                 'trampoline_id' => 1,
-                'image' => 'images/MickeyMouseNuotraukos/firstMickeyMouse.jpg',
+                'image' => 'images/MickyMouseNuotraukos/updated.Micky_mouse.jpg',
             ],
             [
                 'trampoline_id' => 1,
-                'image' => 'images/MickeyMouseNuotraukos/20230509_115125.jpg',
+                'image' => 'images/MickyMouseNuotraukos/mickis.1.jpg',
             ],
             [
                 'trampoline_id' => 1,
-                'image' => 'images/MickeyMouseNuotraukos/20230509_115250.jpg',
+                'image' => 'images/MickyMouseNuotraukos/mikis.2.jpg',
             ],
             [
                 'trampoline_id' => 2,
-                'image' => 'images/PimpackiukaiNuotraukos/firstPimpackiukai.jpg',
+                'image' => 'images/PimpackiukaiNuotraukos/updated.pimpackiukai.jpg',
             ],
             [
                 'trampoline_id' => 2,
-                'image' => 'images/PimpackiukaiNuotraukos/20230508_125243.jpg',
+                'image' => 'images/PimpackiukaiNuotraukos/pimpac.1.jpg',
             ],
             [
                 'trampoline_id' => 2,
-                'image' => 'images/PimpackiukaiNuotraukos/20230508_125250.jpg',
+                'image' => 'images/PimpackiukaiNuotraukos/pimpac.2.jpg',
+            ],
+            [
+                'trampoline_id' => 2,
+                'image' => 'images/PimpackiukaiNuotraukos/pimpac.3.jpg',
             ],
             [
                 'trampoline_id' => 3,
-                'image' => 'images/KempiniukasNuotraukos/firstKempiniukas.jpg',
+                'image' => 'images/KempiniukasNuotraukos/updated.kampiniukas.jpg',
             ],
             [
                 'trampoline_id' => 3,
-                'image' => 'images/KempiniukasNuotraukos/20230814_145817.jpg',
+                'image' => 'images/KempiniukasNuotraukos/kempiniukas.1.jpg',
             ],
             [
                 'trampoline_id' => 3,
-                'image' => 'images/KempiniukasNuotraukos/20230814_145952.jpg',
+                'image' => 'images/KempiniukasNuotraukos/kempiniukas.2.jpg',
             ],
             [
                 'trampoline_id' => 4,
-                'image' => 'images/dinoParkasNuotraukos/20230909_125204(1).jpg',
+                'image' => 'images/dinoParkasNuotraukos/dino_parkas.2.jpg',
+            ],
+            [
+                'trampoline_id' => 4,
+                'image' => 'images/dinoParkasNuotraukos/updated.dino-parkas.fromside.png',
+            ],
+            [
+                'trampoline_id' => 4,
+                'image' => 'images/dinoParkasNuotraukos/dino.1.jpg',
+            ],
+            [
+                'trampoline_id' => 4,
+                'image' => 'images/dinoParkasNuotraukos/dino.2.jpg',
+            ],
+            [
+                'trampoline_id' => 4,
+                'image' => 'images/dinoParkasNuotraukos/dino.3.jpg',
             ],
             [
                 'trampoline_id' => 5,
-                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/firstCiuozykla.jpg',
+                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/updated.ciuozykla.jpg',
             ],
             [
                 'trampoline_id' => 5,
-                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/20230814_124145.jpg',
+                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/ciuozykla.1.jpg',
             ],
             [
                 'trampoline_id' => 5,
-                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/20230814_124328.jpg',
+                'image' => 'images/ciuozyklaSuBaseinuNuotraukos/ciuozykla.2.jpg',
             ],
             [
                 'trampoline_id' => 6,
-                'image' => 'images/DisneyPilisNuotraukos/firstDisney.jpg',
+                'image' => 'images/disneyPilis/updated.disney_pilis.jpg',
             ],
             [
                 'trampoline_id' => 6,
-                'image' => 'images/DisneyPilisNuotraukos/20240303_160719.jpg',
+                'image' => 'images/disneyPilis/disney.1.jpg',
             ],
             [
                 'trampoline_id' => 6,
-                'image' => 'images/DisneyPilisNuotraukos/20240303_160832.jpg',
-            ],
-            [
-                'trampoline_id' => 6,
-                'image' => 'images/DisneyPilisNuotraukos/20240303_160853.jpg',
-            ],
-            [
-                'trampoline_id' => 6,
-                'image' => 'images/DisneyPilisNuotraukos/20240303_160917.jpg',
+                'image' => 'images/disneyPilis/disney.2.jpg',
             ],
             [
                 'trampoline_id' => 7,
-                'image' => 'images/BanglentininkasNuotraukos/firstBanglentininkas.jpg',
+                'image' => 'images/BanglentininkasNuotraukos/updated.banglentininkas.jpg',
             ],
             [
                 'trampoline_id' => 7,
-                'image' => 'images/BanglentininkasNuotraukos/20240303_163700.jpg',
+                'image' => 'images/BanglentininkasNuotraukos/banglentininkas.1.jpg',
             ],
             [
                 'trampoline_id' => 7,
-                'image' => 'images/BanglentininkasNuotraukos/20240303_163653.jpg',
+                'image' => 'images/BanglentininkasNuotraukos/banglentininkas.2.jpg',
+            ],
+            [
+                'trampoline_id' => 7,
+                'image' => 'images/BanglentininkasNuotraukos/banglentininkas.3.jpg',
             ],
             [
                 'trampoline_id' => 8,
-                'image' => 'images/pokimonuParkasNuotraukos/20230909_102036.jpg',
+                'image' => 'images/pokimonuParkasNuotraukos/updated.pokimonai.jpg',
             ],
             [
                 'trampoline_id' => 8,
-                'image' => 'images/pokimonuParkasNuotraukos/20230909_102118.jpg',
+                'image' => 'images/pokimonuParkasNuotraukos/pokimon.1.png',
             ],
             [
                 'trampoline_id' => 8,
-                'image' => 'images/pokimonuParkasNuotraukos/20230909_102127.jpg',
+                'image' => 'images/pokimonuParkasNuotraukos/pokimon.2.png',
             ],
             [
                 'trampoline_id' => 8,
-                'image' => 'images/pokimonuParkasNuotraukos/20230909_102132.jpg',
-            ],
-            [
-                'trampoline_id' => 8,
-                'image' => 'images/pokimonuParkasNuotraukos/20230909_102148.jpg',
+                'image' => 'images/pokimonuParkasNuotraukos/pokimon.3.png',
             ],
             [
                 'trampoline_id' => 9,
-                'image' => 'images/titanikasNuotraukos/20230909_111500.jpg',
+                'image' => 'images/titanikasNuotraukos/updated.titanikas.jpg',
             ],
             [
                 'trampoline_id' => 9,
-                'image' => 'images/titanikasNuotraukos/20230909_111611.jpg',
+                'image' => 'images/titanikasNuotraukos/titanikas.1.jpg',
             ],
             [
                 'trampoline_id' => 9,
-                'image' => 'images/titanikasNuotraukos/20230909_111842.jpg',
+                'image' => 'images/titanikasNuotraukos/titanikas.2.jpg',
             ],
             [
                 'trampoline_id' => 10,
-                'image' => 'images/pilisNuotraukos/20240616_133406.jpg',
+                'image' => 'images/pilisNuotraukos/updated.pilis.jpg',
             ],
             [
                 'trampoline_id' => 10,
-                'image' => 'images/pilisNuotraukos/20240616_133457.jpg',
+                'image' => 'images/pilisNuotraukos/pilis.1.jpg',
             ],
         ];
         DB::table('trampoline_images')->insert($trampolineImages);
