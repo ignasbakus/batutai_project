@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentsController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrampolinesController;
 
@@ -83,3 +84,7 @@ Route::controller(TrampolinesController::class)->group(function () {
         });
     });
 });
+
+Auth::routes();
+
+#Route::get('/home', [TrampolinesController::class, 'publicIndex']);
