@@ -411,7 +411,7 @@ let flatPickerCalendar = {
         let lastVisibleDayElement = null;
 
         allDayElements.forEach(dayElement => {
-            if (!dayElement.classList.contains('prevMonthDay') && !dayElement.classList.contains('nextMonthDay')) {
+            if (dayElement.classList.contains('prevMonthDay') && dayElement.classList.contains('nextMonthDay')) {
                 if (!firstVisibleDayElement) {
                     firstVisibleDayElement = dayElement;
                 }
