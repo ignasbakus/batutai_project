@@ -20,6 +20,45 @@ today.setHours(today.getHours() + 3);
 today = today.toISOString().split('T')[0];
 
 /* JS classes */
+let ToolTip = {
+    init: function () {
+        // Select the calendar element
+        const calendarEl = document.querySelector('#calendar');
+
+        // Initialize the Bootstrap Tooltip
+        const tooltip = new bootstrap.Tooltip(calendarEl, {
+            title: 'Norint pasirinkti dieną, paspauskite ir slinkite "Jūsų užsakymas" per kalendorių',
+            placement: 'top',
+            trigger: 'manual', // Manual trigger so we can control it programmatically
+            html: true // Allow HTML content
+        });
+
+        let tooltipTimeout;
+        let tooltipShown = false;
+
+        // Show tooltip and set timeout to hide it
+        calendarEl.addEventListener('mouseenter', function () {
+            if (!tooltipShown) {
+                tooltip.show();
+                clearTimeout(tooltipTimeout);
+
+                // Set a timeout to hide the tooltip after 10 seconds
+                tooltipTimeout = setTimeout(() => {
+                    tooltip.hide();
+                    tooltipShown = true; // Ensure tooltip is not shown again
+                }, 10000); // 10 seconds
+            }
+        });
+
+        // Hide tooltip if mouse leaves before the timeout
+        calendarEl.addEventListener('mouseleave', function () {
+            clearTimeout(tooltipTimeout);
+            tooltip.hide();
+            tooltipShown = true; // Ensure tooltip is not shown again
+        });
+    }
+};
+
 let showCalendar = {
     showCalendar: function () {
         if ($(window).width() >= 768) {
@@ -57,6 +96,8 @@ let Variables = {
 };
 let CalendarFunctions = {
     Calendar: {
+        tooltipShown: false,
+        tooltipTimeout: null,
         initialize: function () {
             this.calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialDate: Dates.CalendarInitial,
@@ -80,6 +121,41 @@ let CalendarFunctions = {
                         CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
                     }
                     isEventDrop = false;
+                },
+                eventMouseEnter: function (info) {
+                    const event = info.event;
+                    if (event.extendedProps.type_custom === 'trampolineEvent') {
+                        if (!CalendarFunctions.Calendar.tooltipShown) {
+                            const tooltip = new bootstrap.Tooltip(info.el, {
+                                title: 'Paspausk ant dešinio krašto ir trauk į šoną',
+                                placement: 'top',
+                                trigger: 'manual',
+                                html: true
+                            });
+                            tooltip.show();
+
+                            CalendarFunctions.Calendar.tooltipTimeout = setTimeout(() => {
+                                tooltip.hide();
+                                CalendarFunctions.Calendar.tooltipShown = true;
+                            }, 10000);
+                            const hideTooltip = () => {
+                                clearTimeout(CalendarFunctions.Calendar.tooltipTimeout);
+                                tooltip.hide();
+                                CalendarFunctions.Calendar.tooltipShown = true;
+                                info.el.removeEventListener('mouseleave', hideTooltip);
+                            };
+
+                            info.el.addEventListener('mouseleave', hideTooltip);
+                        }
+                    }
+                },
+                eventMouseLeave: function (info) {
+
+                    const event = info.event;
+                    if (event.extendedProps.type_custom === 'trampolineEvent') {
+                        clearTimeout(CalendarFunctions.Calendar.tooltipTimeout);
+                        CalendarFunctions.Calendar.tooltipShown = true;
+                    }
                 },
                 // dayMaxEvents: true,
                 events: [],
@@ -377,7 +453,7 @@ let flatPickerCalendar = {
             }
         });
     },
-    updateInputText: function() {
+    updateInputText: function () {
         const inputField = document.querySelector('#orderForm input[name=flatPickerCalendar]');
         if (inputField) {
             console.log('Input field:', inputField);
@@ -674,6 +750,7 @@ $(document).ready(function () {
     console.log("/js/trampolines/public/order_public.js -> ready!");
     showCalendar.showCalendar()
     TrampolineOrder.init();
+    ToolTip.init()
     console.log('Trampolines ->', Trampolines);
     // new tempusDominus.TempusDominus(document.getElementById('datetimepicker'), {
     //     allowInputToggle: false,

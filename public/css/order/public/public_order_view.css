@@ -291,3 +291,7 @@ hr.new1 {
 .flatpickr-calendar.open{
     z-index: 99998;
 }
+
+.required-asterisk {
+    color: red; /* Change color as needed */
+}

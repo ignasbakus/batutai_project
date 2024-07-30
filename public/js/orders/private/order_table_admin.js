@@ -265,7 +265,7 @@ let Orders = {
                 createdRow: function (row, data, index) {
                 },
                 columns: [
-                    {title: "Užsakymo<br>Numeris", orderable: false, width: "13%"},
+                    {title: "Užsakymo<br>Numeris", orderable: false},
                     {title: "Užsakymo data", orderable: false},
                     {title: "Užsakytas batutas", orderable: false},
                     {title: "Užsakyta <br> nuo-iki"},
