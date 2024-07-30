@@ -1,7 +1,7 @@
 @php use App\MontonioPayments\MontonioPaymentsService;
  $exp = (int) config('montonio.payment_duration');
- @endphp
-    <!DOCTYPE html>
+@endphp
+<!DOCTYPE html>
 <html>
 <head>
     <title>Užsakymas pateiktas</title>
@@ -162,3 +162,4 @@
 </div>
 </body>
 </html>
+
