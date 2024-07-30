@@ -20,6 +20,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 
 class OrderController extends Controller
@@ -67,6 +69,7 @@ class OrderController extends Controller
     }
     public function adminGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
     {
+//        return view('auth.passwords.reset');
         return view('orders.private.admin_order_table');
     }
     public function publicGetIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
