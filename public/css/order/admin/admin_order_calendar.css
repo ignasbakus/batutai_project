@@ -1,3 +1,4 @@
+/* General Styles for Confirmation Container */
 .confirmation-container {
     background-color: #f8f9fa;
     padding: 20px;
@@ -20,11 +21,12 @@
     font-weight: bold;
 }
 
+/* Checkbox Container */
 .checkbox-container {
     margin-top: 30px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
     padding: 10px;
     background-color: #e9ecef;
     border-radius: 8px;
@@ -42,49 +44,7 @@
     margin-right: 10px;
 }
 
-label[for="showConfirmation"] {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    color: #495057;
-}
-
-label[for="showConfirmation"] input[type="checkbox"] {
-    margin-right: 10px;
-}
-
-.close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: red;
-    border: none;
-    color: white;
-    transition: background-color 0.3s ease; /* Smooth transition for button background color */
-}
-
-/* New hover rule for the button to change the container background */
-.close-button:hover + .confirmation-container {
-    background-color: #ffe6e6; /* Light red background color when hovering over the button */
-}
-
-/* New styles for the updated layout */
-.confirmation-container .d-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.checkbox-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.btn-secondary {
-    margin-right: auto;
-}
-
+/* Custom Alert Styles */
 .custom-alert {
     position: fixed;
     top: 20px;
@@ -99,30 +59,82 @@ label[for="showConfirmation"] input[type="checkbox"] {
     border-radius: 10px;
     transition: right 0.5s ease; /* Smooth slide-in effect */
 }
+
 .custom-alert.show {
     right: 20px; /* Slide in to the right position */
 }
+
 .custom-alert .btn-close {
     position: absolute;
     top: 10px;
     right: 10px;
 }
 
+/* Button Container Styles */
 .button-container {
     background-color: #f8f9fa;
     border-radius: 5px;
     padding: 15px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-.button-container .btn, .button-container .form-check {
-    margin-bottom: 10px;
+
+.button-container .btn {
+    margin-right: 1rem; /* Adjust spacing between buttons */
 }
+
+.button-container .form-check {
+    margin-right: 1rem; /* Adjust spacing between switches */
+}
+
+/* Custom Column */
 .custom-col {
     flex: 0 0 auto;
     width: auto;
     max-width: 100%;
 }
 
-/*.flatpickr-calendar {*/
-/*    z-index: 1050; !* Higher than modal's z-index *!*/
-/*}*/
+/* Modal Styles */
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-dialog.modal-fullscreen {
+    max-width: 100%;
+    margin: 0;
+}
+
+/* Additional button styles */
+.btn-secondary {
+    margin-right: auto;
+}
+
+/* Close Button Styles */
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    border: none;
+    color: white;
+    transition: background-color 0.3s ease; /* Smooth transition for button background color */
+}
+
+/* Close Button Hover Effect */
+.close-button:hover + .confirmation-container {
+    background-color: #ffe6e6; /* Light red background color when hovering over the button */
+}
+
+/* Table Styles */
+#orderTable {
+    width: 100%;
+}
+
+#orderTable tbody {
+    /* You can add styles for table rows here if needed */
+}
+
+/* Flatpickr Calendar Fix */
+/* Uncomment if you need to adjust z-index for flatpickr */
+.flatpickr-calendar {
+    z-index: 1050; /* Higher than modal's z-index */
+}

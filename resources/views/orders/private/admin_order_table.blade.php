@@ -5,18 +5,22 @@
     </style>
 @endsection
 @section('content')
-    <div class="row mb-5">
-        <div class="col-12 col-md-4 custom-col">
-            <div class="button-container">
-                <button id="refreshTable" class="btn btn-secondary">
-                    Atnaujinti lentelė
-                </button>
-                <button id="deleteUnpaidOrders" class="btn btn-secondary">
-                    Ištrinti visus užsakymus
-                </button>
-                <div class="form-check form-switch mt-2">
-                    <input class="form-check-input" type="checkbox" id="showWeeklyOrders">
-                    <label class="form-check-label" for="showWeeklyOrders">Rodyti 7 dienų užsakymus</label>
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center button-container">
+                <div class="d-flex">
+                    <button id="refreshTable" class="btn btn-secondary me-2">
+                        Atnaujinti lentelė
+                    </button>
+                    <button id="deleteUnpaidOrders" class="btn btn-secondary">
+                        Ištrinti visus užsakymus
+                    </button>
+                </div>
+                <div class="d-flex">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="showWeeklyOrders">
+                        <label class="form-check-label" for="showWeeklyOrders">Rodyti 7 dienų užsakymus</label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -53,7 +57,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="mt-3 cancellationDropdown"  style="display:none;">
+                                <div class="mt-3 cancellationDropdown" style="display:none;">
                                     <select name="cancellationExcuse" class="form-select">
                                         <option value="normalCancellation">Be priežasties</option>
                                         <option value="technicalFailure">Techninis gedimas</option>

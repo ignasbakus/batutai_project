@@ -1,3 +1,18 @@
+.button-container {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.button-container .btn {
+    margin-right: 1rem; /* Adjust spacing between buttons */
+}
+
+.button-container .form-check {
+    margin-right: 1rem; /* Adjust spacing between switches */
+}
+
 .custom-alert {
     position: fixed;
     top: 20px;
@@ -12,21 +27,19 @@
     border-radius: 10px;
     transition: right 0.5s ease; /* Smooth slide-in effect */
 }
+
 .custom-alert.show {
     right: 20px; /* Slide in to the right position */
 }
+
 .custom-alert .btn-close {
     position: absolute;
     top: 10px;
     right: 10px;
 }
 
-.button-container {
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+/* Modal Styles (if needed for custom styling) */
+.modal-content {
+    border-radius: 10px;
 }
-.button-container .btn, .button-container .form-check {
-    margin-bottom: 10px;
-}
+
