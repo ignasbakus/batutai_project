@@ -12,7 +12,7 @@
                     Atnaujinti lentelė
                 </button>
                 <button id="deleteUnpaidOrders" class="btn btn-secondary">
-                    Ištrinti neapmokėtus užsakymus
+                    Ištrinti visus užsakymus
                 </button>
                 <div class="form-check form-switch mt-2">
                     <input class="form-check-input" type="checkbox" id="showWeeklyOrders">

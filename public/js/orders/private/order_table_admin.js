@@ -316,11 +316,11 @@ let Orders = {
                     $.ajax({
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         method: "DELETE",
-                        url: "/orders/admin/order/deleteUnpaidOrders",
+                        url: "/orders/admin/order/deleteAllOrders",
                     }).done((response) => {
                         $('#overlay').hide();
                         if (response.status) {
-                            $('#successAlertMessage').text('Užsakymai ištrinti')
+                            $('#successAlertMessage').text(response.Messages[0])
                             $('#successAlert').show().css('display', 'flex')
                             Orders.Events.dismissAlertsAfterTimeout('#successAlert', 5000)
                         }

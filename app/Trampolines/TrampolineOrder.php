@@ -414,20 +414,25 @@ class TrampolineOrder implements Order
         return round($advancePayment, -1);
     }
 
-    public function deleteUnpaidOrders(): static
+    public function deleteAll(): static
     {
-        $now = Carbon::now();
-        $unpaidOrders = \App\Models\Order::where('order_status', 'Neapmokėtas')->get();
-        foreach ($unpaidOrders as $order) {
-            $orderDate = Carbon::parse($order->order_date);
-            if (abs($now->diffInHours($orderDate, false)) > 48) {
+        try {
+            $orders = \App\Models\Order::all();
+
+            foreach ($orders as $order) {
                 $order->trampolines()->delete();
-//                $order->client()->delete();
-//                $order->address()->delete();
-                $this->status = $order->delete();
-                $this->Messages[] = 'Neapmokėti užsakymai ištrinti sėkmingai !';
+                $order->paymentCreationLog()->delete();
+                $order->paymentWebhooksLog()->delete();
+                $order->delete();
             }
+
+            $this->status = true;
+            $this->Messages[] = 'Visi užsakymai ištrinti !';
+        } catch (\Exception $exception) {
+            $this->Errors[] = 'Trinant užsakymą įvyko klaida : ' . $exception->getMessage();
+            $this->status = false;
         }
+
         return $this;
     }
 
@@ -468,6 +473,7 @@ class TrampolineOrder implements Order
     public function updateOrderStatus($orderId, $status): array
     {
         $order = \App\Models\Order::find($orderId);
+        Log::info('Order in order status' . $order);
         if (!$order) {
             return [
                 'status' => false,

@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class OrderPaid extends Mailable
 {
@@ -21,7 +22,7 @@ class OrderPaid extends Mailable
         public Order $order
     )
     {
-        //
+        Log::info('Order info' . $order);
     }
 
     /**
