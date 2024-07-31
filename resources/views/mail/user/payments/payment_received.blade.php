@@ -14,7 +14,7 @@
         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #B6D2F7; height: 100px; margin: 0 auto;">
             <tr>
                 <td align="center" style="vertical-align: middle;">
-                    <img src="/images/companyLogo/logo.png" width="70" height="70" style="display: block;" alt="Company Logo" title="Company Logo">
+                    <img src="{{config('app.link_to_homepage')}}/images/companyLogo/logo.png" width="70" height="70" style="display: block;" alt="Company Logo" title="Company Logo">
                 </td>
             </tr>
         </table>
