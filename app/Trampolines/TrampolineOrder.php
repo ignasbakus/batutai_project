@@ -60,6 +60,8 @@ class TrampolineOrder implements Order
 
         $checkResult = self::canRegisterOrder(null, $trampolineOrderData);
 
+        Log::info('Check result ->' . json_encode($checkResult));
+
         if (!$checkResult['status']) {
             $this->status = false;
             $this->failedInputs->add('error', $checkResult['message']);
@@ -351,61 +353,73 @@ class TrampolineOrder implements Order
     }
 
     public static function canRegisterOrder(\App\Models\Order $order = null, TrampolineOrderData $trampolineOrderData = null): array
-    {
-        if ($trampolineOrderData) {
-            foreach ($trampolineOrderData->Trampolines as $trampoline) {
-                $trampolineId = $trampoline['id'];
-                $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
-                $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
-                $orderId = $trampolineOrderData->orderID ?? null; // check if orderID exists
-            }
-        }
-        if ($order) {
-            foreach ($order->trampolines as $trampoline) {
-                $trampolineId = $trampoline->trampolines_id;
-                $rentalStart = Carbon::parse($trampoline->rental_start)->format('Y-m-d');
-                $rentalEnd = Carbon::parse($trampoline->rental_end)->format('Y-m-d');
-                $orderId = $order->id;
-            }
-        }
+{
+    $overlappingRentals = false;
 
-        $overlappingRentals = DB::table('orders_trampolines')
-            ->where('trampolines_id', $trampolineId)
-            ->where('is_active', 1) // Only consider active orders
-            ->when($orderId, function ($query, $orderId) {
-                // exclude the current order from the check if orderID exists
-                return $query->where('orders_id', '!=', $orderId);
-            })
-            ->where(function ($query) use ($rentalStart, $rentalEnd) {
-                $query->where(function ($query) use ($rentalStart) {
-                    // rental_start is between existing rental_start and rental_end
-                    $query->where('rental_start', '<=', $rentalStart)
-                        ->where('rental_end', '>', $rentalStart)
-                        ->where('rental_end', '!=', DB::raw("DATE_ADD('$rentalStart', INTERVAL 0 SECOND)"));
-                })->orWhere(function ($query) use ($rentalEnd) {
-                    // rental_end is between existing rental_start and rental_end
-                    $query->where('rental_start', '<', $rentalEnd)
-                        ->where('rental_end', '>=', $rentalEnd)
-                        ->where('rental_start', '!=', DB::raw("DATE_ADD('$rentalEnd', INTERVAL 0 SECOND)"));
-                })->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
-                    // existing rental period is entirely within the new rental period
-                    $query->where('rental_start', '>=', $rentalStart)
-                        ->where('rental_end', '<=', $rentalEnd);
-                });
-            })
-            ->exists();
+    if ($trampolineOrderData) {
+        foreach ($trampolineOrderData->Trampolines as $trampoline) {
+            $trampolineId = $trampoline['id'];
+            Log::info('Trampoline ID: ' . $trampolineId);
 
-        // Debug output to check the result of the query
-//            dd($overlappingRentals);
+            $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
+            Log::info('Rental Start: ' . $rentalStart);
 
-        if ($overlappingRentals) {
-            return [
-                'status' => false,
-                'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'
-            ];
+            $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
+            Log::info('Rental End: ' . $rentalEnd);
+
+            $orderId = $trampolineOrderData->orderID ?? null;
+            Log::info('Order ID: ' . $orderId);
+
+            $overlappingRentals = self::checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId);
+            if ($overlappingRentals) break;
         }
-        return ['status' => true];
     }
+
+    if ($order) {
+        foreach ($order->trampolines as $trampoline) {
+            $trampolineId = $trampoline->trampolines_id;
+            $rentalStart = Carbon::parse($trampoline->rental_start)->format('Y-m-d');
+            $rentalEnd = Carbon::parse($trampoline->rental_end)->format('Y-m-d');
+            $orderId = $order->id;
+
+            $overlappingRentals = self::checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId);
+            if ($overlappingRentals) break;
+        }
+    }
+
+    if ($overlappingRentals) {
+        return [
+            'status' => false,
+            'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'
+        ];
+    }
+    return ['status' => true];
+}
+
+private static function checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId)
+{
+    return DB::table('orders_trampolines')
+        ->where('trampolines_id', $trampolineId)
+        ->where('is_active', 1)
+        ->when($orderId, function ($query, $orderId) {
+            return $query->where('orders_id', '!=', $orderId);
+        })
+        ->where(function ($query) use ($rentalStart, $rentalEnd) {
+            $query->where(function ($query) use ($rentalStart) {
+                $query->where('rental_start', '<=', $rentalStart)
+                    ->where('rental_end', '>', $rentalStart)
+                    ->where('rental_end', '!=', DB::raw("DATE_ADD('$rentalStart', INTERVAL 0 SECOND)"));
+            })->orWhere(function ($query) use ($rentalEnd) {
+                $query->where('rental_start', '<', $rentalEnd)
+                    ->where('rental_end', '>=', $rentalEnd)
+                    ->where('rental_start', '!=', DB::raw("DATE_ADD('$rentalEnd', INTERVAL 0 SECOND)"));
+            })->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
+                $query->where('rental_start', '>=', $rentalStart)
+                    ->where('rental_end', '<=', $rentalEnd);
+            });
+        })
+        ->exists();
+}
 
     public static function calculateAdvanceSum($totalSum): float
     {

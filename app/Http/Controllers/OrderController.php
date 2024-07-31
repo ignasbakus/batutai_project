@@ -307,9 +307,20 @@ class OrderController extends Controller
         $NewOrderEventTitle = 'Jūsų užsakymas';
 
         $Order = (new TrampolineOrder())->create((new TrampolineOrderData(\request())));
+
+        if (!$Order->status){
+            return response()->json([
+                'status' => false,
+                'failed_input' => $Order->failedInputs,
+            ]);
+
+        }
+
+//        dd($Order);
 //        dd($Order);
 //        dd($Order);
         $trampolines_id = [];
+
 
         foreach (\request()->get('trampolines', []) as $Trampoline) {
             $trampolines_id[] = $Trampoline['id'];

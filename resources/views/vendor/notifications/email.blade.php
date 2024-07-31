@@ -1,87 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="lt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-            color: #333;
-            line-height: 1.4;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            text-align: center;
-            padding: 20px;
-        }
-        .header img {
-            max-width: 200px;
-        }
-        .content {
-            margin: 20px 0;
-        }
-        .content h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .content p {
-            margin: 0 0 15px;
-        }
-        .button {
-            display: inline-block;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #007bff;
-            padding: 15px 25px;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-        }
-        .footer p {
-            margin: 0;
-        }
-        .footer a {
-            color: #007bff;
-            text-decoration: none;
-        }
-    </style>
+    <title>Užsakymas atšauktas</title>
 </head>
-<body>
-<div class="container">
-    <div class="header">
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+<div
+    style="max-width: 650px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+    <div style="background-color: #B6D2F7; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+        <img src="{{config('app.link_to_homepage')}}/images/companyLogo/logo.png" alt="Įmonės logotipas"
+             style="width: 70px;">
     </div>
-    <div class="content">
-        <h1>Slaptažodžio Atstatymo Prašymas</h1>
-        <p>Sveiki,</p>
-        <p>Mes gavome prašymą atstatyti jūsų slaptažodį. Paspauskite žemiau esantį mygtuką, kad atstatytumėte slaptažodį:</p>
-        <p><a href="{{ $actionUrl }}" class="button">Atstatyti Slaptažodį</a></p>
-        <p>Jei slaptažodžio atstatymo prašymas nebuvo atliktas jūsų, galite ignoruoti šį laišką.</p>
-        <p>Ačiū,</p>
-        <p>Jūsų Įmonė</p>
+    <div style="padding: 20px; text-align: center;">
+        <h1 style="font-size: 24px; margin: 0 0 10px; font-weight: 500;">Slaptažodžio Atstatymo Prašymas</h1>
+        <p style="font-size: 16px; margin: 0 0 10px;">Jei norite atstatyti slaptažodį, spauskite žemiau esantį mygtuką.</p>
     </div>
-    <div class="footer">
-        <p>&copy; {{ date('Y') }} Jūsų Įmonė. Visos teisės saugomos.</p>
-        <p><a href="{{ config('app.url') }}">Apsilankykite mūsų svetainėje</a></p>
+
+    <div
+        style="background-color: #F5F7F7; padding: 30px; border-radius: 5px; margin-bottom: 40px; color: #124E78; text-align: center;">
+        <!-- Use an anchor tag styled as a button -->
+        <a href="{{ $actionUrl }}"
+           style="background-color: #B6D2F7; color: black; padding: 10px 20px; text-decoration: none; display: inline-block; border-radius: 5px; font-weight: 500;">
+            Atstatyti Slaptažodį
+        </a>
     </div>
+
+    <table role="presentation" style="width: 100%; max-width: 650px; margin: 0 auto; background-color: #B6D2F7; padding: 20px; border-collapse: collapse; min-height: 70px">
+        <tbody>
+{{--        <tr>--}}
+{{--            <td style="text-align: center; font-size: 16px; color: black; font-family: 'Open Sans', sans-serif; padding-top: 10px;">--}}
+{{--                <a href="{{config('app.link_to_homepage')}}" style="text-decoration: none; color: black;" target="_blank">--}}
+{{--                    op-op.lt--}}
+{{--                </a>--}}
+{{--            </td>--}}
+{{--        </tr>--}}
+{{--        <tr>--}}
+{{--            <td style="text-align: center; font-size: 18px; color: black; font-weight: 500; font-family: 'Open Sans', sans-serif; padding-top: 10px;">--}}
+{{--                <a href="tel:{{config('contactInfo.phone')}}" style="text-decoration: none; color: black;" target="_blank">--}}
+{{--                    <svg style="display: block; margin: 0 auto;" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">--}}
+{{--                        <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"></path>--}}
+{{--                    </svg>--}}
+{{--                    {{config('contactInfo.phone')}}--}}
+{{--                </a>--}}
+{{--            </td>--}}
+{{--        </tr>--}}
+        </tbody>
+    </table>
+
 </div>
 </body>
 </html>

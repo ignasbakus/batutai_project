@@ -627,23 +627,21 @@ let TrampolineOrder = {
                                 $('form .' + FailedInput + 'InValidFeedback').text(response.failed_input[FailedInput][0]);
                                 $('form input[name=' + FailedInput + ']').addClass('is-invalid');
                             });
-                            if (response.failed_input.error) {
-                                $('#failedAlertMessage').text(response.failed_input.error[0]);
-                                $('#failedAlert').show().css('display', 'flex');
-                                TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
-                                CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
-                            }
-                        } else {
-                            if (response.failed_input.error[0] === 'Batutas neaktyvus, prašome pasirinkti kitą') {
-                                $('#failedAlertMessage').text(response.failed_input.error[0]);
-                                $('#failedAlert').show().css('display', 'flex');
-                                TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
-                            }
+                        }
+                        if (response.failed_input.error && response.failed_input.error[0] !== 'Batutas neaktyvus, prašome pasirinkti kitą') {
+                            TrampolineOrder.ViewOrderModal.element.hide()
+                            $('#failedAlertMessage').text(response.failed_input.error[0]);
+                            $('#failedAlert').show().css('display', 'flex');
+                            TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
+                            CalendarFunctions.updateEventsPublic(firstVisibleDayOnCalendar, lastVisibleDayOnCalendar, firstMonthDay);
+                        } else{
+                            $('#failedAlertMessage').text(response.failed_input.error[0]);
+                            $('#failedAlert').show().css('display', 'flex');
+                            TrampolineOrder.Events.dismissAlertsAfterTimeout('#failedAlert', 5000);
                             setTimeout(function () {
                                 window.location.href = response.homeLink;
                             }, 2000);
                         }
-
                     }
                     // if (response.status) {
                     //     // $('form input').removeClass('is-invalid');
