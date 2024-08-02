@@ -48,6 +48,7 @@ class DataTablesProcessing
         // Conditionally select fields based on the model's table
         $fieldsToSelect = [$model->getTable() . '.*'];
         if ($this->TableName === 'orders') {
+            $fieldsToSelect[] = 'order_date';
             $fieldsToSelect[] = 'orders_trampolines.rental_start';
         } elseif ($this->TableName === 'trampolines') {
             $fieldsToSelect[] = 'parameters.activity';
@@ -192,13 +193,13 @@ class DataTablesProcessing
                   </button>
                         ',*/
                         '
-                  <button data-trampolineid="' . $CollectionItem->id . '" class="btn trampolineUpdate">
+                  <button data-trampolineid="' . $CollectionItem->id . '" id="trampolineUpdate" class="btn trampolineUpdate">
                     <svg width="20" height="20" fill="#0066cc" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                         <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9"></path>
                         <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z"></path>
                     </svg>
                   </button>
-                  <button data-trampolineid="' . $CollectionItem->id . '" class="btn trampolineDelete">
+                  <button data-trampolineid="' . $CollectionItem->id . '" id="trampolineDelete" class="btn trampolineDelete">
                     <svg width="20" height="20" fill="red" class="bi bi-trash3" viewBox="0 0 16 16">
                         <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"></path>
                     </svg>
@@ -241,23 +242,23 @@ class DataTablesProcessing
                         $CollectionItem->advance_sum . ' ' . config('trampolines.currency', '€'),
                         $CollectionItem->order_status,
                         '
-                  <button data-orderid="' . $CollectionItem->id . '" class="btn checkOrderStatus">
+                  <button data-orderid="' . $CollectionItem->id . '" id="checkOrderStatus" class="btn checkOrderStatus">
                     <svg width="20" height="20" fill="green" class="bi bi-check-lg" viewBox="0 0 16 16">
                         <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"></path>
                     </svg>
                   </button>
-                  <button data-orderid="' . $CollectionItem->id . '" class="btn orderUpdate">
+                  <button data-orderid="' . $CollectionItem->id . '" id="orderUpdate" class="btn orderUpdate">
                     <svg width="20" height="20" fill="#0066cc" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                         <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9"></path>
                         <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z"></path>
                     </svg>
                   </button>
-                  <button data-orderid="' . $CollectionItem->id . '" class="btn sendMail">
+                  <button data-orderid="' . $CollectionItem->id . '" id="sendMail" class="btn sendMail">
                     <svg width="20" height="20" fill="grey" class="bi bi-envelope" viewBox="0 0 16 16">
                         <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"></path>
                     </svg>
                   </button>
-                  <button data-orderid="' . $CollectionItem->id . '" data-ordernumber="' . $CollectionItem->order_number . '" class="btn orderDelete">
+                  <button data-orderid="' . $CollectionItem->id . '" data-ordernumber="' . $CollectionItem->order_number . '" id="orderDelete" class="btn orderDelete">
                     <svg width="20" height="20" fill="red" class="bi bi-trash3" viewBox="0 0 16 16">
                         <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"></path>
                     </svg>

@@ -43,3 +43,21 @@
     border-radius: 10px;
 }
 
+.truncate {
+    display: inline-block;
+    max-width: 400px; /* Adjust width as needed */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    position: relative;
+}
+
+/*.truncate::after {*/
+/*    content: ' ...';*/
+/*    position: absolute;*/
+/*    margin-left: 5px;*/
+/*    right: 0;*/
+/*    bottom: 0;*/
+/*    !*background: linear-gradient(to right, transparent, #fff);*!*/
+/*    width: 1em;*/
+/*}*/

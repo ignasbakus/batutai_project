@@ -130,9 +130,9 @@ class TrampolinesController extends Controller
     public function adminInsert(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'trampolineName' => 'required|min:5',
-            'trampolineDescription' => 'max:255',
-            'trampolineColor' => 'required|min:3',
+            'trampolineName' => 'required|min:5|max:50',
+            'trampolineDescription' => 'required|max:2000|min:5',
+            'trampolineColor' => 'required|min:3|max:50',
             'trampolineHeight' => 'required|numeric|min:1',
             'trampolineWidth' => 'required|numeric|min:1',
             'trampolineLength' => 'required|numeric|min:1',
@@ -140,14 +140,33 @@ class TrampolinesController extends Controller
         ], [
             'trampolineName.required' => 'Pavadinimas yra privalomas',
             'trampolineName.min' => 'Pavadinimas turi būti nemažesnis nei 5 simboliai',
-            'trampolineDescription.max' => 'Aprašymas per ilgas',
+            'trampolineName.max' => 'Pavadinimas turi būti ne ilgesnis nei 50 simbolių',
+
+            'trampolineDescription.required' => 'Aprašymas yra privalomas',
+            'trampolineDescription.min' => 'Aprašymas turi būti nemažesnis nei 5 simboliai',
+            'trampolineDescription.max' => 'Aprašymas per ilgas, turi būti ne ilgesnis nei 2000 simbolių',
+
             'trampolineColor.required' => 'Spalva yra privaloma',
-            'trampolineColor.min' => 'Spalva turi būti nemažesnė nei 5 simboliai',
+            'trampolineColor.min' => 'Spalva turi būti nemažesnė nei 3 simboliai',
+            'trampolineColor.max' => 'Spalva turi būti ne ilgesnė nei 50 simbolių',
+
             'trampolineHeight.required' => 'Batuto aukštis yra privalomas',
+            'trampolineHeight.numeric' => 'Batuto aukštis turi būti skaičius',
+            'trampolineHeight.min' => 'Batuto aukštis turi būti bent 1',
+
             'trampolineWidth.required' => 'Batuto plotis yra privalomas',
+            'trampolineWidth.numeric' => 'Batuto plotis turi būti skaičius',
+            'trampolineWidth.min' => 'Batuto plotis turi būti bent 1',
+
             'trampolineLength.required' => 'Batuto ilgis yra privalomas',
+            'trampolineLength.numeric' => 'Batuto ilgis turi būti skaičius',
+            'trampolineLength.min' => 'Batuto ilgis turi būti bent 1',
+
             'trampolinePrice.required' => 'Batuto kaina yra privaloma',
+            'trampolinePrice.numeric' => 'Batuto kaina turi būti skaičius',
+            'trampolinePrice.min' => 'Batuto kaina turi būti bent 1',
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
@@ -167,9 +186,9 @@ class TrampolinesController extends Controller
     public function adminUpdate(): JsonResponse
     {
         $validator = Validator::make(request()->all(), [
-            'trampolineName' => 'required|min:5',
-            'trampolineDescription' => 'max:255',
-            'trampolineColor' => 'required|min:3',
+            'trampolineName' => 'required|min:5|max:50',
+            'trampolineDescription' => 'required|max:2000|min:5',
+            'trampolineColor' => 'required|min:3|max:50',
             'trampolineHeight' => 'required|numeric|min:1',
             'trampolineWidth' => 'required|numeric|min:1',
             'trampolineLength' => 'required|numeric|min:1',
@@ -177,13 +196,31 @@ class TrampolinesController extends Controller
         ], [
             'trampolineName.required' => 'Pavadinimas yra privalomas',
             'trampolineName.min' => 'Pavadinimas turi būti nemažesnis nei 5 simboliai',
-            'trampolineDescription.max' => 'Aprašymas per ilgas',
+            'trampolineName.max' => 'Pavadinimas turi būti ne ilgesnis nei 50 simbolių',
+
+            'trampolineDescription.required' => 'Aprašymas yra privalomas',
+            'trampolineDescription.min' => 'Aprašymas turi būti nemažesnis nei 5 simboliai',
+            'trampolineDescription.max' => 'Aprašymas per ilgas, turi būti ne ilgesnis nei 2000 simbolių',
+
             'trampolineColor.required' => 'Spalva yra privaloma',
-            'trampolineColor.min' => 'Spalva turi būti nemažesnė nei 5 simboliai',
+            'trampolineColor.min' => 'Spalva turi būti nemažesnė nei 3 simboliai',
+            'trampolineColor.max' => 'Spalva turi būti ne ilgesnė nei 50 simbolių',
+
             'trampolineHeight.required' => 'Batuto aukštis yra privalomas',
+            'trampolineHeight.numeric' => 'Batuto aukštis turi būti skaičius',
+            'trampolineHeight.min' => 'Batuto aukštis turi būti bent 1',
+
             'trampolineWidth.required' => 'Batuto plotis yra privalomas',
+            'trampolineWidth.numeric' => 'Batuto plotis turi būti skaičius',
+            'trampolineWidth.min' => 'Batuto plotis turi būti bent 1',
+
             'trampolineLength.required' => 'Batuto ilgis yra privalomas',
+            'trampolineLength.numeric' => 'Batuto ilgis turi būti skaičius',
+            'trampolineLength.min' => 'Batuto ilgis turi būti bent 1',
+
             'trampolinePrice.required' => 'Batuto kaina yra privaloma',
+            'trampolinePrice.numeric' => 'Batuto kaina turi būti skaičius',
+            'trampolinePrice.min' => 'Batuto kaina turi būti bent 1',
         ]);
         if ($validator->fails()) {
             return response()->json([

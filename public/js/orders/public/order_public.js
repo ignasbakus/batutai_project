@@ -93,6 +93,21 @@ let Variables = {
     getTrampolines: function () {
         return Trampolines;
     },
+    areInputsFilled: function () {
+        let isFilled = true;
+        this.orderFormInput.forEach(function (inputName) {
+            let value = $('#orderForm input[name="' + inputName + '"]').val().trim();
+            if (value === '') {
+                isFilled = false;
+                // Optionally highlight the empty input
+                $('#orderForm input[name="' + inputName + '"]').addClass('is-invalid');
+            } else {
+                // Remove highlight if filled
+                $('#orderForm input[name="' + inputName + '"]').removeClass('is-invalid');
+            }
+        });
+        return isFilled;
+    }
 };
 let CalendarFunctions = {
     Calendar: {
@@ -448,9 +463,9 @@ let flatPickerCalendar = {
                     }
                 }, 100);
             },
-            onValueUpdate: function (selectedDates, dateStr, instance) {
-                flatPickerCalendar.updateInputText(); // Update input text when value changes
-            }
+                onValueUpdate: function (selectedDates, dateStr, instance) {
+                    flatPickerCalendar.updateInputText(); // Update input text when value changes
+                }
         });
     },
     updateInputText: function () {
@@ -568,7 +583,7 @@ let TrampolineOrder = {
         this.FormSendOrder.init();
         // this.UpdateOrder.init();
         this.ViewOrderModal.init()
-        this.FormSendOrder.checkFormValidity(); // Initial check
+        // this.FormSendOrder.checkFormValidity(); // Initial check
     },
     FormSendOrder: {
         init: function () {
@@ -577,16 +592,16 @@ let TrampolineOrder = {
         dataForm: {
             element: $('#sendOrderColumn form'),
         },
-        checkFormValidity: function () {
-            let isValid = true;
-            $('#orderForm input[required]:visible').each(function () {
-                if ($(this).val().trim() === '') {
-                    isValid = false;
-                    return false;
-                }
-            });
-            $('#viewOrderButton').prop('disabled', !isValid);
-        },
+        // checkFormValidity: function () {
+        //     let isValid = true;
+        //     $('#orderForm input[required]:visible').each(function () {
+        //         if ($(this).val().trim() === '') {
+        //             isValid = false;
+        //             return false;
+        //         }
+        //     });
+        //     $('#viewOrderButton').prop('disabled', !isValid);
+        // },
         Event: {
             OccupiedFromCreate: '',
             EventFromCreate: '',
@@ -599,12 +614,15 @@ let TrampolineOrder = {
                     }
                 });
                 $('#orderForm .viewOrderButton').on('click', function (event) {
-                    event.preventDefault(); // Prevent the default form submission behavior
-                    TrampolineOrder.ViewOrderModal.element.show();
+                    event.preventDefault();
+                    if (Variables.areInputsFilled()){
+                        // console.log('visi uzpildyti')
+                        TrampolineOrder.ViewOrderModal.element.show();
+                    }
                 });
-                $('#orderForm input, #orderForm select').on('input change', function () {
-                    TrampolineOrder.FormSendOrder.checkFormValidity();
-                });
+                // $('#orderForm input, #orderForm select').on('input change', function () {
+                //     TrampolineOrder.FormSendOrder.checkFormValidity();
+                // });
             },
             addOrder: function () {
                 let form_data = Variables.getOrderFormInputs();
@@ -627,8 +645,7 @@ let TrampolineOrder = {
                                 $('form .' + FailedInput + 'InValidFeedback').text(response.failed_input[FailedInput][0]);
                                 $('form input[name=' + FailedInput + ']').addClass('is-invalid');
                             });
-                        }
-                        if (response.failed_input.error && response.failed_input.error[0] !== 'Batutas neaktyvus, prašome pasirinkti kitą') {
+                        } else if (response.failed_input.error && response.failed_input.error[0] !== 'Batutas neaktyvus, prašome pasirinkti kitą') {
                             TrampolineOrder.ViewOrderModal.element.hide()
                             $('#failedAlertMessage').text(response.failed_input.error[0]);
                             $('#failedAlert').show().css('display', 'flex');

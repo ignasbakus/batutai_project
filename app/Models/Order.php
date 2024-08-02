@@ -49,6 +49,7 @@ class Order extends Model
     }
 
     public array $FieldRelationsToColumns = [
+        1 => 'order_date',
         3 => 'orders_trampolines.rental_start'
     ];
 

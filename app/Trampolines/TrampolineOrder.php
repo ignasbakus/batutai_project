@@ -189,11 +189,11 @@ class TrampolineOrder implements Order
         $datesChanged = false;
 
         if (!Auth::check()) {
-            $days = (int) config('trampolines.amount_of_days');
+            $days = (int)config('trampolines.amount_of_days');
             $rentalStartDb = Carbon::parse($order->trampolines()->first()->rental_start)->format('Y-m-d');
             if (Carbon::now()->startOfDay()->addDays($days) > $rentalStartDb) {
                 $this->status = false;
-                $this->failedInputs->add('error', 'Užsakymo atnaujinti negalima, nes liko mažiau nei ' . $days .  ' dienos iki pirmosios rezervacijos dienos');
+                $this->failedInputs->add('error', 'Užsakymo atnaujinti negalima, nes liko mažiau nei ' . $days . ' dienos iki pirmosios rezervacijos dienos');
                 return $this;
             }
         }
@@ -285,7 +285,7 @@ class TrampolineOrder implements Order
                     'rental_duration' => $OrderRentalDuration
                 ]
             );
-        } catch (\Exception $exception){
+        } catch (\Exception $exception) {
             $this->Errors[] = 'Atnaujinant užsakymą įvyko klaida : ' . $exception->getMessage();
             $this->status = false;
         }
@@ -295,7 +295,7 @@ class TrampolineOrder implements Order
         $this->Messages[] = 'Užsakymas atnaujintas sėkmingai !';
         if (config('mail.send_email') === true) {
             $updatedOrder = \App\Models\Order::find($this->Order->id); // Ensure we have the latest order info
-            Mail::to($updatedOrder ->client->email)->send(new orderUpdated($updatedOrder ));
+            Mail::to($updatedOrder->client->email)->send(new orderUpdated($updatedOrder));
             Mail::to(config('mail.admin_email'))->send(new adminOrderUpdated($updatedOrder));
         }
         return $this;
@@ -353,73 +353,73 @@ class TrampolineOrder implements Order
     }
 
     public static function canRegisterOrder(\App\Models\Order $order = null, TrampolineOrderData $trampolineOrderData = null): array
-{
-    $overlappingRentals = false;
+    {
+        $overlappingRentals = false;
 
-    if ($trampolineOrderData) {
-        foreach ($trampolineOrderData->Trampolines as $trampoline) {
-            $trampolineId = $trampoline['id'];
-            Log::info('Trampoline ID: ' . $trampolineId);
+        if ($trampolineOrderData) {
+            foreach ($trampolineOrderData->Trampolines as $trampoline) {
+                $trampolineId = $trampoline['id'];
+                Log::info('Trampoline ID: ' . $trampolineId);
 
-            $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
-            Log::info('Rental Start: ' . $rentalStart);
+                $rentalStart = Carbon::parse($trampoline['rental_start'])->format('Y-m-d');
+                Log::info('Rental Start: ' . $rentalStart);
 
-            $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
-            Log::info('Rental End: ' . $rentalEnd);
+                $rentalEnd = Carbon::parse($trampoline['rental_end'])->format('Y-m-d');
+                Log::info('Rental End: ' . $rentalEnd);
 
-            $orderId = $trampolineOrderData->orderID ?? null;
-            Log::info('Order ID: ' . $orderId);
+                $orderId = $trampolineOrderData->orderID ?? null;
+                Log::info('Order ID: ' . $orderId);
 
-            $overlappingRentals = self::checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId);
-            if ($overlappingRentals) break;
+                $overlappingRentals = self::checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId);
+                if ($overlappingRentals) break;
+            }
         }
-    }
 
-    if ($order) {
-        foreach ($order->trampolines as $trampoline) {
-            $trampolineId = $trampoline->trampolines_id;
-            $rentalStart = Carbon::parse($trampoline->rental_start)->format('Y-m-d');
-            $rentalEnd = Carbon::parse($trampoline->rental_end)->format('Y-m-d');
-            $orderId = $order->id;
+        if ($order) {
+            foreach ($order->trampolines as $trampoline) {
+                $trampolineId = $trampoline->trampolines_id;
+                $rentalStart = Carbon::parse($trampoline->rental_start)->format('Y-m-d');
+                $rentalEnd = Carbon::parse($trampoline->rental_end)->format('Y-m-d');
+                $orderId = $order->id;
 
-            $overlappingRentals = self::checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId);
-            if ($overlappingRentals) break;
+                $overlappingRentals = self::checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId);
+                if ($overlappingRentals) break;
+            }
         }
+
+        if ($overlappingRentals) {
+            return [
+                'status' => false,
+                'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'
+            ];
+        }
+        return ['status' => true];
     }
 
-    if ($overlappingRentals) {
-        return [
-            'status' => false,
-            'message' => 'Dienos, kurias pasirinkote jau yra rezervuotos. Atsiprašome už nesklandumus.'
-        ];
+    private static function checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId)
+    {
+        return DB::table('orders_trampolines')
+            ->where('trampolines_id', $trampolineId)
+            ->where('is_active', 1)
+            ->when($orderId, function ($query, $orderId) {
+                return $query->where('orders_id', '!=', $orderId);
+            })
+            ->where(function ($query) use ($rentalStart, $rentalEnd) {
+                $query->where(function ($query) use ($rentalStart) {
+                    $query->where('rental_start', '<=', $rentalStart)
+                        ->where('rental_end', '>', $rentalStart)
+                        ->where('rental_end', '!=', DB::raw("DATE_ADD('$rentalStart', INTERVAL 0 SECOND)"));
+                })->orWhere(function ($query) use ($rentalEnd) {
+                    $query->where('rental_start', '<', $rentalEnd)
+                        ->where('rental_end', '>=', $rentalEnd)
+                        ->where('rental_start', '!=', DB::raw("DATE_ADD('$rentalEnd', INTERVAL 0 SECOND)"));
+                })->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
+                    $query->where('rental_start', '>=', $rentalStart)
+                        ->where('rental_end', '<=', $rentalEnd);
+                });
+            })
+            ->exists();
     }
-    return ['status' => true];
-}
-
-private static function checkOverlappingRentals($trampolineId, $rentalStart, $rentalEnd, $orderId)
-{
-    return DB::table('orders_trampolines')
-        ->where('trampolines_id', $trampolineId)
-        ->where('is_active', 1)
-        ->when($orderId, function ($query, $orderId) {
-            return $query->where('orders_id', '!=', $orderId);
-        })
-        ->where(function ($query) use ($rentalStart, $rentalEnd) {
-            $query->where(function ($query) use ($rentalStart) {
-                $query->where('rental_start', '<=', $rentalStart)
-                    ->where('rental_end', '>', $rentalStart)
-                    ->where('rental_end', '!=', DB::raw("DATE_ADD('$rentalStart', INTERVAL 0 SECOND)"));
-            })->orWhere(function ($query) use ($rentalEnd) {
-                $query->where('rental_start', '<', $rentalEnd)
-                    ->where('rental_end', '>=', $rentalEnd)
-                    ->where('rental_start', '!=', DB::raw("DATE_ADD('$rentalEnd', INTERVAL 0 SECOND)"));
-            })->orWhere(function ($query) use ($rentalStart, $rentalEnd) {
-                $query->where('rental_start', '>=', $rentalStart)
-                    ->where('rental_end', '<=', $rentalEnd);
-            });
-        })
-        ->exists();
-}
 
     public static function calculateAdvanceSum($totalSum): float
     {
@@ -608,6 +608,11 @@ private static function checkOverlappingRentals($trampolineId, $rentalStart, $re
                 'status' => false,
                 'message' => 'Užsakymas neaktyvus, redaguoti negalima.'
             ];
+        } else if ($order->order_status === 'Neapmokėtas') {
+            return [
+                'status' => false,
+                'message' => 'Užsakymo redaguoti negalima, nes jis neapmokėtas.'
+            ];
         } else if ($orderRentalStart < Carbon::now()->format('Y-m-d')) {
             return [
                 'status' => false,
@@ -633,19 +638,47 @@ private static function checkOverlappingRentals($trampolineId, $rentalStart, $re
         $email = $Request->input('customerEmail');
         switch ($Request->input('emailType')) {
             case 'OrderPaid':
-                Mail::to($email)->send(new OrderPaid($order));
+                if ($order->order_status !== 'Apmokėtas') {
+                    return [
+                        'status' => false,
+                        'message' => 'El. pašto siųsti negalima, nes užsakymas neapmokėtas arba atšauktas !'
+                    ];
+                } else {
+                    Mail::to($email)->send(new OrderPaid($order));
+                }
                 break;
             case 'OrderPlaced':
-                Mail::to($email)->send(new OrderPlaced(
-                    $order,
-                    (new MontonioPaymentsService())->retrievePaymentLink($Request->input('orderID'))
-                ));
+                if ($order->trampolines()->where('is_active', 0)->exists()){
+                    return [
+                        'status' => false,
+                        'message' => 'El. pašto siųsti negalima, nes užsakymas neaktyvus !'
+                    ];
+                } else {
+                    Mail::to($email)->send(new OrderPlaced(
+                        $order,
+                        (new MontonioPaymentsService())->retrievePaymentLink($Request->input('orderID'))
+                    ));
+                }
                 break;
             case 'OrderNotPaid':
-                Mail::to($email)->send(new OrderNotPaid($order));
+                if ($order->order_status !== 'Atšauktas, nes neapmokėtas') {
+                    return [
+                        'status' => false,
+                        'message' => 'El. pašto siųsti negalima, nes užsakymas apmokėtas arba laukia apmokėjimo !'
+                    ];
+                } else {
+                    Mail::to($email)->send(new OrderNotPaid($order));
+                }
                 break;
             case 'OrderCancelled':
-                Mail::to($email)->send(new OrderDeleted($order));
+                if ($order->trampolines()->where('is_active', '!=', 0)->exists()) {
+                    return [
+                        'status' => false,
+                        'message' => 'El. pašto siųsti negalima, nes užsakymas aktyvus ! Turi atšaukti arba klientas arba adminas.'
+                    ];
+                } else {
+                    Mail::to($email)->send(new OrderDeleted($order));
+                }
                 break;
         }
         return [

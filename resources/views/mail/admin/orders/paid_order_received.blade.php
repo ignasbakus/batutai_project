@@ -85,48 +85,26 @@
 
         <h4 style="font-weight: 500; font-size: 1.5rem; margin-bottom: 10px">Kliento informacija</h4>
         <div style="background-color: #B6D2F7; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
-            <table style="width: 100%; border-collapse: collapse; margin: 0; padding: 0;">
-                <tr>
-                    <td style="font-weight: 500; width: 50%; padding: 5px 0; border-bottom: 1px solid white;">Užsakymo numeris:</td>
-                    <td style="text-align: right; padding: 5px 0; border-bottom: 1px solid white;">{{ $order->order_number }}</td>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid white;">
+                    <td style="font-weight: 500;">Vardas Pavardė:</td>
+                    <td style="text-align: right;">{{ $order->client->name }} {{ $order->client->surname }} </td>
                 </tr>
-                <tr>
-                    <td style="font-weight: 500; width: 50%; padding: 5px 0; border-bottom: 1px solid white;">Rezervuotos dienos:</td>
-                    <td style="text-align: right; padding: 5px 0; border-bottom: 1px solid white;">
-                        {{ \Carbon\Carbon::parse($order->trampolines->first()->rental_start)->format('Y-m-d') }}
-                        -
-                        {{ \Carbon\Carbon::parse($order->trampolines->first()->rental_end)->subDay()->format('Y-m-d') }}
-                    </td>
+                <tr style="border-bottom: 1px solid white;">
+                    <td style="font-weight: 500;">Telefonas:</td>
+                    <td style="text-align: right;">{{ $order->client->phone }} </td>
                 </tr>
-                <tr>
-                    <td style="font-weight: 500; width: 50%; padding: 5px 0; border-bottom: 1px solid white;">Pristatymo laikas:</td>
-                    <td style="text-align: right; padding: 5px 0; border-bottom: 1px solid white;">{{ $order->trampolines->first()->delivery_time }}</td>
+                <tr style="border-bottom: 1px solid white;">
+                    <td style="font-weight: 500;">El. paštas:</td>
+                    <td style="text-align: right;">{{ $order->client->email }} </td>
                 </tr>
-                <tr>
-                    <td style="font-weight: 500; width: 50%; padding: 5px 0; border-bottom: 1px solid white;">Batutai:</td>
-                    <td style="text-align: right; padding: 5px 0; border-bottom: 1px solid white;">
-                        @foreach($order->trampolines as $orderTrampoline)
-                            {{$orderTrampoline->trampoline->title}}<br>
-                        @endforeach
-                    </td>
+                <tr style="border-bottom: 1px solid white;">
+                    <td style="font-weight: 500;">Miestas:</td>
+                    <td style="text-align: right;">{{ $order->address->address_town }} </td>
                 </tr>
-                <tr>
-                    <td style="font-weight: 500; width: 50%; padding: 5px 0; border-bottom: 1px solid white;">Avansas:</td>
-                    <td style="text-align: right; padding: 5px 0; border-bottom: 1px solid white;">
-                        {{ number_format($order->advance_sum, 2) }}{{ config('trampolines.currency') }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="font-weight: 500; width: 50%; padding: 5px 0; border-bottom: 1px solid white;">Bendra suma:</td>
-                    <td style="text-align: right; padding: 5px 0; border-bottom: 1px solid white;">
-                        {{ number_format($order->total_sum, 2) }}{{ config('trampolines.currency') }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="font-weight: 500; width: 50%; padding: 5px 0; border-bottom: 1px solid white;">Likusi mokėti suma:</td>
-                    <td style="text-align: right; padding: 5px 0; border-bottom: 1px solid white">
-                        {{ number_format($order->total_sum, 2) - number_format($order->advance_sum, 2) }}{{ config('trampolines.currency') }}
-                    </td>
+                <tr style="border-bottom: 1px solid white;">
+                    <td style="font-weight: 500;">Adresas:</td>
+                    <td style="text-align: right;">{{ $order->address->address_street }}, {{ $order->address->address_postcode }} </td>
                 </tr>
             </table>
         </div>

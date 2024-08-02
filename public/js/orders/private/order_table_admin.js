@@ -9,6 +9,7 @@ let defaultTime;
 let eventDay
 let trampolines;
 let firstMonthDay;
+let flatPicker;
 let today = new Date();
 today.setHours(0, 0, 0, 0);
 today.setHours(today.getHours() + 3);
@@ -43,7 +44,6 @@ let Variables = {
         return values;
     }
 }
-
 let FormatDays = {
     formCorrectFirstVisibleDay: function (firstVisibleDay) {
         firstVisibleDay.setUTCHours(firstVisibleDay.getUTCHours() + 3)
@@ -66,6 +66,7 @@ let CalendarFunctions = {
                 locale: 'lt',
                 editable: true,
                 selectable: true,
+                height: 700, // Set the height in pixels
                 validRange: {
                     start: today
                 },
@@ -186,7 +187,7 @@ let CalendarFunctions = {
         });
     }
 }
-let flatPicker = {
+let flatPickerTime = {
     initialize: function () {
         $('#customerDeliveryTime').flatpickr({
             enableTime: true, // Enable time picker
@@ -197,12 +198,99 @@ let flatPicker = {
         })
     }
 }
+let flatPickerCalendar = {
+    dateRange: false,
+    monthNames: {
+        "January": "Sausis",
+        "February": "Vasaris",
+        "March": "Kovas",
+        "April": "Balandis",
+        "May": "Gegužė",
+        "June": "Birželis",
+        "July": "Liepa",
+        "August": "Rugpjūtis",
+        "September": "Rugsėjis",
+        "October": "Spalis",
+        "November": "Lapkritis",
+        "December": "Gruodis"
+    },
+    initialize: function () {
+        flatPicker = $('#dateRangePicker').flatpickr({
+            mode: "range",
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            onChange: function (selectedDates, dateStr, instance) {
+                flatPickerCalendar.overrideMonthNames();
+                if (selectedDates.length === 2) {
+                    // const startDate = selectedDates[0];
+                    // const endDate = selectedDates[1];
+                    // const newStartDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000);
+                    // const newEndDate = new Date(endDate.getTime() + 3 * 60 * 60 * 1000);
+                    // const formattedStartDate = newStartDate.toISOString().split('T')[0];
+                    // const formattedEndDate = newEndDate.toISOString().split('T')[0];
+                    // console.log('Start Date with +3 hours:', formattedStartDate);
+                    // console.log('End Date with +3 hours:', formattedEndDate);
+                    flatPickerCalendar.dateRange = true
+                    Orders.Table.updateDataTable();
+                }
+
+            },
+            onMonthChange: function (selectedDates, dateStr, instance) {
+                setTimeout(() => {
+                    if (flatPicker.calendarContainer) {
+                        flatPickerCalendar.overrideMonthNames();
+                    } else {
+                        console.error('Calendar container not found after timeout');
+                    }
+                }, 100);
+            },
+            onReady: function (selectedDates, dateStr, instance) {
+                // Use a timeout to ensure the calendar container is available
+                setTimeout(() => {
+                    if (flatPicker.calendarContainer) {
+                        flatPickerCalendar.overrideMonthNames();
+                        flatPickerCalendar.updateInputText(); // Ensure correct text on ready
+                    } else {
+                        console.error('Calendar container not found on ready');
+                    }
+                }, 100);
+            },
+            onValueUpdate: function (selectedDates, dateStr, instance) {
+                flatPickerCalendar.updateInputText(); // Update input text when value changes
+            }
+        });
+    },
+    overrideMonthNames: function () {
+        const calendarContainer = flatPicker.calendarContainer;
+        if (!calendarContainer) {
+            console.error('Calendar container not found');
+            return;
+        }
+
+        const monthElements = calendarContainer.querySelectorAll('.flatpickr-monthDropdown-month');
+        monthElements.forEach((el) => {
+            const englishMonthName = el.textContent.trim();
+            const lithuanianMonthName = flatPickerCalendar.monthNames[englishMonthName];
+            if (lithuanianMonthName) {
+                el.textContent = lithuanianMonthName;
+            }
+        });
+    },
+    updateInputText: function () {
+        const inputField = document.querySelector('#dateForm input[name=dateRangePicker]');
+        if (inputField) {
+            console.log('Input field:', inputField);
+            inputField.value = inputField.value.replace(/to/g, '-');
+        }
+    },
+}
 let Orders = {
     init: function () {
         this.Modals.deleteOrder.init()
         this.Modals.updateOrder.init()
         this.Modals.sendEmailModal.init()
         this.Table.init()
+        this.Events.init()
     },
     Table: {
         DrawCount: 0,
@@ -212,14 +300,17 @@ let Orders = {
         AXAJData: function (d) {
             d._token = $('meta[name="csrf-token"]').attr('content');
             d.sample_data = 1;
-            if (isWeeklyFilterActive) {
-                let currentDate = new Date();
-                let nextWeekDate = new Date();
-                currentDate.setHours(currentDate.getHours() + 3); // Adjust for Lithuanian time zone
-                nextWeekDate.setDate(currentDate.getDate() + 7);
-                nextWeekDate.setHours(nextWeekDate.getHours() + 3); // Adjust for Lithuanian time zone
-                d.start_date = currentDate.toISOString().split('T')[0];
-                d.end_date = nextWeekDate.toISOString().split('T')[0];
+
+            if (flatPickerCalendar.dateRange) {
+                const dateRange = flatPicker.selectedDates
+                if (dateRange.length === 2) {
+                    const startDate = dateRange[0];
+                    const endDate = dateRange[1];
+                    const newStartDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000);
+                    const newEndDate = new Date(endDate.getTime() + 3 * 60 * 60 * 1000);
+                    d.start_date = newStartDate.toISOString().split('T')[0];
+                    d.end_date = newEndDate.toISOString().split('T')[0];
+                }
             }
 
             d.searchValue = d.search.value || '';
@@ -235,7 +326,11 @@ let Orders = {
                 processing: true,
                 filter: true,
                 responsive: true,
-                language: {search: "_INPUT_", searchPlaceholder: "Ieškoti"},
+                language: {
+                    search: "_INPUT_", searchPlaceholder: "Ieškoti",
+                    lengthMenu: "Rodyti _MENU_ įrašus",
+                    zeroRecords: 'Nerasta jokių įrašų'
+                },
                 searchDelay: 1000,
                 order: [],
                 serverSide: true,
@@ -245,6 +340,7 @@ let Orders = {
                     dataType: 'json',
                     data: function (d) {
                         console.log('Sending data:', d);
+                        console.log('Start date: ', d.start_date)
                         d = Orders.Table.AXAJData(d);
                     },
                     dataFilter: function (response) {
@@ -266,7 +362,7 @@ let Orders = {
                 },
                 columns: [
                     {title: "Užsakymo<br>Numeris", orderable: false},
-                    {title: "Užsakymo data", orderable: false},
+                    {title: "Užsakymo data", orderable: true},
                     {title: "Užsakytas batutas", orderable: false},
                     {title: "Užsakyta <br> nuo-iki"},
                     {title: "Pristatymo <br> laikas", orderable: false},
@@ -284,6 +380,7 @@ let Orders = {
                 fixedColumns: true,
                 info: false,
                 initComplete: function () {
+                    toolTip.initTable();
                 }
             })
             this.Events.init()
@@ -386,6 +483,13 @@ let Orders = {
             sendEmail: function (OrderID) {
                 Orders.Modals.sendEmailModal.prepareModal(OrderID)
             }
+        },
+        updateDataTable: function () {
+            $('#orderTable').DataTable().ajax.url('/orders/admin/order/datatable/get').load();
+            // $('#orderTable').DataTable().ajax.params({
+            //     start_date: startDate,
+            //     end_date: endDate
+            // });
         }
     },
     Modals: {
@@ -582,7 +686,7 @@ let Orders = {
                     $('#overlay').hide();
                     if (response.status) {
                         defaultTime = response.order.trampolines[0].delivery_time
-                        flatPicker.initialize();
+                        flatPickerTime.initialize();
                         this.OccupiedWhenCancelled = response.Occupied
                         this.EventWhenCancelled = response.Events
                         eventDay = response.Events[0].start
@@ -825,6 +929,14 @@ let Orders = {
         }
     },
     Events: {
+        init: function () {
+            $('#clearDatesButton').on('click', (event) => {
+                event.stopPropagation();
+                flatPickerCalendar.dateRange = false
+                flatPicker.clear()
+                Orders.Table.Table.draw()
+            })
+        },
         dismissAlertsAfterTimeout: function (alertId, timeout) {
             setTimeout(function () {
                 $(alertId).fadeOut('slow', function () {
@@ -834,9 +946,41 @@ let Orders = {
         }
     }
 }
+let toolTip = {
+    init: function () {
+        tippy('#refreshTable', {
+            content: 'Atnaujinti lentelę',
+            placement: 'top',
+        });
+        tippy('#clearDatesButton', {
+            content: 'Atšaukti "nuo - iki" datų filtravimą',
+            placement: 'top',
+        });
+    },
+    initTable: function () {
+        tippy('#checkOrderStatus', {
+            content: 'Patikrinti užsakymo būseną',
+            placement: 'top',
+        });
+        tippy('#orderUpdate', {
+            content: 'Redaguoti užsakymą',
+            placement: 'top',
+        });
+        tippy('#sendMail', {
+            content: 'Siųsti papildomą el. laišką',
+            placement: 'top',
+        });
+        tippy('#orderDelete', {
+            content: 'Ištrinti užsakymą',
+            placement: 'top',
+        });
+    }
+}
 
 /* Document ready function */
 $(document).ready(function () {
-    Orders.init();
     console.log("/js/orders/private/order_table_admin.js -> ready!");
+    Orders.init();
+    toolTip.init()
+    flatPickerCalendar.initialize()
 });

@@ -7,11 +7,22 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center button-container">
                 <div class="d-flex">
-                    <button class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#createTrampolineModal">
-                        Pridėti naują batutą
+                    <button id="refreshTable" type="button" class="btn btn-dark me-2">
+                        <svg width="20" height="20" fill="currentColor" class="bi bi-arrow-clockwise"
+                             viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                  d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"></path>
+                            <path
+                                d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"></path>
+                        </svg>
                     </button>
-                    <button id="refreshTable" class="btn btn-secondary">
-                        Atnaujinti lentelė
+                    <button id="addTrampoline" type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                            data-bs-target="#createTrampolineModal">
+                        <svg width="20" height="20" fill="currentColor" class="bi bi-plus-square-fill"
+                             viewBox="0 0 16 16">
+                            <path
+                                d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"></path>
+                        </svg>
                     </button>
                 </div>
                 <div class="d-flex">
@@ -90,8 +101,7 @@
                             <div class="row mb-3">
                                 <div class="col">
                                     <label for="trampolineDescription" class="form-label">Aprašymas</label>
-                                    <input type="text" name="trampolineDescription" class="form-control"
-                                           id="trampolineDescription">
+                                    <textarea name="trampolineDescription" class="form-control" id="trampolineDescription" rows="6"></textarea>
                                     <div class="invalid-feedback trampolineDescriptionInValidFeedback"></div>
                                 </div>
                             </div>
@@ -120,24 +130,6 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Uždaryti</button>
                         <button type="submit" class="btn btn-primary createTrampoline">Sukurti</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="showTrampolineModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        ...
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
             </div>
@@ -197,8 +189,8 @@
                             <div class="row mb-3">
                                 <div class="col">
                                     <label for="trampolineDescription" class="form-label">Aprašymas</label>
-                                    <input type="text" name="trampolineDescription" class="form-control"
-                                           id="trampolineDescription">
+                                    <textarea name="trampolineDescription" class="form-control" id="trampolineDescription" rows="6"></textarea>
+                                    <div class="invalid-feedback trampolineDescriptionInValidFeedback"></div>
                                 </div>
                             </div>
                             <div class="row mb-3">

@@ -31,7 +31,8 @@
                         </div>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="customerPhoneNumber">Telefono Numeris <span class="required-asterisk">*</span></label>
+                        <label for="customerPhoneNumber">Telefono Numeris <span
+                                class="required-asterisk">*</span></label>
                         <input name="customerPhoneNumber" type="tel" class="form-control" id="customerPhoneNumber"
                                placeholder="Įveskite telefono numerį">
                         <div class="invalid-feedback customerPhoneNumberInValidFeedback"></div>
@@ -44,14 +45,16 @@
                     </div>
                     <div class="row mt-3">
                         <div class="form-group col-6">
-                            <label for="customerDeliveryCity">Pristatymo Miestas <span class="required-asterisk">*</span></label>
+                            <label for="customerDeliveryCity">Pristatymo Miestas <span
+                                    class="required-asterisk">*</span></label>
                             <input name="customerDeliveryCity" type="text" class="form-control"
                                    id="customerDeliveryCity"
                                    placeholder="Įveskite pristatymo miestą" required>
                             <div class="invalid-feedback customerDeliveryCityInValidFeedback"></div>
                         </div>
                         <div class="form-group col-6">
-                            <label for="customerDeliveryPostCode">Pašto Kodas <span class="required-asterisk">*</span></label>
+                            <label for="customerDeliveryPostCode">Pašto Kodas <span
+                                    class="required-asterisk">*</span></label>
                             <input name="customerDeliveryPostCode" type="text" class="form-control"
                                    id="customerDeliveryPostCode" placeholder="Įveskite pašto kodą" required>
                             <div class="invalid-feedback customerDeliveryPostCodeInValidFeedback"></div>
@@ -65,7 +68,8 @@
                     </div>
                     <div class="row mt-3" id="orderDates">
                         <div class="form-group col">
-                            <label for="flatPickerCalendar">Užsakymo datos <span class="required-asterisk">*</span></label>
+                            <label for="flatPickerCalendar">Užsakymo datos <span
+                                    class="required-asterisk">*</span></label>
                             <input name="flatPickerCalendar" class="form-control" type="text" id="flatPickerCalendar"
                                    placeholder="Pasirinkite datas" required>
                         </div>
@@ -81,7 +85,7 @@
                         <div class="col infoBeforeSuccessfulOrder">
                             <button
                                 class="btn btn-primary mt-3 d-flex align-items-center justify-content-center viewOrderButton"
-                                id="viewOrderButton" data-toggle="modal" data-target="#viewOrderModal" disabled>
+                                id="viewOrderButton">
                                 <span id="buttonText">Peržiūrėti užsakymą</span>
                             </button>
                         </div>
@@ -154,7 +158,8 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="disabledDatesModal" tabindex="-1" role="dialog" aria-labelledby="reservationModalLabel"
+        <div class="modal fade" id="disabledDatesModal" tabindex="-1" role="dialog"
+             aria-labelledby="reservationModalLabel"
              aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
@@ -164,7 +169,7 @@
                     </div>
                     <div class="modal-body">
                         <h6>Informuojame, jog pasirinkote laikotarpį, kuriame yra užimtos dienos. Prašome pasirinkti
-                        kitas dienas</h6>
+                            kitas dienas</h6>
                     </div>
                     <div id="disabledDatesModalButtons" class="modal-footer justify-content-between">
                         <button type="button" class="btn btn-secondary closeModal">Rinktis kitas dienas</button>

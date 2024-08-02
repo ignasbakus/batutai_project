@@ -10,15 +10,8 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h4>Susisiekite su mumis</h4>
-                        <p><strong>Adresas:</strong> Gedimino pr. 1, Vilnius, Lietuva</p>
-                        <p><strong>Telefonas:</strong> {{config('contactInfo.phone')}}</p>
-                        <p><strong>El. paštas:</strong> {{config('contactInfo.email')}}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Darbo laikas</h4>
-                        <p><strong>Pirmadienis - Penktadienis:</strong> 8:00 - 18:00</p>
-                        <p><strong>Šeštadienis:</strong> 9:00 - 15:00</p>
-                        <p><strong>Sekmadienis:</strong> Nedirbame</p>
+                        <p><strong>Telefonas:</strong> {{ config('contactInfo.phone') }}</p>
+                        <p><strong>El. paštas:</strong> {{ config('contactInfo.email') }}</p>
                     </div>
                 </div>
             </div>
@@ -31,4 +24,3 @@
 
 @section('custom_js')
 @endsection
-

@@ -9,18 +9,32 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center button-container">
                 <div class="d-flex">
-                    <button id="refreshTable" class="btn btn-secondary me-2">
-                        Atnaujinti lentelė
+                    <button id="refreshTable" type="button" class="btn btn-dark me-2">
+                        <svg width="20" height="20" fill="currentColor" class="bi bi-arrow-clockwise"
+                             viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                  d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"></path>
+                            <path
+                                d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"></path>
+                        </svg>
                     </button>
                     <button id="deleteUnpaidOrders" class="btn btn-secondary">
                         Ištrinti visus užsakymus
                     </button>
                 </div>
-                <div class="d-flex">
-                    <div class="form-check form-switch mt-2">
-                        <input class="form-check-input" type="checkbox" id="showWeeklyOrders">
-                        <label class="form-check-label" for="showWeeklyOrders">Rodyti 7 dienų užsakymus</label>
+                <div class="d-flex form-group">
+                    {{--                    <div class="form-check form-switch mt-2">--}}
+                    {{--                        <input class="form-check-input" type="checkbox" id="showWeeklyOrders">--}}
+                    {{--                        <label class="form-check-label" for="showWeeklyOrders">Rodyti 7 dienų užsakymus</label>--}}
+                    {{--                    </div>--}}
+                    <div id="dateForm" class="form-group me-2">
+                        <input name="dateRangePicker" type="text" class="form-control" id="dateRangePicker" placeholder="Rodyti užsak. nuo - iki" />
                     </div>
+                    <button type="button" class="btn btn-dark" id="clearDatesButton">
+                        <svg  width="20" height="20" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -87,7 +101,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-4">
+                            <div id="formRow" class="col-4">
                                 <form id="updateOrderForm" class="needs-validation" novalidate>
                                     <div class="row mb-3">
                                         <div class="form-group col-6">

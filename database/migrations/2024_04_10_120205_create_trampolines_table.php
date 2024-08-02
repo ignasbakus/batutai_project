@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('trampolines', function (Blueprint $table) {
             $table->id();
             $table->string('title', 50);
-            $table->string('description', 256);
+            $table->string('description', 1000);
             $table->timestamps();
         });
     }

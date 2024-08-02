@@ -244,11 +244,11 @@ hr.new1 {
     /*border-radius: 0;*/
 }
 
-#viewOrderButton:disabled {
-    background-color: #cccccc; /* Light gray background */
-    cursor: not-allowed; /* Change cursor to indicate disabled state */
-    opacity: 0.6; /* Slightly transparent */
-}
+/*#viewOrderButton:disabled {*/
+/*    background-color: #cccccc; !* Light gray background *!*/
+/*    cursor: not-allowed; !* Change cursor to indicate disabled state *!*/
+/*    opacity: 0.6; !* Slightly transparent *!*/
+/*}*/
 
 @media (max-width: 576px) {
     .fc-day-header {

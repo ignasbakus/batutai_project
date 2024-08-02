@@ -138,3 +138,7 @@
 .flatpickr-calendar {
     z-index: 1050; /* Higher than modal's z-index */
 }
+
+#formRow {
+    margin-top: 2.5rem;
+}

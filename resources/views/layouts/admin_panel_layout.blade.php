@@ -10,6 +10,7 @@
     <link href="/frameworks/jquery-ui-1.13.2/jquery-ui.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
     <link href="/css/layout/layout.css" rel="stylesheet" crossorigin="anonymous">
     @yield('custom_css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -143,6 +144,7 @@
 <script src="https://unpkg.com/@popperjs/core@2" crossorigin="anonymous"></script>
 <script src="/frameworks/bootstrap-5.3.3/js/bootstrap.bundle.js" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.js"></script>
+<script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.min.js"></script>
 @yield('custom_js')
 
 </body>
