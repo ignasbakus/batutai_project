@@ -325,7 +325,6 @@ let Orders = {
                 lengthMenu: [[5, 10, 15, 20, 30], [5, 10, 15, 20, 30]],
                 processing: true,
                 filter: true,
-                responsive: true,
                 language: {
                     search: "_INPUT_", searchPlaceholder: "Ieškoti",
                     lengthMenu: "Rodyti _MENU_ įrašus",

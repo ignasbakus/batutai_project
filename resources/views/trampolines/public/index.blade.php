@@ -5,6 +5,9 @@
 @endsection
 
 @section('content')
+    <div style="text-align: center">
+        <img class="cover-photo" alt="banner" src="/images/coverPhoto/testas (1920 x 350 px).png">
+    </div>
     <div class="container">
         <div class="row mt-5">
             <div class="col-12 col-lg-6 mb-3 mt-lg-5">

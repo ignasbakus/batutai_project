@@ -8,9 +8,13 @@
     <link href="/frameworks/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"
           crossorigin="anonymous">
     <link href="/frameworks/jquery-ui-1.13.2/jquery-ui.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.js" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.datatables.net/colreorder/2.0.3/js/colReorder.dataTables.js" rel="stylesheet" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.js">
+    <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/2.0.3/css/colReorder.dataTables.css" >
     <link href="/css/layout/layout.css" rel="stylesheet" crossorigin="anonymous">
     @yield('custom_css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
