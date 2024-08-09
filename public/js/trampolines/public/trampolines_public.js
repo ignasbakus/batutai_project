@@ -16,9 +16,12 @@ let view = {
             Trampolines.PcCalendar = true;
             Trampolines.mobileCalendar = false;
             $('#carousel-wrap').attr('style', 'width: 50%; margin: 0 auto;');
+            $('.trampoline-name').show()
         } else {
             Trampolines.mobileCalendar = true;
             Trampolines.PcCalendar = false;
+            $('#carousel-row').removeClass('mt-5')
+
         }
     }
 }

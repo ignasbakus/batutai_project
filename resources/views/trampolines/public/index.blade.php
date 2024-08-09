@@ -5,17 +5,18 @@
 @endsection
 
 @section('content')
-{{--    <div id="banner-container" style="text-align: center; max-width: 100%">--}}
-{{--        <img width="100%" class="cover-photo" alt="banner" src="/images/coverPhoto/pc_main.png">--}}
-{{--    </div>--}}
+    {{--    <div id="banner-container" style="text-align: center; max-width: 100%">--}}
+    {{--        <img width="100%" class="cover-photo" alt="banner" src="/images/coverPhoto/pc_main.png">--}}
+    {{--    </div>--}}
     <div id="banner-container" style="text-align: center; max-width: 100%">
         <!-- Mobile Banner -->
-        <img id="mobileBanner" width="100%" class="cover-photo mobile-banner" alt="banner" src="/images/coverPhoto/phone 1080 x 600 bigger title.png">
+        <img id="mobileBannerTop" width="100%" class="cover-photo mobile-banner" alt="banner"
+             src="/images/coverPhoto/page top mobile.png">
         <!-- PC Banner -->
         <img id="pcBanner" width="100%" class="cover-photo pc-banner" alt="banner" src="/images/coverPhoto/pc_main.png">
     </div>
     <div class="container custom-container">
-        <div class="row mt-5 mb-5 ">
+        <div id="carousel-row" class="row mt-5 mb-5 ">
             <div id="carouselColumn" class="col-12 col-lg-12">
                 <div id="carousel-wrap">
                     <div id="trampolinesCarousel" class="carousel slide" data-bs-theme="dark">
@@ -23,7 +24,7 @@
                             @foreach($Trampolines as $Trampoline)
                                 <div class="carousel-item {{ $Trampoline->active ? 'active' : '' }}"
                                      data-trampolineid='{{$Trampoline->id}}'>
-                                    <div class="trampoline-name text-center">
+                                    <div class="trampoline-name text-center" style="display: none">
                                         <h3>{{ $Trampoline->title }}</h3> <!-- Display trampoline name -->
                                     </div>
                                     <a class="openModal" data-bs-target="#showTrampolineModal" data-bs-toggle="modal"
@@ -101,6 +102,11 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="banner-bottom" style="text-align: center; max-width: 100%">
+        <!-- Mobile Banner -->
+        <img id="mobileBannerBottom" width="100%" class="cover-photo mobile-banner" alt="banner"
+             src="/images/coverPhoto/page bottom mobile (3).png">
     </div>
 @endsection
 

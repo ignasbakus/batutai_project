@@ -11,12 +11,19 @@
         max-width: 100%; /* Adjust as needed */
         width: 700px;   /* Custom width */
     }
-    #mobileBanner {
+    #mobileBannerTop {
+        display: none; /* Hide mobile banner for larger screens */
+    }
+
+    #mobileBannerBottom {
         display: none; /* Hide mobile banner for larger screens */
     }
 
     #pcBanner {
         display: block; /* Show PC banner */
+    }
+    #content-wrap {
+        background-color: #F6F7F7;
     }
 }
 
@@ -27,7 +34,11 @@
     .mt-lg-5 {
         margin-top: 0;
     }
-    #mobileBanner {
+    #mobileBannerTop {
+        display: block; /* Hide mobile banner for larger screens */
+    }
+
+    #mobileBannerBottom {
         display: block; /* Hide mobile banner for larger screens */
     }
 
@@ -206,22 +217,13 @@
     }
 }
 
-.cover-photo {
-    border-top: black 1px solid;
-    border-bottom: black 1px solid;
-}
 
 /*.custom-container {*/
 /*    background-color: #F6F7F7;*/
 /*}*/
 
-/*#content-wrap {*/
-/*    background-color: #F6F7F7;*/
-/*}*/
 
-#page-container {
-    background-color: #F6F7F7;
-}
+
 
 #selectTrampoline {
     background-color: #4E91FD;
@@ -232,6 +234,7 @@
     background-color: #F4AA90;
     font-weight: 500;
 }
+
 
 
 
