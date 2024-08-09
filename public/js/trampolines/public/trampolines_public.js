@@ -29,7 +29,7 @@ let ToolTip = {
         if (window.innerWidth > 768) {
             this.tooltipInstance = tippy('.carousel-item', {
                 content: 'Paspauskite ant batuto, kad pamatytumėte daugiau nuotraukų ir informacijos',
-                placement: 'left',
+                placement: 'top',
             });
         }
     },
