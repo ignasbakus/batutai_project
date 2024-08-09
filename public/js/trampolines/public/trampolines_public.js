@@ -1,6 +1,7 @@
 let Actions = {
     InitActions: function () {
         ToolTip.init();
+        view.findViewDevice();
         Carousels.trampolinesCarousel.init();
         Carousels.imageModal.init();
         Carousels.trampolinesCarousel.ChosenTrampoline = firstTrampolineId
@@ -9,6 +10,19 @@ let Actions = {
         Trampolines.Modals.showTrampoline.Events.init();
     }
 }
+let view = {
+    findViewDevice: function () {
+        if ($(window).width() >= 768) {
+            Trampolines.PcCalendar = true;
+            Trampolines.mobileCalendar = false;
+            $('#carousel-wrap').attr('style', 'width: 50%; margin: 0 auto;');
+        } else {
+            Trampolines.mobileCalendar = true;
+            Trampolines.PcCalendar = false;
+        }
+    }
+}
+
 let ToolTip = {
     tooltipInstance: null,
     init: function () {
@@ -40,8 +54,12 @@ let Carousels = {
             })
             $('#selectTrampoline').on('click', () => {
                 Trampolines.addToSelected(this.ChosenTrampoline);
+                $('#selectedTrampolinesSection').show();
+                // Change the carousel column to col-lg-6
+                $('#carouselColumn').removeClass('col-lg-12').addClass('col-lg-6');
+                // Disable the CSS rule for carousel wrap
+                $('#carousel-wrap').removeAttr('style');
             })
-
         },
     },
     imageModal: {
@@ -84,8 +102,9 @@ let Carousels = {
 }
 
 let Trampolines = {
+    PcCalendar: false,
+    mobileCalendar: false,
     init: function () {
-        this.updateNoTrampolinesMessage()
     },
     chosen: [],
     Modals: {
@@ -159,13 +178,6 @@ let Trampolines = {
             $('#sendToOrderButton').hide();
         }
     },
-    updateNoTrampolinesMessage: function () {
-        if (this.chosen.length === 0) {
-            $('#SelectedTrampolines').html('<li class="list-group-item mt-3 no-trampolines-message">Nepasirinkote jokių batutų</li>');
-        } else {
-            $('#SelectedTrampolines .no-trampolines-message').remove();
-        }
-    },
     initEventsAfterHtmlUpdate: function () {
         $('.removeSelectedTrampoline').on('click', (event) => {
             event.stopPropagation();
@@ -187,10 +199,24 @@ let Trampolines = {
             $('#overlay').hide();
             $('#SelectedTrampolines').html(response.view);
             this.initEventsAfterHtmlUpdate();
-            this.updateNoTrampolinesMessage(); // Update message after rendering
+            this.Events.removeSelection()
         }).fail(function (jqXHR, textStatus) {
             alert("Request failed: " + textStatus);
         });
+    },
+    Events: {
+        removeSelection: function () {
+            $('.removeSelectedTrampoline').on('click', (event) => {
+                event.stopPropagation();
+                if (Trampolines.chosen.length === 0) {
+                    $('#selectedTrampolinesSection').hide();
+                    if (Trampolines.PcCalendar) {
+                        $('#carouselColumn').removeClass('col-lg-6').addClass('col-lg-12');
+                        $('#carousel-wrap').attr('style', 'width: 50%; margin: 0 auto;');
+                    }
+                }
+            });
+        }
     }
 };
 

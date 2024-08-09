@@ -11,6 +11,13 @@
         max-width: 100%; /* Adjust as needed */
         width: 700px;   /* Custom width */
     }
+    .mobile-banner {
+        display: none; /* Hide mobile banner for larger screens */
+    }
+
+    .pc-banner {
+        display: block; /* Show PC banner */
+    }
 }
 
 @media (max-width: 767px) {
@@ -102,10 +109,6 @@
     color: #343a40; /* Dark text color */
 }
 
-
-
-
-
 .trampoline-name {
     text-align: center;
     margin: 0 auto 10px; /* Center horizontally and add margin below */
@@ -116,7 +119,7 @@
 .trampoline-name h3 {
     font-size: 1.5rem;
     color: black; /* White text color for visibility */
-    background-color: #DDC8C4; /* Optional: dark background for readability */
+    background-color: #F4AA90; /* Optional: dark background for readability */
     padding: 10px;
     border-radius: 15px;
     margin: 0; /* Remove default margin */
@@ -200,5 +203,32 @@
     border-top: black 1px solid;
     border-bottom: black 1px solid;
 }
+
+/*.custom-container {*/
+/*    background-color: #F6F7F7;*/
+/*}*/
+
+/*#content-wrap {*/
+/*    background-color: #F6F7F7;*/
+/*}*/
+
+#page-container {
+    background-color: #F6F7F7;
+}
+
+#selectTrampoline {
+    background-color: #4E91FD;
+    color: white;
+    font-weight: 500;
+}
+#sendToOrderButton{
+    background-color: #F4AA90;
+    font-weight: 500;
+}
+
+.pc-banner {
+    display: none;
+}
+
 
 

@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-lightblue mb-3 d-lg-none">
+    <nav class="navbar navbar-expand-lg navbar-lightblue d-lg-none">
         <div class="container-fluid">
             <a href="{{ route('trampolinesPublic') }}"><img height="40px" alt="Logo" src="/images/companyLogo/logo.png"></a>
 {{--            <a class="navbar-brand" href="{{ route('trampolinesPublic') }}">op-op</a>--}}
