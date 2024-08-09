@@ -10,9 +10,9 @@
 {{--    </div>--}}
     <div id="banner-container" style="text-align: center; max-width: 100%">
         <!-- Mobile Banner -->
-        <img width="100%" class="cover-photo mobile-banner" alt="banner" src="/images/coverPhoto/phone 1080 x 600 bigger title.png">
+        <img id="mobileBanner" width="100%" class="cover-photo mobile-banner" alt="banner" src="/images/coverPhoto/phone 1080 x 600 bigger title.png">
         <!-- PC Banner -->
-        <img width="100%" class="cover-photo pc-banner" alt="banner" src="/images/coverPhoto/pc_main.png">
+        <img id="pcBanner" width="100%" class="cover-photo pc-banner" alt="banner" src="/images/coverPhoto/pc_main.png">
     </div>
     <div class="container custom-container">
         <div class="row mt-5 mb-5 ">
