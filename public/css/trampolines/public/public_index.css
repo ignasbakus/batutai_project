@@ -82,6 +82,10 @@
     #footer {
         height: 3rem;
     }
+
+    #selectedTrampolinesSection {
+        width: 40%;
+    }
 }
 
 /* for mobile */
