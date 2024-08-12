@@ -224,7 +224,7 @@ let Trampolines = {
                     $('#selectedTrampolinesSection').hide();
                     if (Trampolines.PcCarousel) {
                         $('#carouselColumn').removeClass('col-lg-6').addClass('col-lg-12');
-                        $('#carousel-wrap').attr('style', 'width: 50%; margin: 0 auto;');
+                        // $('#carousel-wrap').attr('style', 'width: 50%; margin: 0 auto;');
                     }
                 }
             });
