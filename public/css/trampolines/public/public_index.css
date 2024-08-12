@@ -42,6 +42,10 @@
         width: 50%;
         margin: 0 auto;
     }
+
+    #selectedTrampolinesSection {
+        width: 51%;
+    }
 }
 
  /*for smaller pc screens*/
@@ -84,7 +88,7 @@
     }
 
     #selectedTrampolinesSection {
-        width: 40%;
+        width: 41%;
     }
 }
 
@@ -144,10 +148,7 @@
 /* Ensure consistent styling for list items */
 .list-group-item, .trampoline-item {
     padding: 20px; /* Padding inside the item */
-    margin-bottom: 10px; /* Margin between items */
     border: 1px solid #ddd; /* Border */
-    border-radius: 8px; /* Rounded corners */
-    background-color: #f8f9fa; /* Light background */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for depth */
 }
 
@@ -191,23 +192,7 @@
 }
 
 /* Additional styling for the selected trampolines section */
-#SelectedTrampolines {
-    background-color: #ffffff; /* White background */
-    border: 1px solid #ced4da; /* Light gray border */
-    border-radius: 8px; /* Rounded corners */
-    padding: 20px; /* Padding inside the div */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for depth */
-}
 
-#SelectedTrampolines .no-trampolines-message {
-    padding: 10px; /* Padding inside the message */
-    font-weight: bold; /* Bold text for emphasis */
-    color: #6c757d; /* Gray text color */
-    background-color: #f8f9fa; /* Light gray background */
-    border-radius: 8px; /* Rounded corners */
-    text-align: center; /* Center align text */
-    margin-bottom: 10px; /* Margin at the bottom of the message */
-}
 
 
 #sendToOrderButton {
