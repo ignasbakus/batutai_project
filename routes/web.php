@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrampolinesController;
 
+
 Route::controller(PaymentsController::class)->group(function () {
     Route::get('/status', 'checkPaymentStatus');
     Route::post('/webhook/montonio', 'paymentResponse');
@@ -85,6 +86,6 @@ Route::controller(TrampolinesController::class)->group(function () {
     });
 });
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 Route::get('/home', [TrampolinesController::class, 'publicIndex']);
