@@ -89,10 +89,10 @@
             <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('trampolinesPublic') }}">Batutai</a>
+                        <a class="nav-link" href="{{ config('app.link_to_trampolines') }}">Batutai</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('contactsIndex') }}">Kontaktai</a>
+                        <a class="nav-link" href="{{ route('trampolinesPublic') }}">Užsakyti</a>
                     </li>
                     {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ route('deliveryPricesIndex') }}">Pristatymo kainos</a>
