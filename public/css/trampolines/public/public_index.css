@@ -215,8 +215,8 @@
 
 .trampoline-name h3 {
     font-size: 1.5rem;
-    color: black; /* White text color for visibility */
-    background-color: #F4AA90; /* Optional: dark background for readability */
+    color: white; /* White text color for visibility */
+    background-color: #4E91FD; /* Optional: dark background for readability */
     padding: 10px;
     border-radius: 15px;
     margin: 0; /* Remove default margin */
