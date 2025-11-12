@@ -6,4 +6,6 @@ return [
     'return_url' => env('MONTONIO_RETURN_URL'),
     'webhook_url' => env('MONTONIO_WEBHOOK_URL'),
     'payment_duration' => env('MONTONIO_PAYMENT_DURATION'),
+    // Set to false to bypass payment and confirm immediately
+    'require_payment' => env('MONTONIO_REQUIRE_PAYMENT', false),
 ];

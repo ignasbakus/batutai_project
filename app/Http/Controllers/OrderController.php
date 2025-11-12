@@ -615,8 +615,15 @@ class OrderController extends Controller
     }
     public function generatePaymentUrl($orderId): string
     {
+        // If payments are disabled, mark as paid and return direct order view link
+        if (!config('montonio.require_payment')) {
+            $order = Order::findOrFail($orderId);
+            // Mark order as paid to grant access to the view page
+            $order->update(['order_status' => 'Apmok�-tas']);
+            return url('/orders/public/order/view/' . $order->order_number);
+        }
+
         (new MontonioPaymentsService())->createOrder($orderId);
-//        dd((new MontonioPaymentsService())->retrievePaymentLink($orderId));
         return (new MontonioPaymentsService())->retrievePaymentLink($orderId);
     }
     public function deliveryPricesIndex(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
