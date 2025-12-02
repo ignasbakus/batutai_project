@@ -25,3 +25,8 @@ This project was developed as part of a learning journey to:
 - **Database:** MySQL  
 - **Frontend:** Blade templates (HTML + JQuery + css), Bootstrap  
 - **Environment:** PHP, Composer, Artisan, Docker
+
+## 🔐 Viewing the page
+
+- **URL:** https://batutaiportfolio.lt  
+- **Logins:** Upon request, logins will be provided
